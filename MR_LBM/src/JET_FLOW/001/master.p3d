@@ -1,0 +1,18 @@
+{
+
+ "auto-detect-format": true,
+
+ "filenames": [
+
+{ "time" :  1, "xyz" : "grid.x", "function" : "data10010000.f" },
+{ "time" :  2, "xyz" : "grid.x", "function" : "data10020000.f" },
+{ "time" :  3, "xyz" : "grid.x", "function" : "data10030000.f" },
+{ "time" :  4, "xyz" : "grid.x", "function" : "data10040000.f" },
+{ "time" :  5, "xyz" : "grid.x", "function" : "data10050000.f" },
+{ "time" :  6, "xyz" : "grid.x", "function" : "data10060000.f" },
+{ "time" :  7, "xyz" : "grid.x", "function" : "data10070000.f" },
+{ "time" :  8, "xyz" : "grid.x", "function" : "data10080000.f" },
+{ "time" :  9, "xyz" : "grid.x", "function" : "data10090000.f" },
+
+]
+}

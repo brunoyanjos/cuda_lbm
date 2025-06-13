@@ -125,30 +125,19 @@ inline void boundary_calculation(unsigned int nodeType, dfloat* rhoVar, dfloat* 
 		const dfloat mxxIn = (pop[3] + pop[6] + pop[7]) * inv_rhoIn - cs2;
 		const dfloat mxyIn = (pop[7] - pop[6]) * inv_rhoIn;
 		const dfloat myyIn = (pop[2] + pop[4] + pop[6] + pop[7]) * inv_rhoIn - cs2;
-	
-		if (y < NY / 2 + D / 2 && y > NY / 2 - D / 2) {
-
-			*ux = U_MAX;
-			*uy = 0.0;
-
-			const dfloat rho = (4.0 * rhoIn + 3.0 * rhoIn * mxxIn) / (3.0 - 3.0 * (*ux));
-			*mxx = (rho + 9.0 * rhoIn * mxxIn + 3.0 * rho * (*ux)) / (6.0 * rho);
-			*mxy = 2.0 * rhoIn * mxyIn / rho;
-			*myy = 6.0 * rhoIn * myyIn / (5.0 * rho);
-
-			*rhoVar = rho;
-		}
-		else {
-			*ux = 0.0;
-			*uy = 0.0;
-
-			*rhoVar = -3.0 * (-4.0 * rhoIn - 3.0 * mxxIn * rhoIn + 3.0 * mxxIn * OMEGA * rhoIn) / (9.0 + OMEGA);
-
-			*mxx = (-2.0 - 15.0 * mxxIn) / (3.0 * (-4.0 - 3.0 * mxxIn + 3.0 * mxxIn * OMEGA));
-			*mxy = -2.0 * mxyIn * (9.0 + OMEGA) / (3.0 * (-4.0 - 3.0 * mxxIn + 3.0 * mxxIn * OMEGA));
-			*myy = -2.0 * myyIn * (9.0 + OMEGA) / (5.0 * (-4.0 - 3.0 * mxxIn + 3.0 * mxxIn * OMEGA));
-		}
 		
+		const dfloat H= NY-1;
+		*uy = 0.0;
+		*ux = 4.0 * U_MAX *((y/H) - (y/H)*(y/H));
+		// *ux = U_MAX;
+		
+		const dfloat rho = (4.0 * rhoIn + 3.0 * rhoIn * mxxIn) / (3.0 - 3.0 * (*ux));
+		*mxx = (rho + 9.0 * rhoIn * mxxIn + 3.0 * rho * (*ux)) / (6.0 * rho);
+		*mxy = 2.0 * rhoIn * mxyIn / rho;
+		*myy = 6.0 * rhoIn * myyIn / (5.0 * rho);
+
+		*rhoVar = rho;
+
 		break;
 	}
 	case EAST:
@@ -167,7 +156,7 @@ inline void boundary_calculation(unsigned int nodeType, dfloat* rhoVar, dfloat* 
 		*ux = fMom[idxMom(threadIdx.x - 1, threadIdx.y, M_UX_INDEX, blockIdx.x, blockIdx.y)] / F_M_I_SCALE;
 		*uy = fMom[idxMom(threadIdx.x - 1, threadIdx.y, M_UY_INDEX, blockIdx.x, blockIdx.y)] / F_M_I_SCALE;
 
-		*rhoVar = rho;
+		*rhoVar = RHO_0;
 
 		*mxx = (rho + 9.0 * rhoIn * mxxIn - 3.0 * rho * *ux) / (6.0 * rho);
 		*mxy = (6.0 * rhoIn * mxyIn - rho * *uy) / (3.0 * rho);

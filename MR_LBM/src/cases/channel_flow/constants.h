@@ -3,23 +3,21 @@
 
 #include "../../var.h"
 
-constexpr dfloat RE = 300;
+constexpr dfloat RE = 100;
 
 constexpr int SCALE = 1;
 constexpr int N_STEPS = 100000;
 
-constexpr int MACR_SAVE = 10000;
+constexpr int MACR_SAVE = 1000;
 
-constexpr int D = 16;
-
-constexpr int N = 256 * SCALE;
-constexpr int NX = 3 * N;               // size x of the grid
+constexpr int N = 64 * SCALE;
+constexpr int NX = 10 * N;               // size x of the grid
 constexpr int NY = N;               // size y of the grid
 
 constexpr dfloat U_MAX = 0.1;
 constexpr dfloat L = N;
 
-constexpr dfloat VISC = U_MAX * D / RE;
+constexpr dfloat VISC = U_MAX * (NY-1) / RE;
 constexpr dfloat TAU = 0.5 + 3.0 * VISC; // relaxation time
 
 constexpr dfloat OMEGA = 1.0 / TAU;            // (tau)^-1
@@ -42,9 +40,9 @@ constexpr dfloat MACH_NUMBER = U_MAX / 0.57735026918962;
 constexpr int INI_STEP = 0; // initial simulation step (0 default)
 
 #define BC_X_WALL
-//#define BC_Y_WALL
-#define BC_Y_PERIODIC
+#define BC_Y_WALL
+// #define BC_Y_PERIODIC
 
-constexpr bool IRBC = true;
+constexpr bool IRBC = false;
 
 #endif // !CONSTANTS_H
