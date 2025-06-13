@@ -3,8 +3,7 @@
 #include "globalFunctions.h"
 
 __global__ void gpuMomCollisionStream(
-	dfloat* fMom, unsigned int* dNodeType, ghostInterfaceData ghostInterface, unsigned int step
-)
+	dfloat *fMom, unsigned int *dNodeType, ghostInterfaceData ghostInterface, unsigned int step)
 {
 	const int x = threadIdx.x + blockDim.x * blockIdx.x;
 	const int y = threadIdx.y + blockDim.y * blockIdx.y;
@@ -85,8 +84,9 @@ __global__ void gpuMomCollisionStream(
 
 	if (nodeType != BULK)
 	{
+#ifndef CYLINDER
 		boundary_calculation(nodeType, &rhoVar, &ux_t30, &uy_t30, &m_xx_t45, &m_yy_t45, &m_xy_t90, pop, fMom, x, y);
-
+#endif
 		invRho = 1.0 / rhoVar;
 	}
 	else
@@ -109,8 +109,10 @@ __global__ void gpuMomCollisionStream(
 	m_xy_t90 = F_M_IJ_SCALE * (m_xy_t90);
 	m_yy_t45 = F_M_II_SCALE * (m_yy_t45);
 
-	// COLLIDE
+// COLLIDE
+#ifndef CYLINDER
 	moment_collision(ux_t30, uy_t30, &m_xx_t45, &m_yy_t45, &m_xy_t90);
+#endif
 
 	// calculate post collision populations
 	pop_reconstruction(rhoVar, ux_t30, uy_t30, m_xx_t45, m_yy_t45, m_xy_t90, pop);

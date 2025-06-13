@@ -3,15 +3,15 @@
 #ifndef __INTERFACE_BC_H
 #define __INTERFACE_BC_H
 
-#define INTERFACE_BC_WEST_PERIO (threadIdx.x == 0)
-#define INTERFACE_BC_WEST_BLOCK (threadIdx.x == 0 && x != 0)
-#define INTERFACE_BC_EAST_PERIO (threadIdx.x == (BLOCK_NX - 1))
-#define INTERFACE_BC_EAST_BLOCK (threadIdx.x == (BLOCK_NX - 1) && x != (NX - 1))
+#define INTERFACE_BC_WEST_PERIO (tx == 0)
+#define INTERFACE_BC_WEST_BLOCK (tx == 0 && x != 0)
+#define INTERFACE_BC_EAST_PERIO (tx == (BLOCK_NX - 1))
+#define INTERFACE_BC_EAST_BLOCK (tx == (BLOCK_NX - 1) && x != (NX - 1))
 
-#define INTERFACE_BC_SOUTH_PERIO (threadIdx.y == 0)
-#define INTERFACE_BC_SOUTH_BLOCK (threadIdx.y == 0 && y != 0)
-#define INTERFACE_BC_NORTH_PERIO (threadIdx.y == (BLOCK_NY - 1))
-#define INTERFACE_BC_NORTH_BLOCK (threadIdx.y == (BLOCK_NY - 1) && y != (NY - 1))
+#define INTERFACE_BC_SOUTH_PERIO (ty == 0)
+#define INTERFACE_BC_SOUTH_BLOCK (ty == 0 && y != 0)
+#define INTERFACE_BC_NORTH_PERIO (ty == (BLOCK_NY - 1))
+#define INTERFACE_BC_NORTH_BLOCK (ty == (BLOCK_NY - 1) && y != (NY - 1))
 
 #ifdef BC_X_WALL
 #define INTERFACE_BC_WEST INTERFACE_BC_WEST_BLOCK

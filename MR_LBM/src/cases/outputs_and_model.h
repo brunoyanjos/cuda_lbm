@@ -4,7 +4,7 @@
 #define PATH_FILES "JET_FLOW"
 #define ID_SIM "001"
 
-#define BC_PROBLEM jet_flow
+#define BC_PROBLEM cylinder
 #define CASE_DIRECTORY cases
 #define REG_ORDER 2nd_order
 

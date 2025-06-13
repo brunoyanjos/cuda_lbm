@@ -13,6 +13,7 @@
 
 #include COLREC
 #include CASE_BC
+#include "includeFiles/interface_handling.cuh"
 
 
 #include "globalStructs.h"
@@ -30,6 +31,38 @@
  */
 __global__ void gpuMomCollisionStream(
 	dfloat* fMom, unsigned int* dNodeType, ghostInterfaceData ghostInterface, unsigned int step
+);
+
+/*
+ *   @brief Updates macroscopics and then performs collision and streaming
+ *   @param fMom: macroscopics moments
+ *   @param ghostInterface interface block transfer information
+ *   @param d_mean_rho: mean density, used for density correction
+ *   @param d_BC_Fx: boundary condition force x
+ *   @param d_BC_Fy: boundary condition force x
+ *   @param d_BC_Fz: boundary condition force x
+ *   @param step: current time step
+ *   @param save: if is necessary save some data
+ */
+__global__ void streamingAndMom(
+	dfloat* fMom, dfloat OMEGA, unsigned int* dNodeType,
+	ghostInterfaceData ghostInterface, cylinderProperties* cylinder_properties, unsigned int step
+) ;
+
+/*
+ *   @brief Updates macroscopics and then performs collision and streaming
+ *   @param fMom: macroscopics moments
+ *   @param ghostInterface interface block transfer information
+ *   @param d_mean_rho: mean density, used for density correction
+ *   @param d_BC_Fx: boundary condition force x
+ *   @param d_BC_Fy: boundary condition force x
+ *   @param d_BC_Fz: boundary condition force x
+ *   @param step: current time step
+ *   @param save: if is necessary save some data
+ */
+__global__ void boundaryAndCollision(
+	dfloat* fMom, dfloat* fMom_old, dfloat OMEGA, unsigned int* dNodeType,
+	ghostInterfaceData ghostInterface, cylinderProperties* cylinder_properties, unsigned int step
 );
 
 

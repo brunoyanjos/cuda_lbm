@@ -29,7 +29,11 @@ inline void pop_reconstruction(dfloat rhoVar, dfloat ux, dfloat uy, dfloat mxx, 
 }
 
 __device__
-inline void moment_collision(dfloat ux, dfloat uy, dfloat* mxx, dfloat* myy, dfloat* mxy) {
+inline void moment_collision(dfloat ux, dfloat uy, dfloat* mxx, dfloat* myy, dfloat* mxy,
+#ifdef CYLINDER
+dfloat OMEGA
+#endif
+) {
 	const dfloat omegaVar = OMEGA;
 	const dfloat t_omegaVar = 1 - omegaVar;
 	const dfloat omegaVar_d2 = omegaVar / 2;

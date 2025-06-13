@@ -19,4 +19,29 @@ typedef struct ghostInterfaceData
     ghostData h_fGhost;
 } GhostInterfaceData;
 
-#endif //__GLOBAL_STRUCTS_H
+typedef struct cylinderProperties
+{
+    // x coordinates
+    dfloat xb;
+    dfloat xw;
+    dfloat x1;
+    dfloat x2;
+    dfloat x3;
+
+    // y coordinates
+    dfloat yb;
+    dfloat yw;
+    dfloat y1;
+    dfloat y2;
+    dfloat y3;
+
+    // incomings and outgoings
+    size_t is[9];
+    size_t os[9];
+
+    // other properties
+    dfloat dr;
+    dfloat theta;
+} CylinderProperties;
+
+#endif //__GLOBAL_STRUCTS

@@ -11,6 +11,7 @@
 #include "var.h"
 #include "nodeTypeMap.h"
 #include "globalFunctions.h"
+#include "globalStructs.h"
 
 #include <iostream>
 #include <fstream>
@@ -58,5 +59,16 @@ __host__ void hostInitialization_nodeType_bulk(
 __host__ void hostInitialization_nodeType(
 	unsigned int* hNodeType);
 
+
+	/*
+ *   @brief Initialize the boundary condition node type
+ *   @param nodeType: node type ID
+ */
+__host__ void hostInitialization_innerNodes(
+	unsigned int* hNodeType,
+	dfloat* D_MAX,
+	cylinderProperties** cylinder_properties,
+	size_t* contour_counter
+);
 
 #endif // !__LBM_INITIALIZATION_CUH
