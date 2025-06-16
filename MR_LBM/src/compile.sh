@@ -9,8 +9,7 @@ if [ -z "$CompCap" ]; then
     fi
 fi
 rm -f ./../*sim_D2Q9_sm75
-# rm -f ./2D_CHANNEL/$1/*.dat
-# rm -r ./2D_CHANNEL/$1
+rm -r ./CYLINDER/$1/
     nvcc -gencode arch=compute_${CompCap},code=sm_${CompCap} -rdc=true --ptxas-options=-v -O3 --restrict \
         *.cu \
         -lcudadevrt -lcurand -o ./../$1sim_${LT}_sm${CompCap}

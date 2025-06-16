@@ -1,7 +1,7 @@
 #ifndef OUTPUTS_AND_MODEL_H
 #define OUTPUTS_AND_MODEL_H
 
-#define PATH_FILES "JET_FLOW"
+#define PATH_FILES "CYLINDER"
 #define ID_SIM "001"
 
 #define BC_PROBLEM cylinder

@@ -36,8 +36,8 @@ typedef struct cylinderProperties
     dfloat y3;
 
     // incomings and outgoings
-    size_t is[9];
-    size_t os[9];
+    int is[9];
+    int os[9];
 
     // other properties
     dfloat dr;

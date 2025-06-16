@@ -8,9 +8,9 @@ constexpr dfloat RE = 100;
 constexpr int SCALE = 1;
 constexpr int N_STEPS = 100000;
 
-constexpr int MACR_SAVE = 1000;
+constexpr int MACR_SAVE = 10000;
 
-constexpr int D = 10;
+constexpr int D = 32;
 
 constexpr int L_top = 10 * D;
 constexpr int L_bot = 10 * D;
@@ -44,6 +44,7 @@ constexpr int INI_STEP = 0; // initial simulation step (0 default)
 #define BC_Y_PERIODIC
 
 constexpr bool IRBC = false;
+constexpr bool ROTATIONAL_COORDINATES = false;
 
 #define CYLINDER
 

@@ -31,3 +31,8 @@ MR_LBM/post/*
 !MR_LBM/post/*.py
 MR_LBM/*.dat
 MR_LBM/OUTPUT/*
+MR_LBM/CYLINDER/*
+MR_LBM/JET_FLOW/*
+MR_LBM/src/OUTPUT/*
+MR_LBM/src/CYLINDER/*
+MR_LBM/src/JET_FLOW/*

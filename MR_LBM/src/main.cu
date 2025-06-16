@@ -4,9 +4,31 @@
 #include <chrono>
 #include "saveData.cuh"
 
+#include <string>
+#include <math.h>
+#include <cuda.h>
+#include <curand.h>
+#include <cuda_runtime.h>
+#include <builtin_types.h>
+#include "var.h"
+
 using namespace std;
 
-std::map<unsigned int, unsigned int> cylinder_index;
+__global__ void printDeviceProperties(cylinderProperties *cylinder_proporties, unsigned int *dNodeType)
+{
+	cylinderProperties property = cylinder_proporties[threadIdx.x];
+	int xb = property.xb;
+	int yb = property.yb;
+
+	int nodeType = dNodeType[idxScalarBlock(xb % BLOCK_NX, yb % BLOCK_NY, xb / BLOCK_NX, yb / BLOCK_NY)];
+
+	printf("nodeType: %d\n"
+		   "Is = {%d, %d, %d, %d, %d, %d, %d, %d, %d}\n"
+		   "Os = {%d, %d, %d, %d, %d, %d, %d, %d, %d}\n",
+		   nodeType,
+		   property.is[0], property.is[1], property.is[2], property.is[3], property.is[4], property.is[5], property.is[6], property.is[7], property.is[8],
+		   property.os[0], property.os[1], property.os[2], property.os[3], property.os[4], property.os[5], property.os[6], property.os[7], property.os[8]);
+}
 
 int main()
 {
@@ -21,8 +43,8 @@ int main()
 	dfloat *d_fMom;
 	dfloat *d_fMom_old;
 	ghostInterfaceData ghostInterface;
-	cylinderProperties *d_cylinder_proporties;
-	cylinderProperties *h_cylinder_proporties;
+	cylinderProperties *d_cylinder_properties;
+	cylinderProperties *h_cylinder_properties;
 
 	unsigned int *dNodeType;
 	unsigned int *hNodeType;
@@ -64,23 +86,16 @@ int main()
 	initializeDomain(ghostInterface, d_fMom, h_fMom, hNodeType, dNodeType,
 					 &step, gridBlock, threadBlock,
 #ifdef CYLINDER
-					 &D_Max, &h_cylinder_proporties,
-					 d_cylinder_proporties, &countor_count
+					 &D_Max, &h_cylinder_properties,
+					 d_cylinder_properties, &countor_count
 #endif
 	);
 
-	printf("count: %d, d_max:%f", countor_count, D_Max);
+	printf("count: %d, d_max:%f\n", countor_count, D_Max);
 
 	const dfloat VISC = U_MAX * D_Max / RE;
 	const dfloat TAU = 0.5 + 3.0 * VISC; // relaxation time
-
 	const dfloat OMEGA = 1.0 / TAU;			   // (tau)^-1
-	const dfloat OMEGAd2 = OMEGA / 2.0;		   // OMEGA/2
-	const dfloat OMEGAd9 = OMEGA / 9.0;		   // OMEGA/9
-	const dfloat T_OMEGA = 1.0 - OMEGA;		   // 1-OMEGA
-	const dfloat TT_OMEGA = 1.0 - 0.5 * OMEGA; // 1.0 - OMEGA/2
-	const dfloat OMEGA_P1 = 1.0 + OMEGA;	   // 1+ OMEGA
-	const dfloat TT_OMEGA_T3 = TT_OMEGA * 3.0; // 3*(1-0.5*OMEGA)
 
 	/* ------------------------------ TIMER EVENTS  ------------------------------ */
 	checkCudaErrors(cudaSetDevice(GPU_INDEX));
@@ -94,15 +109,15 @@ int main()
 	/* --------------------------------------------------------------------- */
 	for (step = INI_STEP; step < N_STEPS; step++)
 	{
-		#ifdef CYLINDER
-		streamingAndMom << <gridBlock, threadBlock >> > (d_fMom, OMEGA, dNodeType, ghostInterface, d_cylinder_proporties, step);
+#ifdef CYLINDER
+		streamingAndMom<<<gridBlock, threadBlock>>>(d_fMom, OMEGA, countor_count, dNodeType, ghostInterface, d_cylinder_properties, step);
 		checkCudaErrors(cudaDeviceSynchronize());
 		checkCudaErrors(cudaMemcpy(d_fMom_old, d_fMom, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyDeviceToDevice));
 
-		boundaryAndCollision << <gridBlock, threadBlock >> > (d_fMom, d_fMom_old, OMEGA, dNodeType, ghostInterface, d_cylinder_proporties, step);
-		#else
+		boundaryAndCollision<<<gridBlock, threadBlock>>>(d_fMom, d_fMom_old, countor_count, OMEGA, dNodeType, ghostInterface, d_cylinder_properties, step);
+#else
 		gpuMomCollisionStream<<<gridBlock, threadBlock>>>(d_fMom, dNodeType, ghostInterface, step);
-		#endif
+#endif
 
 		// swap interface pointers
 		swapGhostInterfaces(ghostInterface);

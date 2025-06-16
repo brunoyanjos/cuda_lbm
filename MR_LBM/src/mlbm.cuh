@@ -15,6 +15,10 @@
 #include CASE_BC
 #include "includeFiles/interface_handling.cuh"
 
+#ifdef CYLINDER
+#include "cases/cylinder/aux_functions.cuh"
+#endif
+
 
 #include "globalStructs.h"
 
@@ -45,7 +49,7 @@ __global__ void gpuMomCollisionStream(
  *   @param save: if is necessary save some data
  */
 __global__ void streamingAndMom(
-	dfloat* fMom, dfloat OMEGA, unsigned int* dNodeType,
+	dfloat* fMom, dfloat OMEGA, size_t cylinder_counter, unsigned int* dNodeType,
 	ghostInterfaceData ghostInterface, cylinderProperties* cylinder_properties, unsigned int step
 ) ;
 
@@ -61,9 +65,8 @@ __global__ void streamingAndMom(
  *   @param save: if is necessary save some data
  */
 __global__ void boundaryAndCollision(
-	dfloat* fMom, dfloat* fMom_old, dfloat OMEGA, unsigned int* dNodeType,
-	ghostInterfaceData ghostInterface, cylinderProperties* cylinder_properties, unsigned int step
-);
+    dfloat *fMom, dfloat *fMom_old, size_t cylinder_count, dfloat OMEGA, unsigned int *dNodeType,
+    ghostInterfaceData ghostInterface, cylinderProperties *cylinder_properties, unsigned int step);
 
 
 #endif __MLBM_H

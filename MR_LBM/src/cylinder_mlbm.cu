@@ -3,7 +3,7 @@
 #include "globalFunctions.h"
 
 __global__ void streamingAndMom(
-    dfloat *fMom, dfloat OMEGA, unsigned int *dNodeType,
+    dfloat *fMom, dfloat OMEGA, size_t cylinder_counter, unsigned int *dNodeType,
     ghostInterfaceData ghostInterface, cylinderProperties *cylinder_properties, unsigned int step)
 {
     const int x = threadIdx.x + blockDim.x * blockIdx.x;
@@ -13,8 +13,7 @@ __global__ void streamingAndMom(
         return;
 
     dfloat pop[Q];
-    dfloat pics2;
-    dfloat multiplyTerm;
+
     __shared__ dfloat s_pop[BLOCK_LBM_SIZE * (Q - 1)];
 
     // Load moments from global memory
@@ -30,7 +29,7 @@ __global__ void streamingAndMom(
     dfloat m_xy_t90 = fMom[idxMom(threadIdx.x, threadIdx.y, M_MXY_INDEX, blockIdx.x, blockIdx.y)];
     dfloat m_yy_t45 = fMom[idxMom(threadIdx.x, threadIdx.y, M_MYY_INDEX, blockIdx.x, blockIdx.y)];
 
-    pop_reconstruction(rhoVar, ux_t30, uy_t30, m_xx_t45, m_xy_t90, m_yy_t45, pop);
+    pop_reconstruction(rhoVar, ux_t30, uy_t30, m_xx_t45, m_yy_t45, m_xy_t90, pop);
 
     const unsigned short int xp1 = (threadIdx.x + 1 + BLOCK_NX) % BLOCK_NX;
     const unsigned short int xm1 = (threadIdx.x - 1 + BLOCK_NX) % BLOCK_NX;
@@ -68,7 +67,16 @@ __global__ void streamingAndMom(
 
     if (nodeType != BULK)
     {
-        boundary_calculation(nodeType, &rhoVar, &ux_t30, &uy_t30, &m_xx_t45, &m_yy_t45, &m_xy_t90, pop, fMom, x, y, OMEGA);
+        if (nodeType > 100 && nodeType < 115)
+        {
+            cylinderProperties bc_property = findCylindeProperty(cylinder_properties, cylinder_counter, x, y);
+
+            immersedBoundaryLoop(bc_property.is, pop, &rhoVar, &m_xx_t45, &m_yy_t45, &m_xy_t90, x, y);
+        }
+        else
+        {
+            boundary_calculation(nodeType, &rhoVar, &ux_t30, &uy_t30, &m_xx_t45, &m_yy_t45, &m_xy_t90, pop, fMom, x, y, OMEGA);
+        }
     }
     else
     {
@@ -98,7 +106,7 @@ __global__ void streamingAndMom(
 }
 
 __global__ void boundaryAndCollision(
-    dfloat *fMom, dfloat *fMom_old, dfloat OMEGA, unsigned int *dNodeType,
+    dfloat *fMom, dfloat *fMom_old, size_t cylinder_count, dfloat OMEGA, unsigned int *dNodeType,
     ghostInterfaceData ghostInterface, cylinderProperties *cylinder_properties, unsigned int step)
 {
     const int x = threadIdx.x + blockDim.x * blockIdx.x;
@@ -121,14 +129,15 @@ __global__ void boundaryAndCollision(
     dfloat m_xy_t90 = fMom[idxMom(threadIdx.x, threadIdx.y, M_MXY_INDEX, blockIdx.x, blockIdx.y)];
     dfloat m_yy_t45 = fMom[idxMom(threadIdx.x, threadIdx.y, M_MYY_INDEX, blockIdx.x, blockIdx.y)];
 
-    // if (nodeType > 100) {
-    // 	immersed_boundary_treatment(
-    // 		nodeType,
-    // 		&rhoVar, &ux_t30, &uy_t30, &m_xx_t45, &m_xy_t90, &m_yy_t45,
-    // 		threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y, x, y,
-    // 		cylinder_properties,
-    // 		fMom_old, OMEGA, step);
-    // }
+    if (nodeType > 100)
+    {
+        immersed_boundary_treatment(
+            nodeType,
+            &rhoVar, &ux_t30, &uy_t30, &m_xx_t45, &m_xy_t90, &m_yy_t45,
+            threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y, x, y,
+            cylinder_properties, cylinder_count,
+            fMom_old, OMEGA, step);
+    }
 
     ux_t30 = F_M_I_SCALE * ux_t30;
     uy_t30 = F_M_I_SCALE * uy_t30;
@@ -137,9 +146,9 @@ __global__ void boundaryAndCollision(
     m_xy_t90 = F_M_IJ_SCALE * (m_xy_t90);
     m_yy_t45 = F_M_II_SCALE * (m_yy_t45);
 
-    moment_collision(ux_t30, uy_t30, &m_xx_t45, &m_xy_t90, &m_yy_t45, OMEGA);
+    moment_collision(ux_t30, uy_t30, &m_xx_t45, &m_yy_t45, &m_xy_t90, OMEGA);
 
-    pop_reconstruction(rhoVar, ux_t30, uy_t30, m_xx_t45, m_xy_t90, m_yy_t45, pop);
+    pop_reconstruction(rhoVar, ux_t30, uy_t30, m_xx_t45, m_yy_t45, m_xy_t90, pop);
 
     // if (nodeType > 100 && step >= N_STEPS - FORCES_TIME && CALCULATE_FORCES) {
     // 	outgoing_forces(nodeType, x, y, cylinder_properties, cylinder_index, pop);

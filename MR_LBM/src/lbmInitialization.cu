@@ -209,6 +209,12 @@ __host__ void hostInitialization_innerNodes(
 				node_7 == BULK ||
 				node_8 == BULK;
 
+			if(node_0 == SOLID_NODE) {
+				printf("xx ");
+			} else {
+				printf("00 ");
+			}
+
 			if (node_0 == SOLID_NODE && anyBulk)
 			{
 				if (count >= max_count)
@@ -249,6 +255,7 @@ __host__ void hostInitialization_innerNodes(
 				hNodeType[idxScalarBlock(x % BLOCK_NX, y % BLOCK_NY, x / BLOCK_NX, y / BLOCK_NY)] = bc_number + 100;
 			}
 		}
+		printf("\n");
 	}
 
 	for (int i = 0; i < count; i++)
