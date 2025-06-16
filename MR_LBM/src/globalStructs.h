@@ -40,6 +40,9 @@ typedef struct cylinderProperties
     int os[9];
 
     // other properties
+    dfloat Fx;
+    dfloat Fy;
+    dfloat ps;
     dfloat dr;
     dfloat theta;
 } CylinderProperties;

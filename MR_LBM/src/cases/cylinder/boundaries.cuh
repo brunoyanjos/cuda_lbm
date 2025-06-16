@@ -11,6 +11,7 @@
 #include "../../nodeTypeMap.h"
 #include "numerical_solutions.cuh"
 #include "aux_functions.cuh"
+#include "interpolation_utilities.cuh"
 
 __host__ __device__ inline void boundary_definition(unsigned int *nodeType, unsigned int x, unsigned int y)
 {
@@ -300,46 +301,46 @@ __device__ inline void immersed_boundary_treatment(
 	cylinderProperties *cylinder_properties, size_t cylinder_counter,
 	dfloat *fMom_old, dfloat OMEGA, unsigned int step)
 {
-	cylinderProperties property = findCylindeProperty(cylinder_properties, cylinder_counter, x, y);
+	cylinderProperties property = *findCylindeProperty(cylinder_properties, cylinder_counter, x, y);
 
 	// for first point
 
-	// dfloat ux1;
-	// dfloat uy1;
+	dfloat ux1;
+	dfloat uy1;
 
-	// bilinear_velocity_interpolation(property.x1, property.y1, int(property.x1), int(property.y1), int(property.x1) + 1, int(property.y1) + 1, fMom_old, M_UX_INDEX, &ux1);
-	// bilinear_velocity_interpolation(property.x1, property.y1, int(property.x1), int(property.y1), int(property.x1) + 1, int(property.y1) + 1, fMom_old, M_UY_INDEX, &uy1);
+	bilinear_velocity_interpolation(property.x1, property.y1, int(property.x1), int(property.y1),
+									int(property.x1) + 1, int(property.y1) + 1, fMom_old, M_UX_INDEX, &ux1);
+	bilinear_velocity_interpolation(property.x1, property.y1, int(property.x1), int(property.y1),
+									int(property.x1) + 1, int(property.y1) + 1, fMom_old, M_UY_INDEX, &uy1);
 
 	// for second point
 
-	// dfloat ux2;
-	// dfloat uy2;
+	dfloat ux2;
+	dfloat uy2;
 
-	// bilinear_velocity_interpolation(property.x2, property.y2, int(property.x2), int(property.y2), int(property.x2) + 1, int(property.y2) + 1, fMom_old, M_UX_INDEX, &ux2);
-	// bilinear_velocity_interpolation(property.x2, property.y2, int(property.x2), int(property.y2), int(property.x2) + 1, int(property.y2) + 1, fMom_old, M_UY_INDEX, &uy2);
+	bilinear_velocity_interpolation(property.x2, property.y2, int(property.x2), int(property.y2),
+									int(property.x2) + 1, int(property.y2) + 1, fMom_old, M_UX_INDEX, &ux2);
+	bilinear_velocity_interpolation(property.x2, property.y2, int(property.x2), int(property.y2),
+									int(property.x2) + 1, int(property.y2) + 1, fMom_old, M_UY_INDEX, &uy2);
 
 	// moment interpolation to first point
-	// dfloat mxx1 = 0.0;
-	// dfloat myy1 = 0.0;
-	// dfloat mxx2 = 0.0;
-	// dfloat myy2 = 0.0;
+	dfloat mxx1 = 0.0;
+	dfloat myy1 = 0.0;
+	dfloat mxx2 = 0.0;
+	dfloat myy2 = 0.0;
 
-	// if (ROTATIONAL_COORDINATES) {
-	// 	/*bilinear_moment_interpolation(property.x1, property.y1, property.lx1, property.ly1, property.lx1p1, property.ly1p1, fMom_old, &mxx1, &myy1);
-	// 	bilinear_moment_interpolation(property.x2, property.y2, property.lx2, property.ly2, property.lx2p1, property.ly2p1, fMom_old, &mxx2, &myy2);*/
-
-	// 	bilinear_moment_interpolation(property.x1, property.y1, int(property.x1), int(property.y1), int(property.x1) + 1, int(property.y1) + 1, fMom_old, &mxx1, &myy1);
-	// 	bilinear_moment_interpolation(property.x2, property.y2, int(property.x2), int(property.y2), int(property.x2) + 1, int(property.y2) + 1, fMom_old, &mxx2, &myy2);
-	// }
+	if (ROTATIONAL_COORDINATES)
+	{
+		bilinear_moment_interpolation(property.x1, property.y1, int(property.x1), int(property.y1),
+									  int(property.x1) + 1, int(property.y1) + 1, fMom_old, &mxx1, &myy1);
+		bilinear_moment_interpolation(property.x2, property.y2, int(property.x2), int(property.y2),
+									  int(property.x2) + 1, int(property.y2) + 1, fMom_old, &mxx2, &myy2);
+	}
 
 	// if (CALCULATE_PRESSURE && step >= N_STEPS - PRESSURE_TIME) {
 	// 	dfloat rho1;
 	// 	dfloat rho2;
 	// 	dfloat rho3;
-
-	// 	/*bilinear_velocity_interpolation(property.x1, property.y1, property.lx1, property.ly1, property.lx1p1, property.ly1p1, fMom_old, M_RHO_INDEX, &rho1);
-	// 	bilinear_velocity_interpolation(property.x2, property.y2, property.lx2, property.ly2, property.lx2p1, property.ly2p1, fMom_old, M_RHO_INDEX, &rho2);
-	// 	bilinear_velocity_interpolation(property.x3, property.y3, property.lx3, property.ly3, property.lx3p1, property.ly3p1, fMom_old, M_RHO_INDEX, &rho3);*/
 
 	// 	bilinear_velocity_interpolation(property.x1, property.y1, int(property.x1), int(property.y1), int(property.x1) + 1, int(property.y1) + 1, fMom_old, M_RHO_INDEX, &rho1);
 	// 	bilinear_velocity_interpolation(property.x2, property.y2, int(property.x2), int(property.y2), int(property.x2) + 1, int(property.y2) + 1, fMom_old, M_RHO_INDEX, &rho2);
@@ -348,20 +349,17 @@ __device__ inline void immersed_boundary_treatment(
 	// 	pressure_extrapolation(property.xw, property.yw, property.x1, property.y1, property.x2, property.y2, property.x3, property.y3, rho1, rho2, rho3, &(cylinder_properties[index].ps));
 	// }
 
-	// dfloat delta = property.dr;
+	const dfloat delta = property.dr;
 
-	// *ux = extrapolation(delta, ux1, ux2);
-	// *uy = extrapolation(delta, uy1, uy2);
+	*ux = extrapolation(delta, ux1, ux2);
+	*uy = extrapolation(delta, uy1, uy2);
 
-	// dfloat m_xx_int = extrapolation(delta, mxx1, mxx2);
-	// dfloat m_yy_int = extrapolation(delta, myy1, myy2);
-
-	*ux = 0.0;
-	*uy = 0.0;
+	const dfloat m_xx_int = extrapolation(delta, mxx1, mxx2);
+	const dfloat m_yy_int = extrapolation(delta, myy1, myy2);
 
 	if (ROTATIONAL_COORDINATES)
 	{
-		// numericalSolution_rotation(rhoVar, *ux, *uy, mxx, mxy, myy, m_xx_int, m_yy_int, incomings, outgoings, OMEGA, x, y);
+		numericalSolution_rotation(rhoVar, *ux, *uy, mxx, mxy, myy, m_xx_int, m_yy_int, property.is, property.os, OMEGA, x, y);
 	}
 	else
 	{

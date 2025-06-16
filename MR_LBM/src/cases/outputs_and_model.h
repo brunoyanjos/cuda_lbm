@@ -14,4 +14,14 @@
 
 #include CASE_CONSTANTS
 
+constexpr bool CALCULATE_PRESSURE = true;
+constexpr bool CALCULATE_FORCES = true;
+constexpr bool CALCULATE_RHO = true;
+constexpr bool SAVE_DOMAIN = true;
+
+constexpr unsigned int STAT_BEGIN_TIME = N_STEPS - 50000;
+constexpr unsigned int STAT_END_TIME = N_STEPS;
+
+constexpr int INI_MEAN_STEP = 0;
+
 #endif // !OUTPUTS_AND_MODEL_H

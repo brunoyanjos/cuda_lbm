@@ -17,6 +17,7 @@
 #include "lbmInitialization.cuh"
 #include "mlbm.cuh"
 #include "saveData.cuh"
+#include "treat_data.cuh"
 
 /*
  *   @brief Swaps the pointers of two dfloat variables.

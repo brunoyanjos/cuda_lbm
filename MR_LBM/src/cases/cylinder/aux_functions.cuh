@@ -3,31 +3,31 @@
 
 #include "../../globalStructs.h"
 
-__device__ inline cylinderProperties findCylindeProperty(
-    cylinderProperties *cylinderProperties, size_t counter,
-    size_t x, size_t y)
+__device__ inline cylinderProperties *findCylindeProperty(
+	cylinderProperties *cylinderProperties, size_t counter,
+	size_t x, size_t y)
 {
-    for(size_t i = 0; i < counter; i++) {
-        size_t xb = cylinderProperties[i].xb;
-        size_t yb = cylinderProperties[i].yb;
-    
-        if(x == xb && y == yb) {
-            return cylinderProperties[i];
-        }
-    }
+	for (size_t i = 0; i < counter; i++)
+	{
+		size_t xb = cylinderProperties[i].xb;
+		size_t yb = cylinderProperties[i].yb;
+
+		if (x == xb && y == yb)
+		{
+			return &(cylinderProperties[i]);
+		}
+	}
 }
 
-__device__
-inline void immersedBoundaryLoop(
-	const int(&incomings)[9],
-	const dfloat(&pop)[9],
-	dfloat* rhoVar,
-	dfloat* m_xx_t45,
-	dfloat* m_yy_t45,
-	dfloat* m_xy_t90,
+__device__ inline void immersedBoundaryLoop(
+	const int (&incomings)[9],
+	const dfloat (&pop)[9],
+	dfloat *rhoVar,
+	dfloat *m_xx_t45,
+	dfloat *m_yy_t45,
+	dfloat *m_xy_t90,
 	int x,
-	int y
-)
+	int y)
 {
 	dfloat rho_I = 0;
 	dfloat m_xx_I = 0;
@@ -65,7 +65,7 @@ inline void immersedBoundaryLoop(
 				const dfloat Hxx = (cx[i] * cx[i]) - cs2;
 				const dfloat Hyy = (cy[i] * cy[i]) - cs2;
 				const dfloat Hxy = cx[i] * cy[i];
-                
+
 				rho_I += pop[i];
 				m_xx_I += pop[i] * Hxx;
 				m_yy_I += pop[i] * Hyy;
@@ -80,6 +80,35 @@ inline void immersedBoundaryLoop(
 	*m_xx_t45 = m_xx_I * inv_rho_I;
 	*m_yy_t45 = m_yy_I * inv_rho_I;
 	*m_xy_t90 = m_xy_I * inv_rho_I;
+}
+
+__device__ inline void incoming_forces(
+	cylinderProperties *cylinder_properties, dfloat *pop)
+{
+	(*cylinder_properties).Fx = 0.0;
+	(*cylinder_properties).Fy = 0.0;
+
+	for (size_t j = 1; j < 9; j++)
+	{
+		if ((*cylinder_properties).is[j] == 1)
+		{
+			(*cylinder_properties).Fx += pop[j] * cx[j];
+			(*cylinder_properties).Fy += pop[j] * cy[j];
+		}
+	}
+}
+
+__device__ inline void outgoing_forces(
+	cylinderProperties *cylinder_properties, size_t counter, dfloat *pop)
+{
+	for (size_t j = 1; j < 9; j++)
+	{
+		if ((*cylinder_properties).os[j] == 1)
+		{
+			(*cylinder_properties).Fx -= pop[j] * cx[j];
+			(*cylinder_properties).Fy -= pop[j] * cy[j];
+		}
+	}
 }
 
 #endif

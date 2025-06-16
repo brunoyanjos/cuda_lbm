@@ -69,9 +69,14 @@ __global__ void streamingAndMom(
     {
         if (nodeType > 100 && nodeType < 115)
         {
-            cylinderProperties bc_property = findCylindeProperty(cylinder_properties, cylinder_counter, x, y);
+            cylinderProperties* bc_property = findCylindeProperty(cylinder_properties, cylinder_counter, x, y);
 
-            immersedBoundaryLoop(bc_property.is, pop, &rhoVar, &m_xx_t45, &m_yy_t45, &m_xy_t90, x, y);
+            immersedBoundaryLoop((*bc_property).is, pop, &rhoVar, &m_xx_t45, &m_yy_t45, &m_xy_t90, x, y);
+
+            if (step >= STAT_BEGIN_TIME && step <= STAT_END_TIME && CALCULATE_FORCES)
+            {
+                incoming_forces(bc_property, pop);
+            }
         }
         else
         {
@@ -90,10 +95,6 @@ __global__ void streamingAndMom(
         m_xy_t90 = ((pop[5] + pop[7]) - (pop[6] + pop[8])) * invRho;
         m_yy_t45 = (pop[2] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8]) * invRho - cs2;
     }
-
-    // if (nodeType > 100 && step >= N_STEPS - FORCES_TIME && CALCULATE_FORCES) {
-    // 	incoming_forces(nodeType, x, y, cylinder_properties, cylinder_index, pop);
-    // }
 
     fMom[idxMom(threadIdx.x, threadIdx.y, M_RHO_INDEX, blockIdx.x, blockIdx.y)] = rhoVar - RHO_0;
 
@@ -150,9 +151,12 @@ __global__ void boundaryAndCollision(
 
     pop_reconstruction(rhoVar, ux_t30, uy_t30, m_xx_t45, m_yy_t45, m_xy_t90, pop);
 
-    // if (nodeType > 100 && step >= N_STEPS - FORCES_TIME && CALCULATE_FORCES) {
-    // 	outgoing_forces(nodeType, x, y, cylinder_properties, cylinder_index, pop);
-    // }
+    if (nodeType > 100 && step >= STAT_BEGIN_TIME && step <= STAT_END_TIME && CALCULATE_FORCES)
+    {
+        cylinderProperties* bc_property = findCylindeProperty(cylinder_properties, cylinder_count, x, y);
+
+        outgoing_forces(bc_property, cylinder_count, pop);
+    }
 
     fMom[idxMom(threadIdx.x, threadIdx.y, M_RHO_INDEX, blockIdx.x, blockIdx.y)] = rhoVar - RHO_0;
 

@@ -95,7 +95,7 @@ int main()
 
 	const dfloat VISC = U_MAX * D_Max / RE;
 	const dfloat TAU = 0.5 + 3.0 * VISC; // relaxation time
-	const dfloat OMEGA = 1.0 / TAU;			   // (tau)^-1
+	const dfloat OMEGA = 1.0 / TAU;		 // (tau)^-1
 
 	/* ------------------------------ TIMER EVENTS  ------------------------------ */
 	checkCudaErrors(cudaSetDevice(GPU_INDEX));
@@ -121,6 +121,11 @@ int main()
 
 		// swap interface pointers
 		swapGhostInterfaces(ghostInterface);
+
+		checkCudaErrors(cudaDeviceSynchronize());
+		checkCudaErrors(cudaMemcpy(h_cylinder_properties, d_cylinder_properties, sizeof(cylinderProperties) * countor_count, cudaMemcpyDeviceToHost));
+
+		calculate_forces(h_cylinder_properties, countor_count, step);
 
 		if (MACR_SAVE != 0 && step % MACR_SAVE == 0)
 		{

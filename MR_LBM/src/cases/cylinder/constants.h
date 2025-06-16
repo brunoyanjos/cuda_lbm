@@ -6,7 +6,7 @@
 constexpr dfloat RE = 100;
 
 constexpr int SCALE = 1;
-constexpr int N_STEPS = 100000;
+constexpr int N_STEPS = 1000000;
 
 constexpr int MACR_SAVE = 10000;
 
@@ -44,7 +44,7 @@ constexpr int INI_STEP = 0; // initial simulation step (0 default)
 #define BC_Y_PERIODIC
 
 constexpr bool IRBC = false;
-constexpr bool ROTATIONAL_COORDINATES = false;
+constexpr bool ROTATIONAL_COORDINATES = true;
 
 #define CYLINDER
 

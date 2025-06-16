@@ -153,7 +153,7 @@ __device__
 inline void numericalSolution_rotation(
 	dfloat* rhoVar, const dfloat ux, const dfloat uy, dfloat* mxx_I, dfloat* mxy_I, dfloat* myy_I,
 	dfloat mxx, dfloat myy,
-	const bool(&incomings)[9], const bool(&outgoings)[9], const dfloat OMEGA, int x, int y)
+	const int(&incomings)[9], const int(&outgoings)[9], const dfloat OMEGA, int x, int y)
 {
 	dfloat A_prime = 0;
 	dfloat E_prime = 0;
