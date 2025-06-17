@@ -12,7 +12,7 @@
 #include <cstring>
 
 /* ----------------------------- PROBLEM DEFINE ---------------------------- */
-typedef float dfloat;
+typedef double dfloat;
 
 #define GPU_INDEX 0
 /* --------------------------  SIMULATION DEFINES -------------------------- */

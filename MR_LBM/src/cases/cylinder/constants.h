@@ -6,7 +6,7 @@
 constexpr dfloat RE = 100;
 
 constexpr int SCALE = 1;
-constexpr int N_STEPS = 1000000;
+constexpr int N_STEPS = 400000;
 
 constexpr int MACR_SAVE = 10000;
 
