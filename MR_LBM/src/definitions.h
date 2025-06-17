@@ -46,8 +46,7 @@ constexpr dfloat F_M_IJ_SCALE = as2 * as2;
 #include "arrayIndex.h"
 
 constexpr int SHARED_MEMORY_ELEMENT_SIZE = sizeof(dfloat) * (Q - 1);
-// constexpr int MAX_ELEMENTS_IN_BLOCK = 48128 / SHARED_MEMORY_ELEMENT_SIZE;
-constexpr int MAX_ELEMENTS_IN_BLOCK = 24064 / SHARED_MEMORY_ELEMENT_SIZE;
+ constexpr int MAX_ELEMENTS_IN_BLOCK = 48128 / SHARED_MEMORY_ELEMENT_SIZE;
 
 constexpr BlockDim optimalBlockDimArray = findOptimalBlockDimensions(MAX_ELEMENTS_IN_BLOCK);
 

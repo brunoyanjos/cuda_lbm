@@ -55,10 +55,10 @@ __device__ inline void immersedBoundaryLoop(
 				const dfloat Hyy_p = Hxx * sen_theta * sen_theta + Hyy * cos_theta * cos_theta - Hxy * sen_two_theta;
 				const dfloat Hxy_p = (Hyy - Hxx) * 0.5 * sen_two_theta + Hxy * cos_two_theta;
 
-				rho_I += pop[i];
-				m_xx_I += pop[i] * Hxx_p;
-				m_yy_I += pop[i] * Hyy_p;
-				m_xy_I += pop[i] * Hxy_p;
+				rho_I += (pop[i] + w[i]);
+				m_xx_I += (pop[i] + w[i]) * Hxx_p;
+				m_yy_I += (pop[i] + w[i]) * Hyy_p;
+				m_xy_I += (pop[i] + w[i]) * Hxy_p;
 			}
 			else
 			{
@@ -66,10 +66,10 @@ __device__ inline void immersedBoundaryLoop(
 				const dfloat Hyy = (cy[i] * cy[i]) - cs2;
 				const dfloat Hxy = cx[i] * cy[i];
 
-				rho_I += pop[i];
-				m_xx_I += pop[i] * Hxx;
-				m_yy_I += pop[i] * Hyy;
-				m_xy_I += pop[i] * Hxy;
+				rho_I += (pop[i] + w[i]);
+				m_xx_I += (pop[i] + w[i]) * Hxx;
+				m_yy_I += (pop[i] + w[i]) * Hyy;
+				m_xy_I += (pop[i] + w[i]) * Hxy;
 			}
 		}
 	}
@@ -92,8 +92,8 @@ __device__ inline void incoming_forces(
 	{
 		if ((*cylinder_properties).is[j] == 1)
 		{
-			(*cylinder_properties).Fx += pop[j] * cx[j];
-			(*cylinder_properties).Fy += pop[j] * cy[j];
+			(*cylinder_properties).Fx += (pop[j] * w[j]) * cx[j];
+			(*cylinder_properties).Fy += (pop[j] * w[j]) * cy[j];
 		}
 	}
 }
@@ -105,8 +105,8 @@ __device__ inline void outgoing_forces(
 	{
 		if ((*cylinder_properties).os[j] == 1)
 		{
-			(*cylinder_properties).Fx -= pop[j] * cx[j];
-			(*cylinder_properties).Fy -= pop[j] * cy[j];
+			(*cylinder_properties).Fx -= (pop[j] * w[j]) * cx[j];
+			(*cylinder_properties).Fy -= (pop[j] * w[j]) * cy[j];
 		}
 	}
 }

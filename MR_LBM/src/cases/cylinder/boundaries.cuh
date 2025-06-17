@@ -80,16 +80,28 @@ __host__ __device__ inline void boundary_definition(unsigned int *nodeType, unsi
 
 __device__ inline void boundary_calculation(unsigned int nodeType, dfloat *rhoVar, dfloat *ux, dfloat *uy, dfloat *mxx, dfloat *myy, dfloat *mxy, dfloat *pop, dfloat *fMom, int x, int y, dfloat OMEGA)
 {
+	const dfloat pop_0 = pop[0] + W0;
+	
+	const dfloat pop_1 = pop[1] + W1;
+	const dfloat pop_2 = pop[2] + W1;
+	const dfloat pop_3 = pop[3] + W1;
+	const dfloat pop_4 = pop[4] + W1;
+
+	const dfloat pop_5 = pop[5] + W2;
+	const dfloat pop_6 = pop[6] + W2;
+	const dfloat pop_7 = pop[7] + W2;
+	const dfloat pop_8 = pop[8] + W2;
+
 	switch (nodeType)
 	{
 	case NORTH:
 	{
-		const dfloat rhoIn = pop[0] + pop[1] + pop[2] + pop[3] + pop[5] + pop[6];
+		const dfloat rhoIn = pop_0 + pop_1 + pop_2 + pop_3 + pop_5 + pop_6;
 		const dfloat inv_rhoIn = 1.0 / rhoIn;
 
-		const dfloat mxxIn = (pop[1] + pop[3] + pop[5] + pop[6]) * inv_rhoIn - cs2;
-		const dfloat mxyIn = (pop[5] - pop[6]) * inv_rhoIn;
-		const dfloat myyIn = (pop[2] + pop[5] + pop[6]) * inv_rhoIn - cs2;
+		const dfloat mxxIn = (pop_1 + pop_3 + pop_5 + pop_6) * inv_rhoIn - cs2;
+		const dfloat mxyIn = (pop_5 - pop_6) * inv_rhoIn;
+		const dfloat myyIn = (pop_2 + pop_5 + pop_6) * inv_rhoIn - cs2;
 
 		*ux = 0.0;
 		*uy = 0.0;
@@ -104,12 +116,12 @@ __device__ inline void boundary_calculation(unsigned int nodeType, dfloat *rhoVa
 	}
 	case SOUTH:
 	{
-		const dfloat rhoIn = pop[0] + pop[1] + pop[3] + pop[4] + pop[7] + pop[8];
+		const dfloat rhoIn = pop_0 + pop_1 + pop_3 + pop_4 + pop_7 + pop_8;
 		const dfloat inv_rhoIn = 1.0 / rhoIn;
 
-		const dfloat mxxIn = (pop[1] + pop[3] + pop[7] + pop[8]) * inv_rhoIn - cs2;
-		const dfloat mxyIn = (pop[7] - pop[8]) * inv_rhoIn;
-		const dfloat myyIn = (pop[3] + pop[7] + pop[8]) * inv_rhoIn - cs2;
+		const dfloat mxxIn = (pop_1 + pop_3 + pop_7 + pop_8) * inv_rhoIn - cs2;
+		const dfloat mxyIn = (pop_7 - pop_8) * inv_rhoIn;
+		const dfloat myyIn = (pop_3 + pop_7 + pop_8) * inv_rhoIn - cs2;
 
 		*ux = 0.0;
 		*uy = 0.0;
@@ -124,12 +136,12 @@ __device__ inline void boundary_calculation(unsigned int nodeType, dfloat *rhoVa
 	}
 	case WEST:
 	{
-		const dfloat rhoIn = pop[0] + pop[2] + pop[3] + pop[4] + pop[6] + pop[7];
+		const dfloat rhoIn = pop_0 + pop_2 + pop_3 + pop_4 + pop_6 + pop_7;
 		const dfloat inv_rhoIn = 1.0 / rhoIn;
 
-		const dfloat mxxIn = (pop[3] + pop[6] + pop[7]) * inv_rhoIn - cs2;
-		const dfloat mxyIn = (pop[7] - pop[6]) * inv_rhoIn;
-		const dfloat myyIn = (pop[2] + pop[4] + pop[6] + pop[7]) * inv_rhoIn - cs2;
+		const dfloat mxxIn = (pop_3 + pop_6 + pop_7) * inv_rhoIn - cs2;
+		const dfloat mxyIn = (pop_7 - pop_6) * inv_rhoIn;
+		const dfloat myyIn = (pop_2 + pop_4 + pop_6 + pop_7) * inv_rhoIn - cs2;
 
 		*uy = 0.0;
 		*ux = U_MAX;
@@ -145,12 +157,12 @@ __device__ inline void boundary_calculation(unsigned int nodeType, dfloat *rhoVa
 	}
 	case EAST:
 	{
-		const dfloat rhoIn = pop[0] + pop[1] + pop[2] + pop[4] + pop[5] + pop[8];
+		const dfloat rhoIn = pop_0 + pop_1 + pop_2 + pop_4 + pop_5 + pop_8;
 		const dfloat inv_rhoIn = 1.0 / rhoIn;
 
-		const dfloat mxxIn = (pop[1] + pop[5] + pop[8]) * inv_rhoIn - cs2;
-		const dfloat mxyIn = (pop[5] - pop[8]) * inv_rhoIn;
-		const dfloat myyIn = (pop[2] + pop[4] + pop[5] + pop[8]) * inv_rhoIn - cs2;
+		const dfloat mxxIn = (pop_1 + pop_5 + pop_8) * inv_rhoIn - cs2;
+		const dfloat mxyIn = (pop_5 - pop_8) * inv_rhoIn;
+		const dfloat myyIn = (pop_2 + pop_4 + pop_5 + pop_8) * inv_rhoIn - cs2;
 
 		const dfloat rho = RHO_0 + fMom[idxMom(threadIdx.x - 1, threadIdx.y, M_RHO_INDEX, blockIdx.x, blockIdx.y)];
 		*ux = fMom[idxMom(threadIdx.x - 1, threadIdx.y, M_UX_INDEX, blockIdx.x, blockIdx.y)] / F_M_I_SCALE;
@@ -167,12 +179,12 @@ __device__ inline void boundary_calculation(unsigned int nodeType, dfloat *rhoVa
 
 	case SOUTH_WEST:
 	{
-		const dfloat rhoIn = pop[0] + pop[3] + pop[4] + pop[7];
+		const dfloat rhoIn = pop_0 + pop_3 + pop_4 + pop_7;
 		const dfloat inv_rhoIn = 1.0 / rhoIn;
 
-		const dfloat mxxIn = (pop[3] + pop[7]) * inv_rhoIn - cs2;
-		const dfloat mxyIn = pop[7] * inv_rhoIn;
-		const dfloat myyIn = (pop[4] + pop[7]) * inv_rhoIn - cs2;
+		const dfloat mxxIn = (pop_3 + pop_7) * inv_rhoIn - cs2;
+		const dfloat mxyIn = pop_7 * inv_rhoIn;
+		const dfloat myyIn = (pop_4 + pop_7) * inv_rhoIn - cs2;
 
 		*ux = 0.0;
 		*uy = 0.0;
@@ -198,12 +210,12 @@ __device__ inline void boundary_calculation(unsigned int nodeType, dfloat *rhoVa
 	}
 	case SOUTH_EAST:
 	{
-		const dfloat rhoIn = pop[0] + pop[1] + pop[4] + pop[8];
+		const dfloat rhoIn = pop_0 + pop_1 + pop_4 + pop_8;
 		const dfloat inv_rhoIn = 1.0 / rhoIn;
 
-		const dfloat mxxIn = (pop[1] + pop[8]) * inv_rhoIn - cs2;
-		const dfloat mxyIn = -pop[8] * inv_rhoIn;
-		const dfloat myyIn = (pop[4] + pop[8]) * inv_rhoIn - cs2;
+		const dfloat mxxIn = (pop_1 + pop_8) * inv_rhoIn - cs2;
+		const dfloat mxyIn = -pop_8 * inv_rhoIn;
+		const dfloat myyIn = (pop_4 + pop_8) * inv_rhoIn - cs2;
 
 		*ux = 0.0;
 		*uy = 0.0;
@@ -229,12 +241,12 @@ __device__ inline void boundary_calculation(unsigned int nodeType, dfloat *rhoVa
 	}
 	case NORTH_WEST:
 	{
-		const dfloat rhoIn = pop[0] + pop[2] + pop[3] + pop[6];
+		const dfloat rhoIn = pop_0 + pop_2 + pop_3 + pop_6;
 		const dfloat inv_rhoIn = 1.0 / rhoIn;
 
-		const dfloat mxxIn = (pop[3] + pop[6]) * inv_rhoIn - cs2;
-		const dfloat mxyIn = -pop[6] * inv_rhoIn;
-		const dfloat myyIn = (pop[2] + pop[6]) * inv_rhoIn - cs2;
+		const dfloat mxxIn = (pop_3 + pop_6) * inv_rhoIn - cs2;
+		const dfloat mxyIn = -pop_6 * inv_rhoIn;
+		const dfloat myyIn = (pop_2 + pop_6) * inv_rhoIn - cs2;
 
 		*ux = 0.0;
 		*uy = 0.0;
@@ -260,12 +272,12 @@ __device__ inline void boundary_calculation(unsigned int nodeType, dfloat *rhoVa
 	}
 	case NORTH_EAST:
 	{
-		const dfloat rhoIn = pop[0] + pop[1] + pop[2] + pop[5];
+		const dfloat rhoIn = pop_0 + pop_1 + pop_2 + pop_5;
 		const dfloat inv_rhoIn = 1.0 / rhoIn;
 
-		const dfloat mxxIn = (pop[1] + pop[5]) * inv_rhoIn - cs2;
-		const dfloat mxyIn = pop[5] * inv_rhoIn;
-		const dfloat myyIn = (pop[2] + pop[5]) * inv_rhoIn - cs2;
+		const dfloat mxxIn = (pop_1 + pop_5) * inv_rhoIn - cs2;
+		const dfloat mxyIn = pop_5 * inv_rhoIn;
+		const dfloat myyIn = (pop_2 + pop_5) * inv_rhoIn - cs2;
 
 		*ux = 0.0;
 		*uy = 0.0;
@@ -291,79 +303,6 @@ __device__ inline void boundary_calculation(unsigned int nodeType, dfloat *rhoVa
 	}
 	default:
 		break;
-	}
-}
-
-__device__ inline void immersed_boundary_treatment(
-	unsigned int nodeType,
-	dfloat *rhoVar, dfloat *ux, dfloat *uy, dfloat *mxx, dfloat *mxy, dfloat *myy,
-	unsigned int tx, unsigned int ty, unsigned int bx, unsigned int by, unsigned int x, unsigned int y,
-	cylinderProperties *cylinder_properties, size_t cylinder_counter,
-	dfloat *fMom_old, dfloat OMEGA, unsigned int step)
-{
-	cylinderProperties property = *findCylindeProperty(cylinder_properties, cylinder_counter, x, y);
-
-	// for first point
-
-	dfloat ux1;
-	dfloat uy1;
-
-	bilinear_velocity_interpolation(property.x1, property.y1, int(property.x1), int(property.y1),
-									int(property.x1) + 1, int(property.y1) + 1, fMom_old, M_UX_INDEX, &ux1);
-	bilinear_velocity_interpolation(property.x1, property.y1, int(property.x1), int(property.y1),
-									int(property.x1) + 1, int(property.y1) + 1, fMom_old, M_UY_INDEX, &uy1);
-
-	// for second point
-
-	dfloat ux2;
-	dfloat uy2;
-
-	bilinear_velocity_interpolation(property.x2, property.y2, int(property.x2), int(property.y2),
-									int(property.x2) + 1, int(property.y2) + 1, fMom_old, M_UX_INDEX, &ux2);
-	bilinear_velocity_interpolation(property.x2, property.y2, int(property.x2), int(property.y2),
-									int(property.x2) + 1, int(property.y2) + 1, fMom_old, M_UY_INDEX, &uy2);
-
-	// moment interpolation to first point
-	dfloat mxx1 = 0.0;
-	dfloat myy1 = 0.0;
-	dfloat mxx2 = 0.0;
-	dfloat myy2 = 0.0;
-
-	if (ROTATIONAL_COORDINATES)
-	{
-		bilinear_moment_interpolation(property.x1, property.y1, int(property.x1), int(property.y1),
-									  int(property.x1) + 1, int(property.y1) + 1, fMom_old, &mxx1, &myy1);
-		bilinear_moment_interpolation(property.x2, property.y2, int(property.x2), int(property.y2),
-									  int(property.x2) + 1, int(property.y2) + 1, fMom_old, &mxx2, &myy2);
-	}
-
-	// if (CALCULATE_PRESSURE && step >= N_STEPS - PRESSURE_TIME) {
-	// 	dfloat rho1;
-	// 	dfloat rho2;
-	// 	dfloat rho3;
-
-	// 	bilinear_velocity_interpolation(property.x1, property.y1, int(property.x1), int(property.y1), int(property.x1) + 1, int(property.y1) + 1, fMom_old, M_RHO_INDEX, &rho1);
-	// 	bilinear_velocity_interpolation(property.x2, property.y2, int(property.x2), int(property.y2), int(property.x2) + 1, int(property.y2) + 1, fMom_old, M_RHO_INDEX, &rho2);
-	// 	bilinear_velocity_interpolation(property.x3, property.y3, int(property.x3), int(property.y3), int(property.x3) + 1, int(property.y3) + 1, fMom_old, M_RHO_INDEX, &rho3);
-
-	// 	pressure_extrapolation(property.xw, property.yw, property.x1, property.y1, property.x2, property.y2, property.x3, property.y3, rho1, rho2, rho3, &(cylinder_properties[index].ps));
-	// }
-
-	const dfloat delta = property.dr;
-
-	*ux = extrapolation(delta, ux1, ux2);
-	*uy = extrapolation(delta, uy1, uy2);
-
-	const dfloat m_xx_int = extrapolation(delta, mxx1, mxx2);
-	const dfloat m_yy_int = extrapolation(delta, myy1, myy2);
-
-	if (ROTATIONAL_COORDINATES)
-	{
-		numericalSolution_rotation(rhoVar, *ux, *uy, mxx, mxy, myy, m_xx_int, m_yy_int, property.is, property.os, OMEGA, x, y);
-	}
-	else
-	{
-		numericalSolution(rhoVar, *ux, *uy, mxx, mxy, myy, property.is, property.os, OMEGA, x, y);
 	}
 }
 

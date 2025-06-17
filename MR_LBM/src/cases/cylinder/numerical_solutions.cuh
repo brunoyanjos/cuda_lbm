@@ -6,7 +6,7 @@
 __device__
 inline void numericalSolution(
 	dfloat* rhoVar, const dfloat ux, const dfloat uy, dfloat* mxx_I, dfloat* mxy_I, dfloat* myy_I,
-	const int(&incomings)[9], const int(&outgoings)[9], const dfloat OMEGA, int x, int y)
+	const int(&incomings)[9], const int(&outgoings)[9], const dfloat OMEGA)
 {
 	dfloat rho;
 

@@ -64,8 +64,22 @@ __global__ void streamingAndMom(
  *   @param step: current time step
  *   @param save: if is necessary save some data
  */
+__global__ void updateInnerBoundaries(dfloat* fMom, cylinderProperties* cylinder_properties, dfloat OMEGA);
+
+
+/*
+ *   @brief Updates macroscopics and then performs collision and streaming
+ *   @param fMom: macroscopics moments
+ *   @param ghostInterface interface block transfer information
+ *   @param d_mean_rho: mean density, used for density correction
+ *   @param d_BC_Fx: boundary condition force x
+ *   @param d_BC_Fy: boundary condition force x
+ *   @param d_BC_Fz: boundary condition force x
+ *   @param step: current time step
+ *   @param save: if is necessary save some data
+ */
 __global__ void boundaryAndCollision(
-    dfloat *fMom, dfloat *fMom_old, size_t cylinder_count, dfloat OMEGA, unsigned int *dNodeType,
+    dfloat *fMom, size_t cylinder_count, dfloat OMEGA, unsigned int *dNodeType,
     ghostInterfaceData ghostInterface, cylinderProperties *cylinder_properties, unsigned int step);
 
 
