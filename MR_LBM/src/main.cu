@@ -120,10 +120,20 @@ int main()
 		// swap interface pointers
 		swapGhostInterfaces(ghostInterface);
 
-		checkCudaErrors(cudaDeviceSynchronize());
-		checkCudaErrors(cudaMemcpy(h_cylinder_properties, d_cylinder_properties, sizeof(cylinderProperties) * countor_count, cudaMemcpyDeviceToHost));
+		
 
-		calculate_forces(h_cylinder_properties, countor_count, step);
+#ifdef CYLINDER
+		if (step >= STAT_BEGIN_TIME && step <= STAT_END_TIME) {
+			checkCudaErrors(cudaDeviceSynchronize());
+			checkCudaErrors(cudaMemcpy(h_cylinder_properties, d_cylinder_properties, sizeof(cylinderProperties) * countor_count, cudaMemcpyDeviceToHost));
+			checkCudaErrors(cudaMemcpy(h_fMom, d_fMom, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyDeviceToHost));
+
+			calculate_forces(h_cylinder_properties, countor_count, step);
+			calculate_pressure(h_cylinder_properties, countor_count, step);
+			calculate_inlet_density(h_fMom, step);
+		}
+#endif // CYLINDER
+
 
 		if (MACR_SAVE != 0 && step % MACR_SAVE == 0)
 		{
