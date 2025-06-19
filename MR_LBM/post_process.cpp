@@ -35,7 +35,7 @@ struct cycleAndPeriod
 //     period = peak2 - peak1;
 // }
 
-[[nodiscard]] cycleAndPeriod find_peaks(const std::vector<double>& signal)
+[[nodiscard]] cycleAndPeriod find_peaks(const std::vector<double>&signal)
 {
     int peak1 = -1;
     int peak2 = -1;
@@ -91,8 +91,8 @@ int main()
 
 
     // Allocating the variables:
-    std::vector<float> F_drag(line_count), F_lift(line_count);
-    std::vector<float> Cd(line_count), Cl(line_count);
+    std::vector<double> F_drag(line_count), F_lift(line_count);
+    std::vector<double> Cd(line_count), Cl(line_count);
     std::vector<int> time(line_count);
 
     // Reading force file:
@@ -137,22 +137,19 @@ int main()
     std:: cout << "Averaging over %d cycles" << n_cycle <<std::endl;
 
     // Strouhal number
-    const float D_cy = 32.9848440;
-    const float uo = 0.1;
-    const float rho_infty = 1.169;
-    const float f_norm = 0.50 * rho_infty * (uo * uo) * D_cy;
-    float Str = D_cy/(cycle_period * uo);
+    const double D_cy = 32.9848440;
+    const double uo = 0.1;
+    const double rho_infty = 1.20393;
+    const double f_norm = 0.50 * rho_infty * (uo * uo) * D_cy;
+    double Str = D_cy/(cycle_period * uo);
 
     std:: cout << Str << std::endl;
 
 
     for(int i=cycle_start; i<=cycle_end; i++){
         int mean_counter = i-cycle_start;
-
-        Cd(i) = fd_signal(i)/f_norm
-        Cl(i) = fl_signal(i)/f_norm
-
-
+        Cd[i] = F_lift[i]/f_norm;
+        Cl[i] = F_drag[i]/f_norm;
     }
 
 

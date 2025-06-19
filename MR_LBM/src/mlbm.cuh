@@ -64,7 +64,7 @@ __global__ void streamingAndMom(
  *   @param step: current time step
  *   @param save: if is necessary save some data
  */
-__global__ void updateInnerBoundaries(dfloat* fMom, cylinderProperties* cylinder_properties, dfloat OMEGA);
+__global__ void updateInnerBoundaries(dfloat* fMom, cylinderProperties* cylinder_properties, dfloat OMEGA, unsigned int step);
 
 
 /*

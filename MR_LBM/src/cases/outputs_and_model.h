@@ -2,7 +2,7 @@
 #define OUTPUTS_AND_MODEL_H
 
 #define PATH_FILES "CYLINDER"
-#define ID_SIM "002"
+#define ID_SIM "003"
 
 #define BC_PROBLEM cylinder
 #define CASE_DIRECTORY cases

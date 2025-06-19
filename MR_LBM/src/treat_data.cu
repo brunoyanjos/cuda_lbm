@@ -2,7 +2,7 @@
 
 __host__
 void calculate_pressure(cylinderProperties* h_cylinder_properties, unsigned int count, unsigned int step) {
-	if (step == INI_STEP) {
+	if (step == STAT_BEGIN_TIME) {
 		std::ostringstream filename_stream;
 		filename_stream << PATH_FILES << "/" << ID_SIM << "/" << "theta_" << ID_SIM << ".dat";
 		std::string filename = filename_stream.str();

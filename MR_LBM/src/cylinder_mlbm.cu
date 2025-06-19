@@ -118,7 +118,7 @@ __global__ void streamingAndMom(
 	fMom[idxMom(threadIdx.x, threadIdx.y, M_MYY_INDEX, blockIdx.x, blockIdx.y)] = m_yy_t45;
 }
 
-__global__ void updateInnerBoundaries(dfloat* fMom, cylinderProperties* cylinder_properties, dfloat OMEGA) {
+__global__ void updateInnerBoundaries(dfloat* fMom, cylinderProperties* cylinder_properties, dfloat OMEGA, unsigned int step) {
 	cylinderProperties property = cylinder_properties[threadIdx.x];
 
 	const int xb = (int) property.xb;
@@ -170,17 +170,17 @@ __global__ void updateInnerBoundaries(dfloat* fMom, cylinderProperties* cylinder
 			int(property.x2) + 1, int(property.y2) + 1, fMom, &mxx2, &myy2);
 	}
 
-	// if (CALCULATE_PRESSURE && step >= N_STEPS - PRESSURE_TIME) {
-	// 	dfloat rho1;
-	// 	dfloat rho2;
-	// 	dfloat rho3;
+	if (CALCULATE_PRESSURE && step >= STAT_BEGIN_TIME && step <= STAT_END_TIME) {
+		dfloat rho1;
+		dfloat rho2;
+		dfloat rho3;
 
-	// 	bilinear_velocity_interpolation(property.x1, property.y1, int(property.x1), int(property.y1), int(property.x1) + 1, int(property.y1) + 1, fMom_old, M_RHO_INDEX, &rho1);
-	// 	bilinear_velocity_interpolation(property.x2, property.y2, int(property.x2), int(property.y2), int(property.x2) + 1, int(property.y2) + 1, fMom_old, M_RHO_INDEX, &rho2);
-	// 	bilinear_velocity_interpolation(property.x3, property.y3, int(property.x3), int(property.y3), int(property.x3) + 1, int(property.y3) + 1, fMom_old, M_RHO_INDEX, &rho3);
+		bilinear_velocity_interpolation(property.x1, property.y1, int(property.x1), int(property.y1), int(property.x1) + 1, int(property.y1) + 1, fMom, M_RHO_INDEX, &rho1);
+		bilinear_velocity_interpolation(property.x2, property.y2, int(property.x2), int(property.y2), int(property.x2) + 1, int(property.y2) + 1, fMom, M_RHO_INDEX, &rho2);
+		bilinear_velocity_interpolation(property.x3, property.y3, int(property.x3), int(property.y3), int(property.x3) + 1, int(property.y3) + 1, fMom, M_RHO_INDEX, &rho3);
 
-	// 	pressure_extrapolation(property.xw, property.yw, property.x1, property.y1, property.x2, property.y2, property.x3, property.y3, rho1, rho2, rho3, &(cylinder_properties[index].ps));
-	// }
+		pressure_extrapolation(property.xw, property.yw, property.x1, property.y1, property.x2, property.y2, property.x3, property.y3, rho1, rho2, rho3, &(cylinder_properties[threadIdx.x].ps));
+	}
 
 	const dfloat delta = property.dr;
 

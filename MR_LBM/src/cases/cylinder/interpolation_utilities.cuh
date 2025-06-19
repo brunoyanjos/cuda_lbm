@@ -84,6 +84,45 @@ inline void bilinear_moment_interpolation(dfloat x, dfloat y, int x0, int y0, in
 }
 
 __device__
+inline void pressure_extrapolation(dfloat xw, dfloat yw, dfloat x1, dfloat y1, dfloat x2, dfloat y2, dfloat x3, dfloat y3, dfloat rho1, dfloat rho2, dfloat rho3, dfloat* pressure) {
+
+	// pressure interpolation
+	dfloat xw_diff = xw - xc;
+	dfloat yw_diff = yw - yc;
+
+	dfloat x1_diff = x1 - xc;
+	dfloat y1_diff = y1 - yc;
+
+	dfloat x2_diff = x2 - xc;
+	dfloat y2_diff = y2 - yc;
+
+	dfloat x3_diff = x3 - xc;
+	dfloat y3_diff = y3 - yc;
+
+	dfloat rw2 = xw_diff * xw_diff + yw_diff * yw_diff;
+	dfloat r12 = x1_diff * x1_diff + y1_diff * y1_diff;
+	dfloat r22 = x2_diff * x2_diff + y2_diff * y2_diff;
+	dfloat r32 = x3_diff * x3_diff + y3_diff * y3_diff;
+
+	dfloat rw = sqrt(rw2);
+	dfloat r1 = sqrt(r12);
+	dfloat r2 = sqrt(r22);
+	dfloat r3 = sqrt(r32);
+
+	dfloat denom = (r1 - r2) * (r1 - r3) * (r2 - r3);
+
+	dfloat p1 = rho1 * 3.0;
+	dfloat p2 = rho2 * 3.0;
+	dfloat p3 = rho3 * 3.0;
+
+	dfloat a0 = (r1 * r3 * p2 * (r3 - r1) + (r2 * r2) * (r3 * p1 - r1 * p3) + r2 * ((r1 * r1) * p3 - (r3 * r3) * p1)) / denom;
+	dfloat a1 = ((r3 * r3) * (p1 - p2) + (r1 * r1) * (p2 - p3) + (r2 * r2) * (p3 - p1)) / denom;
+	dfloat a2 = (r3 * (p2 - p1) + r2 * (p1 - p3) + r1 * (p3 - p2)) / denom;
+
+	*pressure = a0 + a1 * rw + a2 * (rw * rw);
+}
+
+__device__
 inline dfloat extrapolation(dfloat delta, dfloat value1, dfloat value2) {
 	const dfloat deltax = sqrt(2.0);
 

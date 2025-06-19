@@ -109,7 +109,7 @@ int main()
 #ifdef CYLINDER
 		streamingAndMom << <gridBlock, threadBlock >> > (d_fMom, OMEGA, countor_count, dNodeType, ghostInterface, d_cylinder_properties, step);
 		checkCudaErrors(cudaDeviceSynchronize());
-		updateInnerBoundaries << <1, countor_count >> > (d_fMom, d_cylinder_properties, OMEGA);
+		updateInnerBoundaries << <1, countor_count >> > (d_fMom, d_cylinder_properties, OMEGA, step);
 
 		checkCudaErrors(cudaDeviceSynchronize());
 		boundaryAndCollision << <gridBlock, threadBlock >> > (d_fMom, countor_count, OMEGA, dNodeType, ghostInterface, d_cylinder_properties, step);
