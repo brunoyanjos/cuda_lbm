@@ -10,7 +10,7 @@ constexpr int N_STEPS = 1000000;
 
 constexpr int MACR_SAVE = 20000;
 
-constexpr int D = 64;
+constexpr int D = 32;
 
 constexpr int L_top = 10 * D;
 constexpr int L_bot = 10 * D;

@@ -13,8 +13,9 @@ rm -r ./CYLINDER/$1/
     nvcc -gencode arch=compute_${CompCap},code=sm_${CompCap} -rdc=true --ptxas-options=-v -O3 --restrict \
         *.cu \
         -lcudadevrt -lcurand -o ./../$1sim_${LT}_sm${CompCap}
-                
-./../$1sim_${LT}_sm${CompCap}     
+
+cd ../
+./$1sim_${LT}_sm${CompCap}     
 
 
 

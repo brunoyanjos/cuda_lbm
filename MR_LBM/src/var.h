@@ -14,7 +14,7 @@
 /* ----------------------------- PROBLEM DEFINE ---------------------------- */
 typedef float dfloat;
 
-#define GPU_INDEX 1
+#define GPU_INDEX 0
 /* --------------------------  SIMULATION DEFINES -------------------------- */
 
 #define STR_IMPL(A) #A
