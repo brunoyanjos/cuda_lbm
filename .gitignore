@@ -27,8 +27,6 @@ src/CUDA/x64
 *.test
 *.pdf
 *.dat
-MR_LBM/post/*
-!MR_LBM/post/*.py
 MR_LBM/*.dat
 MR_LBM/OUTPUT/*
 MR_LBM/CYLINDER/*

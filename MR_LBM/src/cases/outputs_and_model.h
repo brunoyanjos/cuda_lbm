@@ -19,7 +19,7 @@ constexpr bool CALCULATE_FORCES = true;
 constexpr bool CALCULATE_RHO = true;
 constexpr bool SAVE_DOMAIN = true;
 
-constexpr unsigned int STAT_BEGIN_TIME = N_STEPS - 50000;
+constexpr unsigned int STAT_BEGIN_TIME = (tstar * D /U_MAX);
 constexpr unsigned int STAT_END_TIME = N_STEPS;
 
 constexpr int INI_MEAN_STEP = 0;
