@@ -33,4 +33,4 @@ __global__ void gpuMomCollisionStream(
 );
 
 
-#endif __MLBM_H
+#endif
