@@ -63,7 +63,7 @@ __host__ void calculate_forces(cylinderProperties *h_cylinder_properties, unsign
 	data_file.close();
 }
 
-__host__ void calculate_inlet_density(dfloat *h_fMom, unsigned int step)
+__host__ void calculate_inlet_density(dfloat *h_fMom, unsigned int step, dfloat* rho_infty)
 {
 	dfloat rho_inlet = 0;
 
@@ -73,6 +73,8 @@ __host__ void calculate_inlet_density(dfloat *h_fMom, unsigned int step)
 	}
 
 	rho_inlet /= NY;
+
+	*rho_infty = rho_inlet;
 
 	std::ostringstream filename_rho;
 	filename_rho << PATH_FILES << "/" << ID_SIM << "/" << "rho_inlet_" << ID_SIM << ".dat";
