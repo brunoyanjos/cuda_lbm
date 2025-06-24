@@ -17,7 +17,6 @@
 #include "errorDef.h"
 #include "globalStructs.h"
 
-
 /*
  *   Get string with simulation information
  *   @param step: simulation's step
