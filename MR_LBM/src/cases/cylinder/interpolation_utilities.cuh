@@ -5,6 +5,22 @@
 #include "../../globalFunctions.h"
 
 __device__
+inline void bilinear_density_interpolation(dfloat x, dfloat y, int x0, int y0, int x1, int y1, dfloat* moms, int mom_index, dfloat* r_f) {
+	const dfloat xd = x - x0;
+	const dfloat yd = y - y0;
+
+	const dfloat r1 = RHO_0 + moms[idxMom(x0 % BLOCK_NX, y0 % BLOCK_NY, mom_index, x0 / BLOCK_NX, y0 / BLOCK_NY)];
+	const dfloat r2 = RHO_0 + moms[idxMom(x1 % BLOCK_NX, y0 % BLOCK_NY, mom_index, x1 / BLOCK_NX, y0 / BLOCK_NY)];
+	const dfloat r3 = RHO_0 + moms[idxMom(x0 % BLOCK_NX, y1 % BLOCK_NY, mom_index, x0 / BLOCK_NX, y1 / BLOCK_NY)];
+	const dfloat r4 = RHO_0 + moms[idxMom(x1 % BLOCK_NX, y1 % BLOCK_NY, mom_index, x1 / BLOCK_NX, y1 / BLOCK_NY)];
+
+	const dfloat r_y0 = (1.0 - xd) * r1 + xd * r2;
+	const dfloat r_y1 = (1.0 - xd) * r3 + xd * r4;
+
+	*r_f = (1.0 - yd) * r_y0 + yd * r_y1;
+}
+
+__device__
 inline void bilinear_velocity_interpolation(dfloat x, dfloat y, int x0, int y0, int x1, int y1, dfloat* moms, int mom_index, dfloat* u_f) {
 	const dfloat xd = x - x0;
 	const dfloat yd = y - y0;
@@ -111,9 +127,9 @@ inline void pressure_extrapolation(dfloat xw, dfloat yw, dfloat x1, dfloat y1, d
 
 	dfloat denom = (r1 - r2) * (r1 - r3) * (r2 - r3);
 
-	dfloat p1 = rho1 * 3.0;
-	dfloat p2 = rho2 * 3.0;
-	dfloat p3 = rho3 * 3.0;
+	dfloat p1 = rho1 * cs2;
+	dfloat p2 = rho2 * cs2;
+	dfloat p3 = rho3 * cs2;
 
 	dfloat a0 = (r1 * r3 * p2 * (r3 - r1) + (r2 * r2) * (r3 * p1 - r1 * p3) + r2 * ((r1 * r1) * p3 - (r3 * r3) * p1)) / denom;
 	dfloat a1 = ((r3 * r3) * (p1 - p2) + (r1 * r1) * (p2 - p3) + (r2 * r2) * (p3 - p1)) / denom;

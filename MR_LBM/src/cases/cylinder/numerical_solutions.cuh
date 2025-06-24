@@ -248,5 +248,92 @@ inline void numericalSolution_rotation(
 	*mxy_I = (mxx_p - myy_p) * 0.5 * sen_two_theta + mxy_p * cos_two_theta;
 }
 
+__device__
+inline void numericalSolution_rotation_rhoeq(
+	dfloat* rhoVar, const dfloat ux, const dfloat uy, dfloat* mxx_I, dfloat* mxy_I, dfloat* myy_I,
+	dfloat mxx, dfloat myy,
+	const int(&incomings)[9], const int(&outgoings)[9], const dfloat OMEGA, int x, int y)
+{
+	dfloat A_prime = 0;
+	dfloat E_prime = 0;
+
+	dfloat B11_prime = 0;
+	dfloat B22_prime = 0;
+	dfloat B12_prime = 0;
+
+	dfloat D_xy_prime = 0;
+
+	dfloat F11_xy_prime = 0;
+	dfloat F22_xy_prime = 0;
+	dfloat F12_xy_prime = 0;
+
+	float xc = (float)(L_front + D * 0.5);
+	float yc = (float)(L_bot + D * 0.5);
+
+	dfloat radius = sqrt((x - xc) * (x - xc) + (y - yc) * (y - yc));
+
+	dfloat cos_theta = (x - xc) / radius;
+	dfloat sen_theta = (y - yc) / radius;
+	dfloat sen_two_theta = 2.0 * cos_theta * sen_theta;
+	dfloat cos_two_theta = cos_theta * cos_theta - sen_theta * sen_theta;
+
+	for (int i = 0; i < 9; i++) {
+		dfloat cx_p = cx[i] * cos_theta + cy[i] * sen_theta;
+		dfloat cy_p = cy[i] * cos_theta - cx[i] * sen_theta;
+
+		const dfloat Hxx_p = cx_p * cx_p - cs2;
+		const dfloat Hyy_p = cy_p * cy_p - cs2;
+		const dfloat Hxy_p = cx_p * cy_p;
+
+		dfloat ux_p = ux * cos_theta + uy * sen_theta;
+		dfloat uy_p = uy * cos_theta - ux * sen_theta;
+
+		dfloat A_i = w[i] * (1.0 + as2 * ux_p * cx_p + as2 * uy_p * cy_p);
+
+		dfloat B11_i = 4.5 * w[i] * Hxx_p;
+		dfloat B22_i = 4.5 * w[i] * Hyy_p;
+		dfloat B12_i = 4.5 * w[i] * Hxy_p;
+
+		if (outgoings[i] == 1)
+		{
+			A_prime += A_i;
+			E_prime += w[i] * (1.0 + as2 * ux_p * cx_p + as2 * uy_p * cy_p + 4.5 * ux_p * ux_p * Hxx_p + 4.5 * uy_p * uy_p * Hyy_p + 9.0 * ux_p * uy_p * Hxy_p);
+
+			B11_prime += B11_i;
+			B22_prime += B22_i;
+			B12_prime += B12_i;
+		}
+
+		if (incomings[i] == 1)
+		{
+			D_xy_prime += A_i * Hxy_p;
+
+			F11_xy_prime += B11_i * Hxy_p;
+			F22_xy_prime += B22_i * Hxy_p;
+			F12_xy_prime += B12_i * Hxy_p;
+		}
+	}
+
+	const dfloat L_11_xy = F11_xy_prime;
+	const dfloat L_22_xy = F22_xy_prime;
+	const dfloat L_12_xy = 2.0 * F12_xy_prime;
+
+	const dfloat R_xy = E_prime * (*mxy_I) - D_xy_prime ;
+
+	dfloat mxx_p = mxx;
+	dfloat myy_p = myy;
+	dfloat mxy_p = (R_xy - mxx_p * L_11_xy - myy_p * L_22_xy) / L_12_xy;
+
+	const dfloat denominator = E_prime;
+	const dfloat inv_denominator = 1.0 / denominator;
+
+	const dfloat rho = (*rhoVar) * inv_denominator;
+
+	*rhoVar = rho;
+	*mxx_I = mxx_p * cos_theta * cos_theta + myy_p * sen_theta * sen_theta - mxy_p * sen_two_theta;
+	*myy_I = mxx_p * sen_theta * sen_theta + myy_p * cos_theta * cos_theta + mxy_p * sen_two_theta;
+	*mxy_I = (mxx_p - myy_p) * 0.50 * sen_two_theta + mxy_p * cos_two_theta;
+}
+
 
 #endif

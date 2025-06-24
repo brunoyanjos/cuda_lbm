@@ -94,8 +94,8 @@ __device__ inline void incoming_forces(
 	{
 		if ((*cylinder_properties).is[j] == 1)
 		{
-			(*cylinder_properties).Fx += (pop[j] * w[j]) * cx[j];
-			(*cylinder_properties).Fy += (pop[j] * w[j]) * cy[j];
+			(*cylinder_properties).Fx += (pop[j] + w[j]) * cx[j];
+			(*cylinder_properties).Fy += (pop[j] + w[j]) * cy[j];
 		}
 	}
 }
@@ -107,8 +107,8 @@ __device__ inline void outgoing_forces(
 	{
 		if ((*cylinder_properties).os[j] == 1)
 		{
-			(*cylinder_properties).Fx -= (pop[j] * w[j]) * cx[j];
-			(*cylinder_properties).Fy -= (pop[j] * w[j]) * cy[j];
+			(*cylinder_properties).Fx -= (pop[j] + w[j]) * cx[j];
+			(*cylinder_properties).Fy -= (pop[j] + w[j]) * cy[j];
 		}
 	}
 }

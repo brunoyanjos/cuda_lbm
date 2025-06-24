@@ -3,8 +3,8 @@
 #include "globalFunctions.h"
 
 __global__ void streamingAndMom(
-	dfloat* fMom, dfloat OMEGA, size_t cylinder_counter, unsigned int* dNodeType,
-	ghostInterfaceData ghostInterface, cylinderProperties* cylinder_properties, unsigned int step)
+	dfloat *fMom, dfloat OMEGA, size_t cylinder_counter, unsigned int *dNodeType,
+	ghostInterfaceData ghostInterface, cylinderProperties *cylinder_properties, unsigned int step)
 {
 	const int x = threadIdx.x + blockDim.x * blockIdx.x;
 	const int y = threadIdx.y + blockDim.y * blockIdx.y;
@@ -69,7 +69,7 @@ __global__ void streamingAndMom(
 	{
 		if (nodeType > 100 && nodeType < 115)
 		{
-			cylinderProperties* bc_property = findCylindeProperty(cylinder_properties, cylinder_counter, x, y);
+			cylinderProperties *bc_property = findCylindeProperty(cylinder_properties, cylinder_counter, x, y);
 
 			immersedBoundaryLoop((*bc_property).is, pop, &rhoVar, &m_xx_t45, &m_yy_t45, &m_xy_t90, x, y);
 
@@ -118,11 +118,12 @@ __global__ void streamingAndMom(
 	fMom[idxMom(threadIdx.x, threadIdx.y, M_MYY_INDEX, blockIdx.x, blockIdx.y)] = m_yy_t45;
 }
 
-__global__ void updateInnerBoundaries(dfloat* fMom, cylinderProperties* cylinder_properties, dfloat OMEGA, unsigned int step) {
+__global__ void updateInnerBoundaries(dfloat *fMom, cylinderProperties *cylinder_properties, dfloat OMEGA, unsigned int step)
+{
 	cylinderProperties property = cylinder_properties[threadIdx.x];
 
-	const int xb = (int) property.xb;
-	const int yb = (int) property.yb;
+	const int xb = (int)property.xb;
+	const int yb = (int)property.yb;
 
 	const int tx = xb % BLOCK_NX;
 	const int ty = yb % BLOCK_NY;
@@ -142,9 +143,9 @@ __global__ void updateInnerBoundaries(dfloat* fMom, cylinderProperties* cylinder
 	dfloat uy1;
 
 	bilinear_velocity_interpolation(property.x1, property.y1, int(property.x1), int(property.y1),
-		int(property.x1) + 1, int(property.y1) + 1, fMom, M_UX_INDEX, &ux1);
+									int(property.x1) + 1, int(property.y1) + 1, fMom, M_UX_INDEX, &ux1);
 	bilinear_velocity_interpolation(property.x1, property.y1, int(property.x1), int(property.y1),
-		int(property.x1) + 1, int(property.y1) + 1, fMom, M_UY_INDEX, &uy1);
+									int(property.x1) + 1, int(property.y1) + 1, fMom, M_UY_INDEX, &uy1);
 
 	// for second point
 
@@ -152,9 +153,9 @@ __global__ void updateInnerBoundaries(dfloat* fMom, cylinderProperties* cylinder
 	dfloat uy2;
 
 	bilinear_velocity_interpolation(property.x2, property.y2, int(property.x2), int(property.y2),
-		int(property.x2) + 1, int(property.y2) + 1, fMom, M_UX_INDEX, &ux2);
+									int(property.x2) + 1, int(property.y2) + 1, fMom, M_UX_INDEX, &ux2);
 	bilinear_velocity_interpolation(property.x2, property.y2, int(property.x2), int(property.y2),
-		int(property.x2) + 1, int(property.y2) + 1, fMom, M_UY_INDEX, &uy2);
+									int(property.x2) + 1, int(property.y2) + 1, fMom, M_UY_INDEX, &uy2);
 
 	// moment interpolation to first point
 	dfloat mxx1 = 0.0;
@@ -165,19 +166,20 @@ __global__ void updateInnerBoundaries(dfloat* fMom, cylinderProperties* cylinder
 	if (ROTATIONAL_COORDINATES)
 	{
 		bilinear_moment_interpolation(property.x1, property.y1, int(property.x1), int(property.y1),
-			int(property.x1) + 1, int(property.y1) + 1, fMom, &mxx1, &myy1);
+									  int(property.x1) + 1, int(property.y1) + 1, fMom, &mxx1, &myy1);
 		bilinear_moment_interpolation(property.x2, property.y2, int(property.x2), int(property.y2),
-			int(property.x2) + 1, int(property.y2) + 1, fMom, &mxx2, &myy2);
+									  int(property.x2) + 1, int(property.y2) + 1, fMom, &mxx2, &myy2);
 	}
 
-	if (CALCULATE_PRESSURE && step >= STAT_BEGIN_TIME && step <= STAT_END_TIME) {
+	if (CALCULATE_PRESSURE && step >= STAT_BEGIN_TIME && step <= STAT_END_TIME)
+	{
 		dfloat rho1;
 		dfloat rho2;
 		dfloat rho3;
 
-		bilinear_velocity_interpolation(property.x1, property.y1, int(property.x1), int(property.y1), int(property.x1) + 1, int(property.y1) + 1, fMom, M_RHO_INDEX, &rho1);
-		bilinear_velocity_interpolation(property.x2, property.y2, int(property.x2), int(property.y2), int(property.x2) + 1, int(property.y2) + 1, fMom, M_RHO_INDEX, &rho2);
-		bilinear_velocity_interpolation(property.x3, property.y3, int(property.x3), int(property.y3), int(property.x3) + 1, int(property.y3) + 1, fMom, M_RHO_INDEX, &rho3);
+		bilinear_density_interpolation(property.x1, property.y1, int(property.x1), int(property.y1), int(property.x1) + 1, int(property.y1) + 1, fMom, M_RHO_INDEX, &rho1);
+		bilinear_density_interpolation(property.x2, property.y2, int(property.x2), int(property.y2), int(property.x2) + 1, int(property.y2) + 1, fMom, M_RHO_INDEX, &rho2);
+		bilinear_density_interpolation(property.x3, property.y3, int(property.x3), int(property.y3), int(property.x3) + 1, int(property.y3) + 1, fMom, M_RHO_INDEX, &rho3);
 
 		pressure_extrapolation(property.xw, property.yw, property.x1, property.y1, property.x2, property.y2, property.x3, property.y3, rho1, rho2, rho3, &(cylinder_properties[threadIdx.x].ps));
 	}
@@ -192,7 +194,14 @@ __global__ void updateInnerBoundaries(dfloat* fMom, cylinderProperties* cylinder
 
 	if (ROTATIONAL_COORDINATES)
 	{
-		numericalSolution_rotation(&rhoVar, ux_t30, uy_t30, &m_xx_t45, &m_xy_t90, &m_yy_t45, m_xx_int, m_yy_int, property.is, property.os, OMEGA, xb, yb);
+		if (RHO_STRONG)
+		{
+			numericalSolution_rotation(&rhoVar, ux_t30, uy_t30, &m_xx_t45, &m_xy_t90, &m_yy_t45, m_xx_int, m_yy_int, property.is, property.os, OMEGA, xb, yb);
+		}
+		if (RHO_EQ)
+		{
+			numericalSolution_rotation_rhoeq(&rhoVar, ux_t30, uy_t30, &m_xx_t45, &m_xy_t90, &m_yy_t45, m_xx_int, m_yy_int, property.is, property.os, OMEGA, xb, yb);
+		}
 	}
 	else
 	{
@@ -210,8 +219,8 @@ __global__ void updateInnerBoundaries(dfloat* fMom, cylinderProperties* cylinder
 }
 
 __global__ void boundaryAndCollision(
-	dfloat* fMom, size_t cylinder_count, dfloat OMEGA, unsigned int* dNodeType,
-	ghostInterfaceData ghostInterface, cylinderProperties* cylinder_properties, unsigned int step)
+	dfloat *fMom, size_t cylinder_count, dfloat OMEGA, unsigned int *dNodeType,
+	ghostInterfaceData ghostInterface, cylinderProperties *cylinder_properties, unsigned int step)
 {
 	const int x = threadIdx.x + blockDim.x * blockIdx.x;
 	const int y = threadIdx.y + blockDim.y * blockIdx.y;
@@ -246,7 +255,7 @@ __global__ void boundaryAndCollision(
 
 	if (nodeType > 100 && step >= STAT_BEGIN_TIME && step <= STAT_END_TIME && CALCULATE_FORCES)
 	{
-		cylinderProperties* bc_property = findCylindeProperty(cylinder_properties, cylinder_count, x, y);
+		cylinderProperties *bc_property = findCylindeProperty(cylinder_properties, cylinder_count, x, y);
 
 		outgoing_forces(bc_property, cylinder_count, pop);
 	}
