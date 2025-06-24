@@ -15,6 +15,4 @@ fi
         -lcudadevrt -lcurand -o ./../$1sim_${LT}_sm${CompCap}
 
 cd ../
-./$1sim_${LT}_sm${CompCap}    
-
-
+./$1sim_${LT}_sm${CompCap}
