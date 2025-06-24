@@ -83,4 +83,4 @@ __global__ void boundaryAndCollision(
     ghostInterfaceData ghostInterface, cylinderProperties *cylinder_properties, unsigned int step);
 
 
-#endif __MLBM_H
+#endif

@@ -52,4 +52,4 @@ __host__ void saveMacr(dfloat* h_fMom, dfloat* rho, dfloat* ux, dfloat* uy, unsi
 
 std::string getVarFilename(const std::string varName, unsigned int step, const std::string ext);
 
-#endif __SAVE_DATA_H
+#endif

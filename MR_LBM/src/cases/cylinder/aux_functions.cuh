@@ -17,6 +17,8 @@ __device__ inline cylinderProperties *findCylindeProperty(
 			return &(cylinderProperties[i]);
 		}
 	}
+
+	return nullptr;
 }
 
 __device__ inline void immersedBoundaryLoop(
