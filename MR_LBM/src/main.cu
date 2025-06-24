@@ -90,7 +90,7 @@ int main()
 #endif
 	);
 
-	printf("count: %d, d_max:%f\n", countor_count, D_Max);
+	printf("count: %zu, d_max:%f\n", countor_count, D_Max);
 
 	const dfloat VISC = U_MAX * D_Max / RE;
 	const dfloat TAU = 0.5 + 3.0 * VISC; // relaxation time

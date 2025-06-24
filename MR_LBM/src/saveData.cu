@@ -10,8 +10,8 @@ __host__ void saveMacr(
 
 	// linearize
 	size_t indexMacr;
-	double uSum = 0;
-	double t_star = 0;
+	// double uSum = 0;
+	// double t_star = 0;
 	
 	// printf("\n--------------------------- Save macr %d ---------------------------\n", step);
 
@@ -287,7 +287,8 @@ void folderSetup()
 	strPath += "plots";
 	std::string cmd = "mkdir -p ";
 	cmd += strPath;
-	system(cmd.c_str());
+	const int i = system(cmd.c_str());
+	static_cast<void>(i);
 	return;
 #endif // !Unix
 	printf("I don't know how to setup folders for your operational system :(\n");
@@ -307,8 +308,13 @@ void saveSimInfo(int step, dfloat MLUPS, int D, dfloat Dcy, size_t count, dfloat
 	outFile = fopen(strInf.c_str(), "w");
 	if (outFile != nullptr)
 	{
+<<<<<<< HEAD
 		std::string strSimInfo = getSimInfoString(step, MLUPS, D, Dcy, count, rho_infty);
 		fprintf(outFile, strSimInfo.c_str());
+=======
+		std::string strSimInfo = getSimInfoString(step, MLUPS);
+		fprintf(outFile, "%s\n", strSimInfo.c_str());
+>>>>>>> ead0d764e2ba72c35174b59d1baaee6ab3afffc9
 		fclose(outFile);
 	}
 	else

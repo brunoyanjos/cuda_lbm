@@ -7,7 +7,11 @@ constexpr dfloat RE = 100;
 
 constexpr int SCALE = 1;
 
+<<<<<<< HEAD
 constexpr int MACR_SAVE = 50000;
+=======
+constexpr int MACR_SAVE = 1000;
+>>>>>>> ead0d764e2ba72c35174b59d1baaee6ab3afffc9
 
 constexpr int D = 64;
 
