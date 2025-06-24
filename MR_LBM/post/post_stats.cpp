@@ -13,11 +13,13 @@ int main()
     std::cin >> ID_SIM;
 
     // -----------------Reading input file---------------------------------------------------
-    std::string filename = PATH_FILES + "/" + ID_SIM + "/" + "input_stat_" + ID_SIM + ".dat";
-    InputParameters params = read_input(filename);
-    const double D_cy = params.Dcy;
-    const double uo = params.uo;
-    const double rho_infty = params.rho_infty;
+    // std::string filename = PATH_FILES + "/" + ID_SIM + "/" + "input_stat_" + ID_SIM + ".dat";
+    std::string filename = PATH_FILES + "/" + ID_SIM + "/" + ID_SIM + "_info" + ".txt";
+    // InputParameters input = read_input(filename);
+    InputParameters input = read_input_info(filename);
+    const double D_cy = input.Dcy;
+    const double uo = input.uo;
+    const double rho_infty = input.rho_infty;
     const double p_infty = rho_infty / 3.0;
     const double f_norm = 0.50 * rho_infty * (uo * uo) * D_cy;
     const double p_norm = 0.50 * rho_infty * (uo * uo);
@@ -36,9 +38,9 @@ int main()
     std::cout << "nsteps = " << nsteps << "\n";
     std::cout << "npoints = " << npoints << "\n";
     std::cout << "ncy = " << npoints << "\n";
-    std::cout << "Dcy = " << params.Dcy << "\n";
-    std::cout << "uo = " << params.uo << "\n";
-    std::cout << "rho_infty = " << params.rho_infty << "\n";
+    std::cout << "Dcy = " << input.Dcy << "\n";
+    std::cout << "uo = " << input.uo << "\n";
+    std::cout << "rho_infty = " << input.rho_infty << "\n";
 
     CFDdata data = allocate_vectors(nsteps, npoints);
 
@@ -61,7 +63,7 @@ int main()
         data.Cd[i] = data.F_drag[i] / f_norm;
         data.Cl[i] = data.F_lift[i] / f_norm;
     }
-    filename = PATH_FILES + "/" + ID_SIM + "/" + "coeff_" + ID_SIM + ".dat";
+    filename = PATH_FILES + "/" + ID_SIM + "/" + "plots/" + "coeff_" + ID_SIM + ".dat";
     std::ofstream coeff_file(filename);
     if (!coeff_file.is_open())
     {
@@ -76,7 +78,7 @@ int main()
 
     // gaussian_smoothing(data.ntime,data.Cl, data.Cl_smooth,0.1); // sigma value 0.01
     moving_average_smoothing(data.ntime, data.Cl, data.Cl_smooth, 21); // odd window numer 21
-    filename = PATH_FILES + "/" + ID_SIM + "/" + "coeff_smooth_" + ID_SIM + ".dat";
+    filename = PATH_FILES + "/" + ID_SIM + "/"  + "plots/" + "coeff_smooth_" + ID_SIM + ".dat";
     std::ofstream coeff_file2(filename);
     if (!coeff_file2.is_open())
     {
@@ -128,8 +130,8 @@ int main()
     std::cout << "Lift Coefficient:" << data.Cl_avg << std::endl;
     std::cout << "---------------------------------------------------------" << std::endl;
 
-    filename = PATH_FILES + "/" + ID_SIM + "/" + "cl_time_" + ID_SIM + ".dat";
-    std::string filename2 = PATH_FILES + "/" + ID_SIM + "/" + "cd_time_" + ID_SIM + ".dat";
+    filename = PATH_FILES + "/" + ID_SIM + "/" + "plots/" + "cl_time_" + ID_SIM + ".dat";
+    std::string filename2 = PATH_FILES + "/" + ID_SIM + "/" + "plots/" + "cd_time_" + ID_SIM + ".dat";
     std::ofstream data_file(filename);
     std::ofstream data_file2(filename2);
     if (!data_file.is_open())
@@ -179,10 +181,10 @@ int main()
         data.Cp_sort[i] = data.Cp[index];
     }
 
-    // gaussian_smoothing(data.theta_sort,data.Cp_sort, data.Cp_smooth,0.1);
-    moving_average_smoothing(data.theta_sort, data.Cp_sort, data.Cp_smooth, 11);
+    gaussian_smoothing(data.theta_sort,data.Cp_sort, data.Cp_smooth,0.1);
+    // moving_average_smoothing(data.theta_sort, data.Cp_sort, data.Cp_smooth, 11);
 
-    filename = PATH_FILES + "/" + ID_SIM + "/" + "cp_" + ID_SIM + ".dat";
+    filename = PATH_FILES + "/" + ID_SIM + "/" + "plots/" +  "cp_" + ID_SIM + ".dat";
     std::ofstream cp_file(filename);
     if (!cp_file.is_open())
     {
