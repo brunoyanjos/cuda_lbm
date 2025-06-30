@@ -311,3 +311,6 @@ void saveSimInfo(int step, dfloat MLUPS)
 	}
 }
 /**/
+
+__device__
+void veocity_on_centerline() {}
