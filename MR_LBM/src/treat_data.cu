@@ -106,8 +106,8 @@ __global__ void domain_avg(dfloat *fMom, dfloat *ux_mean, dfloat *uy_mean, unsig
 __global__ void velocity_on_centerline_average(dfloat *fMom, dfloat *ux_center, dfloat *uy_center, unsigned int step)
 {
 	const size_t offset = L_front + D;
-	const size_t index = threadIdx.x;
-	const size_t x = index + offset;
+	const size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+	const size_t x = idx + offset;
 
 	const size_t top_y_coord = NY / 2;
 	const size_t bot_y_coord = top_y_coord - 1;
@@ -132,6 +132,6 @@ __global__ void velocity_on_centerline_average(dfloat *fMom, dfloat *ux_center, 
 	const size_t time_count = step - STAT_BEGIN_TIME;
 	const dfloat inv_count = 1.0f / (1.0f + time_count);
 
-	ux_center[index] = (ux_center[index] * time_count + ux) * inv_count;
-	uy_center[index] = (uy_center[index] * time_count + uy) * inv_count;
+	ux_center[idx] = (ux_center[idx] * time_count + ux) * inv_count;
+	uy_center[idx] = (uy_center[idx] * time_count + uy) * inv_count;
 }
