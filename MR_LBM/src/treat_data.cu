@@ -109,6 +109,8 @@ __global__ void velocity_on_centerline_average(dfloat *fMom, dfloat *ux_center, 
 	const size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 	const size_t x = idx + offset;
 
+	if(idx > L_back) return;
+
 	const size_t top_y_coord = NY / 2;
 	const size_t bot_y_coord = top_y_coord - 1;
 

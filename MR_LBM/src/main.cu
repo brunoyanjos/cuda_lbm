@@ -98,6 +98,9 @@ int main()
 	const dfloat TAU = 0.5 + 3.0 * VISC; // relaxation time
 	const dfloat OMEGA = 1.0 / TAU;		 // (tau)^-1
 
+	int avg_blockSize = 256; // Otimizado para ocupação
+    int avg_gridSize = (L_back + avg_blockSize - 1) / avg_blockSize;
+
 	/* ------------------------------ TIMER EVENTS  ------------------------------ */
 	checkCudaErrors(cudaSetDevice(GPU_INDEX));
 	cudaEvent_t start, stop, start_step, stop_step;
@@ -124,6 +127,9 @@ int main()
 		// swap interface pointers
 		swapGhostInterfaces(ghostInterface);
 
+		velocity_on_centerline_average<<<avg_gridSize, avg_blockSize>>>(d_fMom, d_ux_center, d_uy_center, step);
+		return 0;
+
 #ifdef CYLINDER
 		if (step >= STAT_BEGIN_TIME && step <= STAT_END_TIME)
 		{
@@ -131,7 +137,7 @@ int main()
 			checkCudaErrors(cudaMemcpy(h_cylinder_properties, d_cylinder_properties, sizeof(cylinderProperties) * countor_count, cudaMemcpyDeviceToHost));
 			checkCudaErrors(cudaMemcpy(h_fMom, d_fMom, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyDeviceToHost));
 
-			velocity_on_centerline_average<<<1, L_back>>>(d_fMom, d_ux_center, d_uy_center, step);
+			
 
 			calculate_forces(h_cylinder_properties, countor_count, step);
 			calculate_pressure(h_cylinder_properties, countor_count, step);
