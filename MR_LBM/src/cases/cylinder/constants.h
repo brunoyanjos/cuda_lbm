@@ -11,8 +11,8 @@ constexpr int MACR_SAVE = 50000;
 
 constexpr int D = 32;
 
-constexpr int L_top = 3 * D;
-constexpr int L_bot = 3 * D;
+constexpr int L_top = 10 * D;
+constexpr int L_bot = 10 * D;
 constexpr int L_front = 15 * D;
 constexpr int L_back = 30 * D;
 
@@ -44,8 +44,8 @@ constexpr dfloat MACH_NUMBER = U_MAX / 0.57735026918962;
 constexpr int INI_STEP = 0; // initial simulation step (0 default)
 
 #define BC_X_WALL
-#define BC_Y_WALL
-// #define BC_Y_PERIODIC
+// #define BC_Y_WALL
+#define BC_Y_PERIODIC
 
 constexpr bool IRBC = false;
 constexpr bool ROTATIONAL_COORDINATES = true;
