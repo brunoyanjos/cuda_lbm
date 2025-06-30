@@ -308,13 +308,8 @@ void saveSimInfo(int step, dfloat MLUPS, int D, dfloat Dcy, size_t count, dfloat
 	outFile = fopen(strInf.c_str(), "w");
 	if (outFile != nullptr)
 	{
-<<<<<<< HEAD
 		std::string strSimInfo = getSimInfoString(step, MLUPS, D, Dcy, count, rho_infty);
 		fprintf(outFile, strSimInfo.c_str());
-=======
-		std::string strSimInfo = getSimInfoString(step, MLUPS);
-		fprintf(outFile, "%s\n", strSimInfo.c_str());
->>>>>>> ead0d764e2ba72c35174b59d1baaee6ab3afffc9
 		fclose(outFile);
 	}
 	else

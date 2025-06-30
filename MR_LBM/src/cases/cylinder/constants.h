@@ -7,16 +7,12 @@ constexpr dfloat RE = 100;
 
 constexpr int SCALE = 1;
 
-<<<<<<< HEAD
 constexpr int MACR_SAVE = 50000;
-=======
-constexpr int MACR_SAVE = 1000;
->>>>>>> ead0d764e2ba72c35174b59d1baaee6ab3afffc9
 
-constexpr int D = 64;
+constexpr int D = 32;
 
-constexpr int L_top = 10 * D;
-constexpr int L_bot = 10 * D;
+constexpr int L_top = 3 * D;
+constexpr int L_bot = 3 * D;
 constexpr int L_front = 15 * D;
 constexpr int L_back = 30 * D;
 
@@ -31,7 +27,7 @@ constexpr dfloat yc = (dfloat)(L_bot + D * 0.5);
 constexpr dfloat U_MAX = 0.1;
 constexpr dfloat L = N;
 
-constexpr int tstar = 100;         //non-dimensional time to start the statistics
+constexpr int tstar = 1000;         //non-dimensional time to start the statistics
 constexpr int stat_period = 100;    //period of statistics * tstar 
 
 constexpr int N_STEPS = (tstar + stat_period) * D / U_MAX;
@@ -48,13 +44,13 @@ constexpr dfloat MACH_NUMBER = U_MAX / 0.57735026918962;
 constexpr int INI_STEP = 0; // initial simulation step (0 default)
 
 #define BC_X_WALL
-// #define BC_Y_WALL
-#define BC_Y_PERIODIC
+#define BC_Y_WALL
+// #define BC_Y_PERIODIC
 
 constexpr bool IRBC = false;
 constexpr bool ROTATIONAL_COORDINATES = true;
-constexpr bool RHO_STRONG = false;
-constexpr bool RHO_EQ = true;
+constexpr bool RHO_STRONG = true;
+constexpr bool RHO_EQ = false;
 
 #define CYLINDER
 

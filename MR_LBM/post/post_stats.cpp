@@ -13,10 +13,9 @@ int main()
     std::cin >> ID_SIM;
 
     // -----------------Reading input file---------------------------------------------------
-    // std::string filename = PATH_FILES + "/" + ID_SIM + "/" + "input_stat_" + ID_SIM + ".dat";
     std::string filename = PATH_FILES + "/" + ID_SIM + "/" + ID_SIM + "_info" + ".txt";
-    // InputParameters input = read_input(filename);
     InputParameters input = read_input_info(filename);
+    const int npoints = input.ncy;
     const double D_cy = input.Dcy;
     const double uo = input.uo;
     const double rho_infty = input.rho_infty;
@@ -30,17 +29,13 @@ int main()
     const int nsteps = count_lines_in_file(filename);
     std::cout << "The number of time steps available: " << nsteps << std::endl;
 
-    // ----------------------------------------------------------------------------------------------
-    // Reading theta file
-    filename = PATH_FILES + "/" + ID_SIM + "/" + "theta_" + ID_SIM + ".dat";
-    const int npoints = get_npoints_on_cylinder(filename);
-
-    std::cout << "nsteps = " << nsteps << "\n";
-    std::cout << "npoints = " << npoints << "\n";
-    std::cout << "ncy = " << npoints << "\n";
-    std::cout << "Dcy = " << input.Dcy << "\n";
-    std::cout << "uo = " << input.uo << "\n";
-    std::cout << "rho_infty = " << input.rho_infty << "\n";
+    std::cout << "nsteps = " << nsteps << std::endl;
+    std::cout << "npoints = " << npoints << std::endl;
+    std::cout << "Re = " << input.Re << std::endl;
+    std::cout << "Dcy = " << input.Dcy << std::endl;
+    std::cout << "D = " << (int)input.Dcy << std::endl;
+    std::cout << "uo = " << input.uo << std::endl;
+    std::cout << "rho_infty = " << input.rho_infty << std::endl;
 
     CFDdata data = allocate_vectors(nsteps, npoints);
 
@@ -53,8 +48,6 @@ int main()
     filename = PATH_FILES + "/" + ID_SIM + "/" + "pressure_" + ID_SIM + ".dat";
     status = read_pressure(filename, nsteps, npoints, data.ps);
     // status = read_pressure_binary(filename, nsteps, npoints, data.ps);
-
-    std::cout << data.ps[nsteps-1][npoints-1] << std::endl;
 
     // Calculate the lift and drag coefficients
     for (int i = 0; i < nsteps; i++)
@@ -78,7 +71,7 @@ int main()
 
     // gaussian_smoothing(data.ntime,data.Cl, data.Cl_smooth,0.1); // sigma value 0.01
     moving_average_smoothing(data.ntime, data.Cl, data.Cl_smooth, 21); // odd window numer 21
-    filename = PATH_FILES + "/" + ID_SIM + "/"  + "plots/" + "coeff_smooth_" + ID_SIM + ".dat";
+    filename = PATH_FILES + "/" + ID_SIM + "/" + "plots/" + "coeff_smooth_" + ID_SIM + ".dat";
     std::ofstream coeff_file2(filename);
     if (!coeff_file2.is_open())
     {
@@ -105,7 +98,7 @@ int main()
     std::cout << "number of cycles: " << n_cycle << std::endl;
 
     // Strouhal number
-    double Str = D_cy / (cycle_period * uo);
+    data.Str = D_cy / ((double)cycle_period * uo);
 
     for (int i = cycle_start; i <= cycle_end; i++)
     {
@@ -121,14 +114,6 @@ int main()
         }
     }
     data.Cl_avg = sqrt(data.Cl_avg);
-
-    std::cout << "---------------------------------------------------------" << std::endl;
-    std::cout << "Averaging over\t" << n_cycle << "\tcycles" << std::endl;
-    std::cout << "---------------------------------------------------------" << std::endl;
-    std::cout << "Strouhal Number:" << Str << std::endl;
-    std::cout << "Drag Coefficient:" << data.Cd_avg << std::endl;
-    std::cout << "Lift Coefficient:" << data.Cl_avg << std::endl;
-    std::cout << "---------------------------------------------------------" << std::endl;
 
     filename = PATH_FILES + "/" + ID_SIM + "/" + "plots/" + "cl_time_" + ID_SIM + ".dat";
     std::string filename2 = PATH_FILES + "/" + ID_SIM + "/" + "plots/" + "cd_time_" + ID_SIM + ".dat";
@@ -181,10 +166,10 @@ int main()
         data.Cp_sort[i] = data.Cp[index];
     }
 
-    gaussian_smoothing(data.theta_sort,data.Cp_sort, data.Cp_smooth,0.1);
+    gaussian_smoothing(data.theta_sort, data.Cp_sort, data.Cp_smooth, 0.1);
     // moving_average_smoothing(data.theta_sort, data.Cp_sort, data.Cp_smooth, 11);
 
-    filename = PATH_FILES + "/" + ID_SIM + "/" + "plots/" +  "cp_" + ID_SIM + ".dat";
+    filename = PATH_FILES + "/" + ID_SIM + "/" + "plots/" + "cp_" + ID_SIM + ".dat";
     std::ofstream cp_file(filename);
     if (!cp_file.is_open())
     {
@@ -200,6 +185,34 @@ int main()
             cp_file << std::abs(theta) << " " << data.Cp_sort[i] << " " << data.Cp_smooth[i] << std::endl;
         }
     }
+
+    // finding stagnation Cp and base Cp
+    status = read_cp(filename,&(data.Cps), &(data.Cpb));
+     std::cout << "---------------------------------------------------------" << std::endl;
+    std::cout << "Averaged over\t" << n_cycle << "\tcycles" << std::endl;
+    std::cout << "---------------------------------------------------------" << std::endl;
+    std::cout << "Strouhal Number:" << data.Str << std::endl;
+    std::cout << "Drag Coefficient:" << data.Cd_avg << std::endl;
+    std::cout << "Lift Coefficient:" << data.Cl_avg << std::endl;
+    std::cout << "Stagnation Cps:" << data.Cps << std::endl;
+    std::cout << "Base Cpb:" << data.Cpb << std::endl;
+    std::cout << "---------------------------------------------------------" << std::endl;
+
+    // Writing output file
+    filename = PATH_FILES + "/" + ID_SIM + "/" + "plots/" + "output_" + ID_SIM + ".dat";
+    std::ofstream out_file(filename);
+    out_file << "Re = " << input.Re << std::endl;
+    out_file << "D = " <<  (int)input.Dcy << std::endl;
+    out_file << "ncy = " <<  (int)input.ncy << std::endl;
+    out_file << "---------------------------------------------------------" << std::endl;
+    out_file << "Averaged over\t" << n_cycle << "\tcycles" << std::endl;
+    out_file << "---------------------------------------------------------" << std::endl;
+    out_file << "Strouhal Number (St):" << data.Str << std::endl;
+    out_file << "Drag Coefficient (Cd):" << data.Cd_avg << std::endl;
+    out_file << "Lift Coefficient (Cl):" << data.Cl_avg << std::endl;
+    out_file << "Stagnation Cp (Cps):" << data.Cps << std::endl;
+    out_file << "Base Cp (Cpb):" << data.Cpb << std::endl;
+    out_file << "---------------------------------------------------------" << std::endl;
 
     return 0;
 }

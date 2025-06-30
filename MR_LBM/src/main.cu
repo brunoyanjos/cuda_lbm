@@ -62,7 +62,7 @@ int main()
 	dfloat* mxy;
 	dfloat* myy;
 
-	dfloat rho_infty;
+	dfloat rho_infty = 0.0;
 
 	/* ----------------- GRID AND THREADS DEFINITION FOR LBM ---------------- */
 	dim3 threadBlock(BLOCK_NX, BLOCK_NY);

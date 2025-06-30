@@ -11,8 +11,11 @@
 const double PI = 4.0 * atan(1.0);
 
 struct CFDdata{
+    double Str;
     double Cd_avg;
     double Cl_avg;
+    double Cps;
+    double Cpb;
 
     std::vector<int> idx;
     std::vector<int> time;
@@ -138,6 +141,9 @@ inline void moving_average_smoothing(const std::vector<double>& sig_x,
         var_smooth[i] = sum / count;
     }
 }
+
+
+
 
 
 
