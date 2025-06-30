@@ -23,13 +23,13 @@
  *   @param step: simulation's step
  *   @return string with simulation info
  */
-std::string getSimInfoString(int step, dfloat MLUPS);
+std::string getSimInfoString(int step, dfloat MLUPS, int D, dfloat Dcy, size_t count, dfloat rho_infty);
 
 /*
  *   Save simulation's information
  *   @param info: simulation's informations
  */
-void saveSimInfo(int step, dfloat MLUPS);
+void saveSimInfo(int step, dfloat MLUPS, int D, dfloat Dcy, size_t count, dfloat rho_infty);
 
 void createVTK(int Nx, int Ny, dfloat* rho, dfloat* ux, dfloat* uy, unsigned int step);
 

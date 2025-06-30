@@ -58,6 +58,8 @@ int main()
 	dfloat *ux;
 	dfloat *uy;
 
+	dfloat rho_infty;
+
 	/* ----------------- GRID AND THREADS DEFINITION FOR LBM ---------------- */
 	dim3 threadBlock(BLOCK_NX, BLOCK_NY);
 	dim3 gridBlock(NUM_BLOCK_X, NUM_BLOCK_Y);
@@ -95,7 +97,7 @@ int main()
 	cudaEvent_t start, stop, start_step, stop_step;
 	initializeCudaEvents(start, stop, start_step, stop_step);
 	/* ------------------------------ LBM LOOP ------------------------------ */
-	saveSimInfo(step, 0.0);
+	saveSimInfo(step, 0.0, D, D_Max, countor_count, rho_infty);
 
 	/* --------------------------------------------------------------------- */
 	/* ---------------------------- BEGIN LOOP ------------------------------ */
@@ -125,7 +127,7 @@ int main()
 
 			calculate_forces(h_cylinder_properties, countor_count, step);
 			calculate_pressure(h_cylinder_properties, countor_count, step);
-			calculate_inlet_density(h_fMom, step);
+			calculate_inlet_density(h_fMom, step, &rho_infty);
 		}
 #endif // CYLINDER
 
@@ -156,7 +158,7 @@ int main()
 	/* ------------------------------ POST ------------------------------ */
 	checkCudaErrors(cudaMemcpy(h_fMom, d_fMom, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyDeviceToHost));
 	// save info file
-	saveSimInfo(step, MLUPS);
+	saveSimInfo(step, MLUPS, D, D_Max, countor_count, rho_infty);
 
 	/* ------------------------------ FREE ------------------------------ */
 	cudaFree(d_fMom);

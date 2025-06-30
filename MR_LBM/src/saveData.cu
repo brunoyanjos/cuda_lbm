@@ -228,30 +228,35 @@ void saveVarBin(
 	}
 }
 
-std::string getSimInfoString(int step, dfloat MLUPS)
+std::string getSimInfoString(int step, dfloat MLUPS, int D, dfloat Dcy, size_t count, dfloat rho_infty)
 {
 #define BOOL_TO_STRING(b) ((b) ? "true" : "false")
 	std::ostringstream strSimInfo("");
 
-	strSimInfo << std::scientific;
+	strSimInfo << std::fixed;
 	strSimInfo << std::setprecision(6);
 
 	strSimInfo << "---------------------------- SIMULATION INFORMATION ----------------------------\n";
-	strSimInfo << "      Simulation ID: " << ID_SIM << "\n";
-	strSimInfo << "       Velocity set: D2Q9\n";
-	strSimInfo << "                 Re: " << RE << "\n";
-	strSimInfo << "          Precision: float\n";
-	strSimInfo << "                 NX: " << NX << "\n";	
-	strSimInfo << "                 NY: " << NY << "\n";
-	strSimInfo << std::scientific << std::setprecision(6);
+	strSimInfo << "      Simulation ID =  " << ID_SIM << "\n";
+	strSimInfo << "       Velocity set = D2Q9\n";
+	strSimInfo << "                 Re = " << RE << "\n";
+	strSimInfo << "          Precision = float\n";
+	strSimInfo << "                 NX = " << NX << "\n";	
+	strSimInfo << "                 NY = " << NY << "\n";
+	strSimInfo << std::fixed << std::setprecision(6);
 	/*strSimInfo << "                Tau: " << TAU << "\n";*/
-	strSimInfo << "               Umax: " << U_MAX << "\n";
-	strSimInfo << "             Macr_save: " << MACR_SAVE << "\n";
-	strSimInfo << "             Nsteps: " << step << "\n";
-	strSimInfo << "              MLUPS: " << MLUPS << "\n";
-	strSimInfo << std::scientific << std::setprecision(0);
-	strSimInfo << "                 BX: " << BLOCK_NX << "\n";
-	strSimInfo << "                 BY: " << BLOCK_NY << "\n";
+	strSimInfo << "                 uo = " << U_MAX << "\n";
+	strSimInfo << "          Macr_save = " << MACR_SAVE << "\n";
+	strSimInfo << "             Nsteps = " << step << "\n";
+	strSimInfo << "              MLUPS = " << MLUPS << "\n";
+	strSimInfo << std::fixed << std::setprecision(0);
+	strSimInfo << "                 BX = " << BLOCK_NX << "\n";
+	strSimInfo << "                 BY = " << BLOCK_NY << "\n";
+	strSimInfo << "                ncy = " << count << "\n";
+	strSimInfo << "                  D = " << D << "\n";
+	strSimInfo << std::fixed << std::setprecision(5);
+	strSimInfo << "                Dcy = " << Dcy << "\n";
+	strSimInfo << "          rho_infty = " << rho_infty << "\n";
 	strSimInfo << "--------------------------------------------------------------------------------\n";
 
 	return strSimInfo.str();
@@ -278,6 +283,8 @@ void folderSetup()
 	strPath = PATH_FILES;
 	strPath += "/";
 	strPath += ID_SIM;
+	strPath += "/";
+	strPath += "plots";
 	std::string cmd = "mkdir -p ";
 	cmd += strPath;
 	const int i = system(cmd.c_str());
@@ -288,7 +295,7 @@ void folderSetup()
 	return;
 }
 
-void saveSimInfo(int step, dfloat MLUPS)
+void saveSimInfo(int step, dfloat MLUPS, int D, dfloat Dcy, size_t count, dfloat rho_infty) 
 {
 	std::string strInf = PATH_FILES;
 	strInf += "/";
@@ -301,8 +308,13 @@ void saveSimInfo(int step, dfloat MLUPS)
 	outFile = fopen(strInf.c_str(), "w");
 	if (outFile != nullptr)
 	{
+<<<<<<< HEAD
+		std::string strSimInfo = getSimInfoString(step, MLUPS, D, Dcy, count, rho_infty);
+		fprintf(outFile, strSimInfo.c_str());
+=======
 		std::string strSimInfo = getSimInfoString(step, MLUPS);
 		fprintf(outFile, "%s\n", strSimInfo.c_str());
+>>>>>>> ead0d764e2ba72c35174b59d1baaee6ab3afffc9
 		fclose(outFile);
 	}
 	else

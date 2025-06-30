@@ -79,6 +79,33 @@ struct InputParameters
     return params;
 }
 
+[[nodiscard]] inline InputParameters read_input_info(const std::string& filename) {
+    std::ifstream file(filename);
+    if (!file) {
+        throw std::runtime_error("Cannot open input file.");
+    }
+
+    std::string line;
+    InputParameters params;
+
+    while (std::getline(file, line)) {
+        std::istringstream iss(line);
+        std::string key;
+        double value;
+
+        // Match lines like "Dcy = 32.9848440"
+        if (line.find("Dcy") != std::string::npos && iss >> key >> key >> value) {
+            params.Dcy = value;
+        } else if (line.find("uo") != std::string::npos && iss >> key >> key >> value) {
+            params.uo = value;
+        } else if (line.find("rho_infty") != std::string::npos && iss >> key >> key >> value) {
+            params.rho_infty = value;
+        }
+    }
+
+    return params;
+}
+
 [[nodiscard]] inline int read_theta(const std::string& filename, const int npoints, std::vector<double>& theta) {
     std::ifstream theta_file(filename);
     if(!theta_file.is_open()){
