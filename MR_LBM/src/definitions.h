@@ -53,6 +53,9 @@ constexpr BlockDim optimalBlockDimArray = findOptimalBlockDimensions(MAX_ELEMENT
 const int BLOCK_NX = optimalBlockDimArray.x; // number of threads in x
 const int BLOCK_NY = optimalBlockDimArray.y; // number of threads in y
 
+// const int BLOCK_NX = 16; // number of threads in x
+// const int BLOCK_NY = 16; // number of threads in y
+
 #define BLOCK_LBM_SIZE (BLOCK_NX * BLOCK_NY) // size of a block
 
 const size_t BLOCK_GHOST_SIZE = BLOCK_NX + BLOCK_NY;

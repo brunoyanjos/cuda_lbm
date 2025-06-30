@@ -112,13 +112,13 @@ __global__ void velocity_on_centerline_average(dfloat *fMom, dfloat *ux_center, 
 	const size_t top_y_coord = NY / 2;
 	const size_t bot_y_coord = top_y_coord - 1;
 
-	const size_t global_x_thread = x % NX;
-	const size_t global_top_y_thread = top_y_coord % NY;
-	const size_t global_bot_y_thread = bot_y_coord % NY;
+	const size_t global_x_thread = x % BLOCK_NX;
+	const size_t global_top_y_thread = top_y_coord % BLOCK_NY;
+	const size_t global_bot_y_thread = bot_y_coord % BLOCK_NY;
 
-	const size_t global_x_block = x / NX;
-	const size_t global_top_y_block = top_y_coord / NY;
-	const size_t global_bot_y_block = bot_y_coord / NY;
+	const size_t global_x_block = x / BLOCK_NX;
+	const size_t global_top_y_block = top_y_coord / BLOCK_NY;
+	const size_t global_bot_y_block = bot_y_coord / BLOCK_NY;
 
 	const dfloat ux_top = fMom[idxMom(global_x_thread, global_top_y_thread, M_UX_INDEX, global_x_block, global_top_y_block)] / F_M_I_SCALE;
 	const dfloat ux_bot = fMom[idxMom(global_x_thread, global_bot_y_thread, M_UX_INDEX, global_x_block, global_bot_y_block)] / F_M_I_SCALE;

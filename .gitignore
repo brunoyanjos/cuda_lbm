@@ -30,6 +30,7 @@ src/CUDA/x64
 MR_LBM/*.dat
 MR_LBM/OUTPUT/*
 MR_LBM/CYLINDER/*
+MR_LBM/simulations/*
 MR_LBM/JET_FLOW/*
 MR_LBM/src/OUTPUT/*
 MR_LBM/src/CYLINDER/*

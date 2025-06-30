@@ -11,6 +11,8 @@
 
 struct InputParameters
 {
+    double Re;
+    double ncy;
     double Dcy;
     double uo;
     double rho_infty;
@@ -55,30 +57,6 @@ struct InputParameters
 }
 
 // Function to read input from file
-[[nodiscard]] inline InputParameters read_input(const std::string& filename) {
-    std::ifstream file(filename);
-    if (!file) {
-        throw std::runtime_error("Cannot open input file.");
-    }
-
-    std::string word;
-    InputParameters params{};
-
-    while (file >> word) {
-        if (word == "Dcy") {
-            file.ignore(100, '='); file >> params.Dcy;
-        } else if (word == "uo") {
-            file.ignore(100, '='); file >> params.uo;
-        } else if (word == "rho_infty") {
-            file.ignore(100, '='); file >> params.rho_infty;
-        }
-    }
-
-    file.close();
-
-    return params;
-}
-
 [[nodiscard]] inline InputParameters read_input_info(const std::string& filename) {
     std::ifstream file(filename);
     if (!file) {
@@ -94,10 +72,14 @@ struct InputParameters
         double value;
 
         // Match lines like "Dcy = 32.9848440"
-        if (line.find("Dcy") != std::string::npos && iss >> key >> key >> value) {
-            params.Dcy = value;
+        if (line.find("Re") != std::string::npos && iss >> key >> key >> value) {
+            params.Re = value;
         } else if (line.find("uo") != std::string::npos && iss >> key >> key >> value) {
             params.uo = value;
+        } else if (line.find("ncy") != std::string::npos && iss >> key >> key >> value) {
+            params.ncy = value;
+        } else if (line.find("Dcy") != std::string::npos && iss >> key >> key >> value) {
+            params.Dcy = value;
         } else if (line.find("rho_infty") != std::string::npos && iss >> key >> key >> value) {
             params.rho_infty = value;
         }
@@ -197,6 +179,32 @@ struct InputParameters
     }
 
     pressure_file.close();
+    return 0;
+}
+
+[[nodiscard]] inline int read_cp(const std::string& filename, double *cps, double *cpb){
+
+    std::ifstream count_file(filename);
+    if (!count_file.is_open()) {
+        std::cout << "Error opening cp file!!" << std::endl;
+        return 1;
+    }
+    std::string line;
+    double theta_first, pressure_first;
+    double theta_last, pressure_last;
+
+    // Read first line
+    if (std::getline(count_file, line)) {
+        std::istringstream iss(line);
+        iss >> theta_first >> *cpb;
+    }
+
+    // Read last line
+    while (std::getline(count_file, line)) {
+        std::istringstream iss(line);
+        iss >> theta_last >> *cps;
+    }
+    count_file.close();
     return 0;
 }
 
