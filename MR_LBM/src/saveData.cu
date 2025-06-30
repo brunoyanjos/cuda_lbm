@@ -3,8 +3,7 @@
 #include <iostream>
 
 __host__ void saveMacr(
-	dfloat* h_fMom, dfloat* rho, dfloat* ux, dfloat* uy, unsigned int nSteps
-)
+	dfloat *h_fMom, dfloat *rho, dfloat *ux, dfloat *uy, unsigned int nSteps)
 {
 	int x, y;
 
@@ -12,7 +11,7 @@ __host__ void saveMacr(
 	size_t indexMacr;
 	// double uSum = 0;
 	// double t_star = 0;
-	
+
 	// printf("\n--------------------------- Save macr %d ---------------------------\n", step);
 
 	for (y = 0; y < NY; y++)
@@ -24,7 +23,6 @@ __host__ void saveMacr(
 			rho[indexMacr] = RHO_0 + h_fMom[idxMom(x % BLOCK_NX, y % BLOCK_NY, M_RHO_INDEX, x / BLOCK_NX, y / BLOCK_NY)];
 			ux[indexMacr] = h_fMom[idxMom(x % BLOCK_NX, y % BLOCK_NY, M_UX_INDEX, x / BLOCK_NX, y / BLOCK_NY)] / F_M_I_SCALE;
 			uy[indexMacr] = h_fMom[idxMom(x % BLOCK_NX, y % BLOCK_NY, M_UY_INDEX, x / BLOCK_NX, y / BLOCK_NY)] / F_M_I_SCALE;
-
 		}
 	}
 
@@ -41,38 +39,52 @@ __host__ void saveMacr(
 	std::ostringstream master_file;
 	master_file << strInf;
 	std::ofstream out(master_file.str());
-	out << "{" << std::endl;;
-	out << std::endl;;
-	out << " \"auto-detect-format\": true," << std::endl;;
-	out << std::endl;;
-	out << " \"filenames\": [" << std::endl;;
-	out << std::endl;;
+	out << "{" << std::endl;
+	;
+	out << std::endl;
+	;
+	out << " \"auto-detect-format\": true," << std::endl;
+	;
+	out << std::endl;
+	;
+	out << " \"filenames\": [" << std::endl;
+	;
+	out << std::endl;
+	;
 
-	for (int iter = 1; iter < N_STEPS; iter++) {
-		if (iter % MACR_SAVE == 0) {
+	for (int iter = 1; iter < N_STEPS; iter++)
+	{
+		if (iter % MACR_SAVE == 0)
+		{
 			std::ostringstream filename_temp;
 			filename_temp << prefix << (10000000 + iter) << suffix;
 			std::string filename = filename_temp.str();
 
-			if (out.is_open()) {
-				out << "{ \"time\" :  " << iter / MACR_SAVE << ", \"xyz\" : \"grid.x\", \"function\" : \"" << filename << "\" }," << std::endl;;
+			if (out.is_open())
+			{
+				out << "{ \"time\" :  " << iter / MACR_SAVE << ", \"xyz\" : \"grid.x\", \"function\" : \"" << filename << "\" }," << std::endl;
+				;
 			}
-			else {
+			else
+			{
 				std::cerr << "Failed to open file: master.p3d" << std::endl;
 			}
-
 		}
 	}
-	out << std::endl;;
-	out << "]" << std::endl;;
-	out << "}" << std::endl;;
+	out << std::endl;
+	;
+	out << "]" << std::endl;
+	;
+	out << "}" << std::endl;
+	;
 	out.close();
 	// ======================================================================================================================
 
 	// writing grid.x file
 	// -------------------------------------------------------------------------------------------------------
 	int nprocs = 1;
-	if(nSteps==0){
+	if (nSteps == 0)
+	{
 		std::string strInf2 = PATH_FILES;
 		strInf2 += "/";
 		strInf2 += ID_SIM;
@@ -80,36 +92,40 @@ __host__ void saveMacr(
 		strInf2 += "grid.x"; // generate file name (with path)
 
 		std::ofstream gridfile(strInf2, std::ios::binary);
-		if (!gridfile) {
+		if (!gridfile)
+		{
 			std::cerr << "Error opening grid file" << std::endl;
 		}
 
 		// Write nprocs
-		gridfile.write(reinterpret_cast<const char*>(&nprocs), sizeof(int));
+		gridfile.write(reinterpret_cast<const char *>(&nprocs), sizeof(int));
 
 		// Write (nx, ny) for each processor (Fortran loop: m = 1 to nprocs)
-		for (int m = 1; m <= nprocs; ++m) {
-			gridfile.write(reinterpret_cast<const char*>(&NX), sizeof(int));
-			gridfile.write(reinterpret_cast<const char*>(&NY), sizeof(int));
+		for (int m = 1; m <= nprocs; ++m)
+		{
+			gridfile.write(reinterpret_cast<const char *>(&NX), sizeof(int));
+			gridfile.write(reinterpret_cast<const char *>(&NY), sizeof(int));
 		}
 
 		// Write x and y arrays for each processor (m = 0 to nprocs - 1)
-		for (int m = 0; m < nprocs; ++m) {
+		for (int m = 0; m < nprocs; ++m)
+		{
 			// Fortran is column-major: loop j outer, i inner
 			for (int j = 0; j < NY; ++j)
-				for (int i = 0; i < NX; ++i) {
-					float val = double(i);  // already float
-					gridfile.write(reinterpret_cast<const char*>(&val), sizeof(float));
+				for (int i = 0; i < NX; ++i)
+				{
+					float val = double(i); // already float
+					gridfile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 				}
 
 			for (int j = 0; j < NY; ++j)
-				for (int i = 0; i < NX; ++i) {
+				for (int i = 0; i < NX; ++i)
+				{
 					float val = double(j);
-					gridfile.write(reinterpret_cast<const char*>(&val), sizeof(float));
+					gridfile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 				}
 		}
 	}
-
 
 	// datafile
 
@@ -123,47 +139,52 @@ __host__ void saveMacr(
 	std::string filename = filename_temp.str();
 
 	std::ofstream datafile(filename, std::ios::binary);
-	if (!datafile) {
+	if (!datafile)
+	{
 		std::cerr << "Error opening grid file" << std::endl;
 	}
 
 	// Write nprocs
-	datafile.write(reinterpret_cast<const char*>(&nprocs), sizeof(int));
+	datafile.write(reinterpret_cast<const char *>(&nprocs), sizeof(int));
 
 	// Write (nx, ny) for each processor (Fortran loop: m = 1 to nprocs)
-	for (int l = 0; l < nprocs; ++l) {
-		datafile.write(reinterpret_cast<const char*>(&NX), sizeof(int));
-		datafile.write(reinterpret_cast<const char*>(&NY), sizeof(int));
-		int nf = 3;  // 3 fields: rho, ux, uy
-		datafile.write(reinterpret_cast<const char*>(&nf), sizeof(int));
+	for (int l = 0; l < nprocs; ++l)
+	{
+		datafile.write(reinterpret_cast<const char *>(&NX), sizeof(int));
+		datafile.write(reinterpret_cast<const char *>(&NY), sizeof(int));
+		int nf = 3; // 3 fields: rho, ux, uy
+		datafile.write(reinterpret_cast<const char *>(&nf), sizeof(int));
 	}
 
 	// Write x and y arrays for each processor (m = 0 to nprocs - 1)
-	for (int m = 0; m < nprocs; ++m) {
+	for (int m = 0; m < nprocs; ++m)
+	{
 		// Fortran is column-major: loop j outer, i inner
 		for (int j = 0; j < NY; ++j)
-			for (int i = 0; i < NX; ++i) {
+			for (int i = 0; i < NX; ++i)
+			{
 				indexMacr = idxScalarGlobal(i, j);
-				float val = rho[indexMacr];  // already float
-				datafile.write(reinterpret_cast<const char*>(&val), sizeof(float));
+				float val = rho[indexMacr]; // already float
+				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 			}
 
 		for (int j = 0; j < NY; ++j)
-			for (int i = 0; i < NX; ++i) {
+			for (int i = 0; i < NX; ++i)
+			{
 				indexMacr = idxScalarGlobal(i, j);
 				float val = ux[indexMacr];
-				datafile.write(reinterpret_cast<const char*>(&val), sizeof(float));
+				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 			}
 
 		for (int j = 0; j < NY; ++j)
-			for (int i = 0; i < NX; ++i) {
+			for (int i = 0; i < NX; ++i)
+			{
 				indexMacr = idxScalarGlobal(i, j);
 				float val = uy[indexMacr];
-				datafile.write(reinterpret_cast<const char*>(&val), sizeof(float));
+				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 			}
 	}
 	datafile.close();
-
 
 	std::string strFileRho, strFileUx, strFileUy;
 
@@ -206,14 +227,12 @@ std::string getVarFilename(
 	return strFile;
 }
 
-
 void saveVarBin(
 	std::string strFile,
-	dfloat* var,
+	dfloat *var,
 	size_t memSize)
 {
-	FILE* outFile = nullptr;
-
+	FILE *outFile = nullptr;
 
 	outFile = fopen(strFile.c_str(), "wb");
 
@@ -241,7 +260,7 @@ std::string getSimInfoString(int step, dfloat MLUPS, int D, dfloat Dcy, size_t c
 	strSimInfo << "       Velocity set = D2Q9\n";
 	strSimInfo << "                 Re = " << RE << "\n";
 	strSimInfo << "          Precision = float\n";
-	strSimInfo << "                 NX = " << NX << "\n";	
+	strSimInfo << "                 NX = " << NX << "\n";
 	strSimInfo << "                 NY = " << NY << "\n";
 	strSimInfo << std::fixed << std::setprecision(6);
 	/*strSimInfo << "                Tau: " << TAU << "\n";*/
@@ -261,7 +280,6 @@ std::string getSimInfoString(int step, dfloat MLUPS, int D, dfloat Dcy, size_t c
 
 	return strSimInfo.str();
 }
-
 
 void folderSetup()
 {
@@ -295,7 +313,7 @@ void folderSetup()
 	return;
 }
 
-void saveSimInfo(int step, dfloat MLUPS, int D, dfloat Dcy, size_t count, dfloat rho_infty) 
+void saveSimInfo(int step, dfloat MLUPS, int D, dfloat Dcy, size_t count, dfloat rho_infty)
 {
 	std::string strInf = PATH_FILES;
 	strInf += "/";
@@ -303,13 +321,13 @@ void saveSimInfo(int step, dfloat MLUPS, int D, dfloat Dcy, size_t count, dfloat
 	strInf += "/";
 	strInf += ID_SIM;
 	strInf += "_info.txt"; // generate file name (with path)
-	FILE* outFile = nullptr;
+	FILE *outFile = nullptr;
 
 	outFile = fopen(strInf.c_str(), "w");
 	if (outFile != nullptr)
 	{
 		std::string strSimInfo = getSimInfoString(step, MLUPS, D, Dcy, count, rho_infty);
-		fprintf(outFile, strSimInfo.c_str());
+		fprintf(outFile, "%s\n", strSimInfo.c_str());
 		fclose(outFile);
 	}
 	else
@@ -318,3 +336,17 @@ void saveSimInfo(int step, dfloat MLUPS, int D, dfloat Dcy, size_t count, dfloat
 	}
 }
 /**/
+
+__host__ void saving_centerline_data(dfloat *ux, dfloat *uy)
+{
+	std::ostringstream source_path;
+	source_path << PATH_FILES << "/" << ID_SIM << "/" << "centerline_" << ID_SIM << ".dat";
+	std::ofstream out_file(source_path.str());
+
+	out_file << "x_coord" << " ux " << " uy" << std::endl;
+
+	for (size_t i = 0; i < L_back; ++i)
+	{
+		out_file << (i + L_front + D) << " " << ux[i] << " " << uy[i] << std::endl;
+	}
+}

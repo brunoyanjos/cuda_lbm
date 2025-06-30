@@ -102,3 +102,36 @@ __global__ void domain_avg(dfloat *fMom, dfloat *ux_mean, dfloat *uy_mean, unsig
 	ux_mean[global_index] = (ux_mean[global_index] * meanCounter + ux) * invCount;
 	uy_mean[global_index] = (uy_mean[global_index] * meanCounter + uy) * invCount;
 }
+
+__global__ void velocity_on_centerline_average(dfloat *fMom, dfloat *ux_center, dfloat *uy_center, unsigned int step)
+{
+	const size_t offset = L_front + D;
+	const size_t index = threadIdx.x;
+	const size_t x = index + offset;
+
+	const size_t top_y_coord = NY / 2;
+	const size_t bot_y_coord = top_y_coord - 1;
+
+	const size_t global_x_thread = x % NX;
+	const size_t global_top_y_thread = top_y_coord % NY;
+	const size_t global_bot_y_thread = bot_y_coord % NY;
+
+	const size_t global_x_block = x / NX;
+	const size_t global_top_y_block = top_y_coord / NY;
+	const size_t global_bot_y_block = bot_y_coord / NY;
+
+	const dfloat ux_top = fMom[idxMom(global_x_thread, global_top_y_thread, M_UX_INDEX, global_x_block, global_top_y_block)] / F_M_I_SCALE;
+	const dfloat ux_bot = fMom[idxMom(global_x_thread, global_bot_y_thread, M_UX_INDEX, global_x_block, global_bot_y_block)] / F_M_I_SCALE;
+
+	const dfloat uy_top = fMom[idxMom(global_x_thread, global_top_y_thread, M_UY_INDEX, global_x_block, global_top_y_block)] / F_M_I_SCALE;
+	const dfloat uy_bot = fMom[idxMom(global_x_thread, global_bot_y_thread, M_UY_INDEX, global_x_block, global_bot_y_block)] / F_M_I_SCALE;
+
+	const dfloat ux = (ux_top + ux_bot) * 0.5;
+	const dfloat uy = (uy_top + uy_bot) * 0.5;
+
+	const size_t time_count = step - STAT_BEGIN_TIME;
+	const dfloat inv_count = 1.0f / (1.0f + time_count);
+
+	ux_center[index] = (ux_center[index] * time_count + ux) * inv_count;
+	uy_center[index] = (uy_center[index] * time_count + uy) * inv_count;
+}

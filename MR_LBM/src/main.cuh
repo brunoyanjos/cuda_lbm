@@ -138,25 +138,24 @@ __host__ void interfaceMalloc(ghostInterfaceData &ghostInterface)
 }
 
 __host__ void allocateHostMemory(
-	dfloat **h_fMom, dfloat **rho, dfloat **ux, dfloat **uy,
-	dfloat **mxx, dfloat **mxy, dfloat **myy)
+	dfloat **h_fMom, dfloat **rho, dfloat **ux, dfloat **uy, dfloat **ux_center, dfloat **uy_center)
 {
 	checkCudaErrors(cudaMallocHost((void **)h_fMom, MEM_SIZE_MOM));
 	checkCudaErrors(cudaMallocHost((void **)rho, MEM_SIZE_SCALAR));
 	checkCudaErrors(cudaMallocHost((void **)ux, MEM_SIZE_SCALAR));
 	checkCudaErrors(cudaMallocHost((void **)uy, MEM_SIZE_SCALAR));
-
-	checkCudaErrors(cudaMallocHost((void **)mxx, MEM_SIZE_SCALAR));
-	checkCudaErrors(cudaMallocHost((void **)mxy, MEM_SIZE_SCALAR));
-	checkCudaErrors(cudaMallocHost((void **)myy, MEM_SIZE_SCALAR));
+	checkCudaErrors(cudaMallocHost((void **)ux_center, L_back * sizeof(dfloat)));
+	checkCudaErrors(cudaMallocHost((void **)uy_center, L_back * sizeof(dfloat)));
 }
 
 __host__ void allocateDeviceMemory(
-	dfloat **d_fMom, unsigned int **dNodeType, GhostInterfaceData *ghostInterface)
+	dfloat **d_fMom, unsigned int **dNodeType, GhostInterfaceData *ghostInterface, dfloat **ux_center, dfloat **uy_center)
 {
 	cudaMalloc((void **)d_fMom, MEM_SIZE_MOM);
 	cudaMalloc((void **)dNodeType, sizeof(int) * NUMBER_LBM_NODES);
 	interfaceMalloc(*ghostInterface);
+	checkCudaErrors(cudaMalloc((void **)ux_center, L_back * sizeof(dfloat)));
+	checkCudaErrors(cudaMalloc((void **)uy_center, L_back * sizeof(dfloat)));
 }
 
 __host__ void initializeDomain(
@@ -183,7 +182,7 @@ __host__ void initializeDomain(
 
 #ifdef CYLINDER
 	hostInitialization_innerNodes(hNodeType, D_max, h_cylinder_properties, contour_count);
-	checkCudaErrors(cudaMalloc((void**)&d_cylinder_properties, sizeof(cylinderProperties) * (*contour_count)));
+	checkCudaErrors(cudaMalloc((void **)&d_cylinder_properties, sizeof(cylinderProperties) * (*contour_count)));
 	checkCudaErrors(cudaMemcpy(d_cylinder_properties, *h_cylinder_properties, sizeof(cylinderProperties) * (*contour_count), cudaMemcpyHostToDevice));
 #endif
 

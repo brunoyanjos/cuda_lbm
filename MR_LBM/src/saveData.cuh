@@ -17,7 +17,6 @@
 #include "errorDef.h"
 #include "globalStructs.h"
 
-
 /*
  *   Get string with simulation information
  *   @param step: simulation's step
@@ -31,7 +30,7 @@ std::string getSimInfoString(int step, dfloat MLUPS, int D, dfloat Dcy, size_t c
  */
 void saveSimInfo(int step, dfloat MLUPS, int D, dfloat Dcy, size_t count, dfloat rho_infty);
 
-void createVTK(int Nx, int Ny, dfloat* rho, dfloat* ux, dfloat* uy, unsigned int step);
+void createVTK(int Nx, int Ny, dfloat *rho, dfloat *ux, dfloat *uy, unsigned int step);
 
 /*
  *   @brief Save array content to binary file
@@ -42,14 +41,15 @@ void createVTK(int Nx, int Ny, dfloat* rho, dfloat* ux, dfloat* uy, unsigned int
  */
 void saveVarBin(
     std::string strFile,
-    dfloat* var,
-    size_t memSize
-);
+    dfloat *var,
+    size_t memSize);
 
 void folderSetup();
 
-__host__ void saveMacr(dfloat* h_fMom, dfloat* rho, dfloat* ux, dfloat* uy, unsigned int nSteps);
+__host__ void saveMacr(dfloat *h_fMom, dfloat *rho, dfloat *ux, dfloat *uy, unsigned int nSteps);
 
 std::string getVarFilename(const std::string varName, unsigned int step, const std::string ext);
+
+__host__ void saving_centerline_data(dfloat* ux, dfloat* uy);
 
 #endif
