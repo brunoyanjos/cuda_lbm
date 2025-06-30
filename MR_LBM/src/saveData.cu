@@ -1,6 +1,4 @@
 #include "saveData.cuh"
-#include "globalFunctions.h"
-#include <iostream>
 
 __host__ void saveMacr(
 	dfloat* h_fMom, dfloat* rho, dfloat* ux, dfloat* uy, unsigned int nSteps
@@ -10,8 +8,8 @@ __host__ void saveMacr(
 
 	// linearize
 	size_t indexMacr;
-	double uSum = 0;
-	double t_star = 0;
+	// double uSum = 0;
+	// double t_star = 0;
 	
 	// printf("\n--------------------------- Save macr %d ---------------------------\n", step);
 
@@ -27,8 +25,6 @@ __host__ void saveMacr(
 
 		}
 	}
-
-	
 
 	// Sakthi-modifications
 	// Creating master.p3d file
@@ -172,16 +168,13 @@ __host__ void saveMacr(
 	strFileRho = getVarFilename("rho", nSteps, ".bin");
 	strFileUx = getVarFilename("ux", nSteps, ".bin");
 	strFileUy = getVarFilename("uy", nSteps, ".bin");
-
-	// saveVarBin(strFileRho, rho, MEM_SIZE_SCALAR);
-	// saveVarBin(strFileUx, ux, MEM_SIZE_SCALAR);
-	// saveVarBin(strFileUy, uy, MEM_SIZE_SCALAR);
 }
 
 std::string getVarFilename(
 	const std::string varName,
 	unsigned int step,
-	const std::string ext)
+	const std::string ext
+)
 {
 	unsigned int n_zeros = 0, pot_10 = 10;
 	unsigned int aux1 = 1000000; // 6 numbers on step
@@ -207,7 +200,6 @@ std::string getVarFilename(
 
 	return strFile;
 }
-
 
 void saveVarBin(
 	std::string strFile,
@@ -259,7 +251,6 @@ std::string getSimInfoString(int step, dfloat MLUPS)
 	return strSimInfo.str();
 }
 
-
 void folderSetup()
 {
 	// Windows
@@ -282,7 +273,8 @@ void folderSetup()
 	strPath += ID_SIM;
 	std::string cmd = "mkdir -p ";
 	cmd += strPath;
-	system(cmd.c_str());
+	const int i = system(cmd.c_str());
+	static_cast<void>(i);
 	return;
 #endif // !Unix
 	printf("I don't know how to setup folders for your operational system :(\n");
@@ -295,15 +287,14 @@ void saveSimInfo(int step, dfloat MLUPS)
 	strInf += "/";
 	strInf += ID_SIM;
 	strInf += "/";
-	strInf += ID_SIM;
-	strInf += "_info.txt"; // generate file name (with path)
+	strInf += "info.txt"; // generate file name (with path)
 	FILE* outFile = nullptr;
 
 	outFile = fopen(strInf.c_str(), "w");
 	if (outFile != nullptr)
 	{
 		std::string strSimInfo = getSimInfoString(step, MLUPS);
-		fprintf(outFile, strSimInfo.c_str());
+		fprintf(outFile, "%s\n", strSimInfo.c_str());
 		fclose(outFile);
 	}
 	else

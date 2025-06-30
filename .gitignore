@@ -1,5 +1,6 @@
 *.o
 *.json
+venv/
 *.lastcodeanalysissucceeded
 *.log
 *.obj
@@ -27,7 +28,15 @@ src/CUDA/x64
 *.test
 *.pdf
 *.dat
-MR_LBM/post/*
-!MR_LBM/post/*.py
+sim_*
 MR_LBM/*.dat
+LDC/*
+OUTPUT/*
+CYLINDER/*
+JET_FLOW/*
 MR_LBM/OUTPUT/*
+MR_LBM/CYLINDER/*
+MR_LBM/JET_FLOW/*
+MR_LBM/src/OUTPUT/*
+MR_LBM/src/CYLINDER/*
+MR_LBM/src/JET_FLOW/*

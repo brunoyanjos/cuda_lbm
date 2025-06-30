@@ -32,5 +32,4 @@ __global__ void gpuMomCollisionStream(
 	dfloat* fMom, unsigned int* dNodeType, ghostInterfaceData ghostInterface, unsigned int step
 );
 
-
-#endif __MLBM_H
+#endif

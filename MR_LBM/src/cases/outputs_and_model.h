@@ -1,10 +1,13 @@
 #ifndef OUTPUTS_AND_MODEL_H
 #define OUTPUTS_AND_MODEL_H
 
-#define PATH_FILES "JET_FLOW"
-#define ID_SIM "001"
+#define PATH_FILES "LDC"
 
-#define BC_PROBLEM jet_flow
+#ifndef ID_SIM
+#define ID_SIM "000"
+#endif
+
+#define BC_PROBLEM ldc
 #define CASE_DIRECTORY cases
 #define REG_ORDER 2nd_order
 

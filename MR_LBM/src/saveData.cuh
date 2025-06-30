@@ -14,6 +14,7 @@
 #include <iostream> // std::cout, std::fixed
 #include <iomanip>  // std::setprecision
 
+#include "globalFunctions.h"
 #include "errorDef.h"
 #include "globalStructs.h"
 
@@ -31,8 +32,6 @@ std::string getSimInfoString(int step, dfloat MLUPS);
  */
 void saveSimInfo(int step, dfloat MLUPS);
 
-void createVTK(int Nx, int Ny, dfloat* rho, dfloat* ux, dfloat* uy, unsigned int step);
-
 /*
  *   @brief Save array content to binary file
  *   @param strFile: filename to save
@@ -46,10 +45,17 @@ void saveVarBin(
     size_t memSize
 );
 
+
+__host__ void velocity_profiles(dfloat* fMom, unsigned int step);
+
+__host__ void kinetic_energy(dfloat *fMom, unsigned int step);
+
 void folderSetup();
+
+
 
 __host__ void saveMacr(dfloat* h_fMom, dfloat* rho, dfloat* ux, dfloat* uy, unsigned int nSteps);
 
 std::string getVarFilename(const std::string varName, unsigned int step, const std::string ext);
 
-#endif __SAVE_DATA_H
+#endif

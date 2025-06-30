@@ -25,7 +25,6 @@ int main()
 	unsigned int* hNodeType;
 
 	dfloat* h_fMom;
-
 	dfloat* rho;
 
 	dfloat* ux;
@@ -77,6 +76,9 @@ int main()
 
 			checkCudaErrors(cudaDeviceSynchronize());
 			checkCudaErrors(cudaMemcpy(h_fMom, d_fMom, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyDeviceToHost));
+			
+			kinetic_energy(h_fMom, step);
+			// velocity_profiles(h_fMom, step);
 			saveMacr(h_fMom, rho, ux, uy, step);
 		}
 	}
