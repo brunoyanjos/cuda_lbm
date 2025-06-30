@@ -49,7 +49,7 @@ int main()
 	unsigned int *hNodeType;
 
 	dfloat D_Max;
-	size_t countor_count; 
+	size_t countor_count;
 
 	dfloat *h_fMom;
 
@@ -58,7 +58,13 @@ int main()
 	dfloat *ux;
 	dfloat *uy;
 
-	dfloat rho_infty;
+	dfloat *d_ux_center;
+	dfloat *d_uy_center;
+
+	dfloat *h_ux_center;
+	dfloat *h_uy_center;
+
+	dfloat rho_infty = 0.0;
 
 	/* ----------------- GRID AND THREADS DEFINITION FOR LBM ---------------- */
 	dim3 threadBlock(BLOCK_NX, BLOCK_NY);
@@ -67,10 +73,10 @@ int main()
 	/* ------------------------- ALLOCATION FOR CPU ------------------------- */
 	int step = 0;
 
-	allocateHostMemory(&h_fMom, &rho, &ux, &uy);
+	allocateHostMemory(&h_fMom, &rho, &ux, &uy, &h_ux_center, &h_uy_center);
 
 	/* -------------- ALLOCATION FOR GPU ------------- */
-	allocateDeviceMemory(&d_fMom, &dNodeType, &ghostInterface);
+	allocateDeviceMemory(&d_fMom, &dNodeType, &ghostInterface, &d_ux_center, &d_uy_center);
 
 	// Setup Streams
 	cudaStream_t streamsLBM[1];
@@ -125,13 +131,13 @@ int main()
 			checkCudaErrors(cudaMemcpy(h_cylinder_properties, d_cylinder_properties, sizeof(cylinderProperties) * countor_count, cudaMemcpyDeviceToHost));
 			checkCudaErrors(cudaMemcpy(h_fMom, d_fMom, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyDeviceToHost));
 
+			velocity_on_centerline_average<<<1, L_back>>>(d_fMom, d_ux_center, d_uy_center, step);
+
 			calculate_forces(h_cylinder_properties, countor_count, step);
 			calculate_pressure(h_cylinder_properties, countor_count, step);
 			calculate_inlet_density(h_fMom, step, &rho_infty);
 		}
 #endif // CYLINDER
-
-
 
 		if (MACR_SAVE != 0 && step % MACR_SAVE == 0)
 		{
@@ -148,6 +154,12 @@ int main()
 	/* --------------------------------------------------------------------- */
 
 	checkCudaErrors(cudaDeviceSynchronize());
+
+	// saving the ux and uy center velocities
+	checkCudaErrors(cudaMemcpy(h_ux_center, d_ux_center, L_back * sizeof(dfloat), cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(h_uy_center, d_uy_center, L_back * sizeof(dfloat), cudaMemcpyDeviceToHost));
+
+	saving_centerline_data(h_ux_center, h_uy_center);
 
 	// Calculate MLUPS
 
