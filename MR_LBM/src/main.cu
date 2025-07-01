@@ -14,22 +14,6 @@
 
 using namespace std;
 
-__global__ void printDeviceProperties(cylinderProperties *cylinder_proporties, unsigned int *dNodeType)
-{
-	cylinderProperties property = cylinder_proporties[threadIdx.x];
-	int xb = property.xb;
-	int yb = property.yb;
-
-	int nodeType = dNodeType[idxScalarBlock(xb % BLOCK_NX, yb % BLOCK_NY, xb / BLOCK_NX, yb / BLOCK_NY)];
-
-	printf("nodeType: %d\n"
-		   "Is = {%d, %d, %d, %d, %d, %d, %d, %d, %d}\n"
-		   "Os = {%d, %d, %d, %d, %d, %d, %d, %d, %d}\n",
-		   nodeType,
-		   property.is[0], property.is[1], property.is[2], property.is[3], property.is[4], property.is[5], property.is[6], property.is[7], property.is[8],
-		   property.os[0], property.os[1], property.os[2], property.os[3], property.os[4], property.os[5], property.os[6], property.os[7], property.os[8]);
-}
-
 int main()
 {
 	printf("BLOCK_NX: %d, BLOCK_NY: %d\n", BLOCK_NX, BLOCK_NY);
@@ -92,6 +76,7 @@ int main()
 #endif
 	);
 
+	printf("final_time: %d, begin_stat: %d\n", N_STEPS, STAT_BEGIN_TIME);
 	printf("count: %zu, d_max:%f\n", countor_count, D_Max);
 
 	const dfloat VISC = U_MAX * D_Max / RE;
@@ -100,6 +85,7 @@ int main()
 
 	int avg_blockSize = 256; // Otimizado para ocupação
 	int avg_gridSize = (L_back + avg_blockSize - 1) / avg_blockSize;
+
 
 	/* ------------------------------ TIMER EVENTS  ------------------------------ */
 	checkCudaErrors(cudaSetDevice(GPU_INDEX));
@@ -125,6 +111,7 @@ int main()
 #endif
 
 		// swap interface pointers
+		checkCudaErrors(cudaDeviceSynchronize());
 		swapGhostInterfaces(ghostInterface);
 
 #ifdef CYLINDER
