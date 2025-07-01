@@ -137,17 +137,12 @@ __host__ void interfaceMalloc(ghostInterfaceData& ghostInterface)
 }
 
 __host__ void allocateHostMemory(
-	dfloat** h_fMom, dfloat** rho, dfloat** ux, dfloat** uy,
-	dfloat** mxx, dfloat** mxy, dfloat** myy)
+	dfloat** h_fMom, dfloat** rho, dfloat** ux, dfloat** uy)
 {
 	checkCudaErrors(cudaMallocHost((void**)h_fMom, MEM_SIZE_MOM));
 	checkCudaErrors(cudaMallocHost((void**)rho, MEM_SIZE_SCALAR));
 	checkCudaErrors(cudaMallocHost((void**)ux, MEM_SIZE_SCALAR));
 	checkCudaErrors(cudaMallocHost((void**)uy, MEM_SIZE_SCALAR));
-
-	checkCudaErrors(cudaMallocHost((void**)mxx, MEM_SIZE_SCALAR));
-	checkCudaErrors(cudaMallocHost((void**)mxy, MEM_SIZE_SCALAR));
-	checkCudaErrors(cudaMallocHost((void**)myy, MEM_SIZE_SCALAR));
 }
 
 __host__ void allocateDeviceMemory(

@@ -30,10 +30,6 @@ int main()
 	dfloat* ux;
 	dfloat* uy;
 
-	dfloat* mxx;
-	dfloat* mxy;
-	dfloat* myy;
-
 	/* ----------------- GRID AND THREADS DEFINITION FOR LBM ---------------- */
 	dim3 threadBlock(BLOCK_NX, BLOCK_NY);
 	dim3 gridBlock(NUM_BLOCK_X, NUM_BLOCK_Y);
@@ -41,7 +37,7 @@ int main()
 	/* ------------------------- ALLOCATION FOR CPU ------------------------- */
 	int step = 0;
 
-	allocateHostMemory(&h_fMom, &rho, &ux, &uy, &mxx, &mxy, &myy);
+	allocateHostMemory(&h_fMom, &rho, &ux, &uy);
 
 	/* -------------- ALLOCATION FOR GPU ------------- */
 	allocateDeviceMemory(&d_fMom, &dNodeType, &ghostInterface);
@@ -109,9 +105,6 @@ int main()
 	cudaFree(rho);
 	cudaFree(ux);
 	cudaFree(uy);
-	cudaFree(mxx);
-	cudaFree(mxy);
-	cudaFree(myy);
 	interfaceFree(ghostInterface);
 	return 0;
 }
