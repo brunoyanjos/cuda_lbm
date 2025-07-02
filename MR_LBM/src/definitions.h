@@ -2,6 +2,7 @@
 #define __DEFINITIONS_H
 
 #include "var.h"
+#include "globalStructs.h"
 
 /* --------------------------- CONSTANTS --------------------------- */
 
@@ -82,5 +83,6 @@ const size_t NUMBER_LBM_POP_NODES = NX * NY;
 const size_t MEM_SIZE_SCALAR = sizeof(dfloat) * NUMBER_LBM_POP_NODES;
 const size_t MEM_SIZE_POP = sizeof(dfloat) * NUMBER_LBM_POP_NODES * Q;
 const size_t MEM_SIZE_MOM = sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS;
+const size_t MEM_SIZE_NODES = sizeof(latticeNode)* NUMBER_LBM_NODES;
 
 #endif //!__DEFINITIONS_H

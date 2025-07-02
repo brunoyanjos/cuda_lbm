@@ -1,6 +1,6 @@
 #include "saveData.cuh"
 
-__host__ void velocity_profiles(dfloat *fMom, unsigned int step)
+__host__ void velocity_profiles(latticeNode *nodes, unsigned int step)
 {
     // 1. Defining variables to store the path
     std::ostringstream source_path;
@@ -11,8 +11,8 @@ __host__ void velocity_profiles(dfloat *fMom, unsigned int step)
     source_path << PATH_FILES << "/" << ID_SIM << "/";
 
     // 3. Definign velocities files name
-    ux_path << source_path.str() << "velocity_x_" << std::setw(8) << std::setfill('0') << step << ".bin";
-    uy_path << source_path.str() << "velocity_y_" << std::setw(8) << std::setfill('0') << step << ".bin";
+    ux_path << source_path.str() << "velocity_x" << ".bin";
+    uy_path << source_path.str() << "velocity_y" << ".bin";
 
     // 4. Now we open the files in binary mode
     std::ofstream ux_file(ux_path.str(), std::ios::binary);
@@ -50,8 +50,11 @@ __host__ void velocity_profiles(dfloat *fMom, unsigned int step)
         const std::size_t y_thread = y % BLOCK_NY;
         const std::size_t y_block = y / BLOCK_NY;
 
-        const dfloat ux_left = fMom[idxMom(x_thread_left, y_thread, M_UX_INDEX, x_block_left, y_block)] / F_M_I_SCALE;
-        const dfloat ux_right = fMom[idxMom(x_thread_right, y_thread, M_UX_INDEX, x_block_right, y_block)] / F_M_I_SCALE;
+        std::size_t idx_left = idxScalarBlock(x_thread_left, y_thread, x_block_left, y_block);
+        std::size_t idx_right = idxScalarBlock(x_thread_right, y_thread, x_block_right, y_block);
+
+        const dfloat ux_left = nodes[idx_left].ux / F_M_I_SCALE;
+        const dfloat ux_right = nodes[idx_right].ux / F_M_I_SCALE;
 
         const dfloat ux = (ux_left + ux_right) * 0.5;
 
@@ -60,7 +63,7 @@ __host__ void velocity_profiles(dfloat *fMom, unsigned int step)
 
     for (std::size_t x = 0; x < NX; ++x)
     {
-        const std::size_t x_thread = x % BLOCK_NX;
+         const std::size_t x_thread = x % BLOCK_NX;
         const std::size_t x_block = x / BLOCK_NX;
 
         const std::size_t y_thread_top = y_coord % BLOCK_NY;
@@ -69,8 +72,11 @@ __host__ void velocity_profiles(dfloat *fMom, unsigned int step)
         const std::size_t y_thread_bottom = (y_coord - 1) % BLOCK_NY;
         const std::size_t y_block_bottom = (y_coord - 1) / BLOCK_NY;
 
-        const dfloat uy_top = fMom[idxMom(x_thread, y_thread_top, M_UY_INDEX, x_block, y_block_top)] / F_M_I_SCALE;
-        const dfloat uy_bottom = fMom[idxMom(x_thread, y_thread_bottom, M_UY_INDEX, x_block, y_block_bottom)] / F_M_I_SCALE;
+        std::size_t idx_top = idxScalarBlock(x_thread, y_thread_top, x_block, y_block_top);
+        std::size_t idx_bottom = idxScalarBlock(x_thread, y_thread_bottom, x_block, y_block_bottom);
+
+        const dfloat uy_top = nodes[idx_top].uy / F_M_I_SCALE;
+        const dfloat uy_bottom = nodes[idx_bottom].uy / F_M_I_SCALE;
 
         const dfloat uy = (uy_top + uy_bottom) * 0.5;
 
@@ -78,7 +84,7 @@ __host__ void velocity_profiles(dfloat *fMom, unsigned int step)
     }
 }
 
-__host__ void kinetic_energy(dfloat *fMom, unsigned int step)
+__host__ void kinetic_energy(latticeNode *nodes, unsigned int step)
 {
     // 1. Defining a variable that will store the totl kinetic energy (TKE) path
     std::ostringstream tke_path;
@@ -110,8 +116,10 @@ __host__ void kinetic_energy(dfloat *fMom, unsigned int step)
             const std::size_t x_block = x / BLOCK_NX;
             const std::size_t y_block = y / BLOCK_NY;
 
-            const dfloat ux = fMom[idxMom(x_thread, y_thread, M_UX_INDEX, x_block, y_block)] / F_M_I_SCALE;
-            const dfloat uy = fMom[idxMom(x_thread, y_thread, M_UY_INDEX, x_block, y_block)] / F_M_I_SCALE;
+            int idx = idxScalarBlock(x_thread, y_thread, x_block, y_block);
+
+            const dfloat ux = nodes[idx].ux / F_M_I_SCALE;
+            const dfloat uy = nodes[idx].uy / F_M_I_SCALE;
 
             const dfloat ux2 = ux * ux;
             const dfloat uy2 = uy * uy;
@@ -125,6 +133,6 @@ __host__ void kinetic_energy(dfloat *fMom, unsigned int step)
     tke_sum /= (U_MAX * U_MAX * NX * NY);
     const dfloat t_star = step * U_MAX / NX;
 
-    tke_file.write(reinterpret_cast<const char*> (&t_star), sizeof(dfloat));
-    tke_file.write(reinterpret_cast<const char*> (&tke_sum), sizeof(dfloat));
+    tke_file.write(reinterpret_cast<const char *>(&t_star), sizeof(dfloat));
+    tke_file.write(reinterpret_cast<const char *>(&tke_sum), sizeof(dfloat));
 }

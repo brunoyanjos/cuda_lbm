@@ -25,8 +25,7 @@
  *          and velocity defined in the function itself
  *   @param fMom: moments to be inialized to be initialized
  */
-__global__ void gpuInitialization_mom(
-	dfloat* fMom);
+__global__ void gpuInitialization_nodes(latticeNode *nodes);
 
 /*
  *   @brief Initializes populations in the intefaces based on the moments
@@ -34,29 +33,18 @@ __global__ void gpuInitialization_mom(
  *   @param fMom: moments used to initialize the interface populations
  *   @param ghostInterface interface block transfer information
  */
-__global__ void gpuInitialization_pop(
-	dfloat* fMom, ghostInterfaceData ghostInterface);
+__global__ void gpuInitialization_pop(latticeNode *nodes, ghostInterfaceData ghostInterface);
 
 /*
  *   @brief Initialize the boundary condition node type
  *   @param nodeType: node type ID
  */
-__global__ void gpuInitialization_nodeType(
-	unsigned int* dNodeType);
+__global__ void gpuInitialization_nodeType_bulk(latticeNode *nodes);
 
 /*
  *   @brief Initialize the boundary condition node type
  *   @param nodeType: node type ID
  */
-__host__ void hostInitialization_nodeType_bulk(
-	unsigned int* hNodeType);
-
-/*
- *   @brief Initialize the boundary condition node type
- *   @param nodeType: node type ID
- */
-__host__ void hostInitialization_nodeType(
-	unsigned int* hNodeType);
-
+__global__ void gpuInitialization_nodeType(latticeNode *nodes);
 
 #endif // !__LBM_INITIALIZATION_CUH

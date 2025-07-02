@@ -6,8 +6,6 @@
 
 using namespace std;
 
-std::map<unsigned int, unsigned int> cylinder_index;
-
 int main()
 {
 	printf("BLOCK_NX: %d, BLOCK_NY: %d\n", BLOCK_NX, BLOCK_NY);
@@ -18,17 +16,9 @@ int main()
 	checkCudaErrors(cudaSetDevice(GPU_INDEX));
 
 	// variable declaration
-	dfloat* d_fMom;
+	latticeNode *d_nodes;
+	latticeNode *h_nodes;
 	ghostInterfaceData ghostInterface;
-
-	unsigned int* dNodeType;
-	unsigned int* hNodeType;
-
-	dfloat* h_fMom;
-	dfloat* rho;
-
-	dfloat* ux;
-	dfloat* uy;
 
 	/* ----------------- GRID AND THREADS DEFINITION FOR LBM ---------------- */
 	dim3 threadBlock(BLOCK_NX, BLOCK_NY);
@@ -37,10 +27,10 @@ int main()
 	/* ------------------------- ALLOCATION FOR CPU ------------------------- */
 	int step = 0;
 
-	allocateHostMemory(&h_fMom, &rho, &ux, &uy);
+	allocateHostMemory(&h_nodes);
 
 	/* -------------- ALLOCATION FOR GPU ------------- */
-	allocateDeviceMemory(&d_fMom, &dNodeType, &ghostInterface);
+	allocateDeviceMemory(&d_nodes, &ghostInterface);
 
 	// Setup Streams
 	cudaStream_t streamsLBM[1];
@@ -48,7 +38,7 @@ int main()
 	checkCudaErrors(cudaStreamCreate(&streamsLBM[0]));
 	checkCudaErrors(cudaDeviceSynchronize());
 
-	initializeDomain(ghostInterface, d_fMom, h_fMom, hNodeType, dNodeType, &step, gridBlock, threadBlock); 
+	initializeDomain(ghostInterface, d_nodes, h_nodes, &step, gridBlock, threadBlock);
 
 	/* ------------------------------ TIMER EVENTS  ------------------------------ */
 	checkCudaErrors(cudaSetDevice(GPU_INDEX));
@@ -62,20 +52,20 @@ int main()
 	/* --------------------------------------------------------------------- */
 	for (step = INI_STEP; step < N_STEPS; step++)
 	{
-		gpuMomCollisionStream << <gridBlock, threadBlock >> > (d_fMom, dNodeType, ghostInterface, step);
+		gpuMomCollisionStream<<<gridBlock, threadBlock>>>(d_nodes, ghostInterface, step);
 
 		// swap interface pointers
 		swapGhostInterfaces(ghostInterface);
 
-		if (MACR_SAVE != 0 && step % MACR_SAVE == 0) {
+		if (MACR_SAVE != 0 && step % MACR_SAVE == 0)
+		{
 			printf("\n----------------------------------- %d -----------------------------------\n", step);
 
 			checkCudaErrors(cudaDeviceSynchronize());
-			checkCudaErrors(cudaMemcpy(h_fMom, d_fMom, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyDeviceToHost));
-			
-			kinetic_energy(h_fMom, step);
-			// velocity_profiles(h_fMom, step);
-			saveMacr(h_fMom, rho, ux, uy, step);
+			checkCudaErrors(cudaMemcpy(h_nodes, d_nodes, sizeof(latticeNode) * NUMBER_LBM_NODES, cudaMemcpyDeviceToHost));
+
+			kinetic_energy(h_nodes, step);
+			//saveMacr(h_nodes, step);
 		}
 	}
 
@@ -92,19 +82,14 @@ int main()
 	printf("MLUPS: %f\n", MLUPS);
 
 	/* ------------------------------ POST ------------------------------ */
-	checkCudaErrors(cudaMemcpy(h_fMom, d_fMom, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(h_nodes, d_nodes, sizeof(latticeNode) * NUMBER_LBM_NODES, cudaMemcpyDeviceToHost));
 	// save info file
 	saveSimInfo(step, MLUPS);
+	velocity_profiles(h_nodes, step);
 
 	/* ------------------------------ FREE ------------------------------ */
-	cudaFree(d_fMom);
-	cudaFree(dNodeType);
-	cudaFree(hNodeType);
-	cudaFree(hNodeType);
-	cudaFree(h_fMom);
-	cudaFree(rho);
-	cudaFree(ux);
-	cudaFree(uy);
+	cudaFree(d_nodes);
+	cudaFree(h_nodes);
 	interfaceFree(ghostInterface);
 	return 0;
 }

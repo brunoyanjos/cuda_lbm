@@ -3,7 +3,7 @@
 #include "globalFunctions.h"
 
 __global__ void gpuMomCollisionStream(
-	dfloat* fMom, unsigned int* dNodeType, ghostInterfaceData ghostInterface, unsigned int step
+	latticeNode* nodes, ghostInterfaceData ghostInterface, unsigned int step
 )
 {
 	const int x = threadIdx.x + blockDim.x * blockIdx.x;
@@ -14,18 +14,20 @@ __global__ void gpuMomCollisionStream(
 	dfloat pop[Q];
 	__shared__ dfloat s_pop[BLOCK_LBM_SIZE * (Q - 1)];
 
+	std::size_t idx = idxScalarBlock(threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y);
+
 	// Load moments from global memory
 
 	// rho'
-	unsigned int nodeType = dNodeType[idxScalarBlock(threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y)];
+	unsigned int nodeType = nodes[idx].node_type;
 	if (nodeType == 0b11111111)
 		return;
-	dfloat rhoVar = RHO_0 + fMom[idxMom(threadIdx.x, threadIdx.y, M_RHO_INDEX, blockIdx.x, blockIdx.y)];
-	dfloat ux_t30 = fMom[idxMom(threadIdx.x, threadIdx.y, M_UX_INDEX, blockIdx.x, blockIdx.y)];
-	dfloat uy_t30 = fMom[idxMom(threadIdx.x, threadIdx.y, M_UY_INDEX, blockIdx.x, blockIdx.y)];
-	dfloat m_xx_t45 = fMom[idxMom(threadIdx.x, threadIdx.y, M_MXX_INDEX, blockIdx.x, blockIdx.y)];
-	dfloat m_xy_t90 = fMom[idxMom(threadIdx.x, threadIdx.y, M_MXY_INDEX, blockIdx.x, blockIdx.y)];
-	dfloat m_yy_t45 = fMom[idxMom(threadIdx.x, threadIdx.y, M_MYY_INDEX, blockIdx.x, blockIdx.y)];
+	dfloat rhoVar = RHO_0 + nodes[idx].rho;
+	dfloat ux_t30 = nodes[idx].ux;
+	dfloat uy_t30 = nodes[idx].uy;
+	dfloat m_xx_t45 = nodes[idx].mxx;
+	dfloat m_xy_t90 = nodes[idx].mxy;
+	dfloat m_yy_t45 = nodes[idx].myy;
 
 	pop_reconstruction(rhoVar, ux_t30, uy_t30, m_xx_t45, m_yy_t45, m_xy_t90, pop);
 
@@ -85,7 +87,7 @@ __global__ void gpuMomCollisionStream(
 
 	if (nodeType != BULK)
 	{
-		boundary_calculation(nodeType, &rhoVar, &ux_t30, &uy_t30, &m_xx_t45, &m_yy_t45, &m_xy_t90, pop, fMom, x, y);
+		boundary_calculation(nodeType, &rhoVar, &ux_t30, &uy_t30, &m_xx_t45, &m_yy_t45, &m_xy_t90, pop, nodes, x, y);
 
 		invRho = 1.0 / rhoVar;
 	}
@@ -117,14 +119,14 @@ __global__ void gpuMomCollisionStream(
 
 	/* write to global mom */
 
-	fMom[idxMom(threadIdx.x, threadIdx.y, M_RHO_INDEX, blockIdx.x, blockIdx.y)] = rhoVar - RHO_0;
+	nodes[idx].rho = rhoVar - RHO_0;
 
-	fMom[idxMom(threadIdx.x, threadIdx.y, M_UX_INDEX, blockIdx.x, blockIdx.y)] = ux_t30;
-	fMom[idxMom(threadIdx.x, threadIdx.y, M_UY_INDEX, blockIdx.x, blockIdx.y)] = uy_t30;
+	nodes[idx].ux = ux_t30;
+	nodes[idx].uy = uy_t30;
 
-	fMom[idxMom(threadIdx.x, threadIdx.y, M_MXX_INDEX, blockIdx.x, blockIdx.y)] = m_xx_t45;
-	fMom[idxMom(threadIdx.x, threadIdx.y, M_MXY_INDEX, blockIdx.x, blockIdx.y)] = m_xy_t90;
-	fMom[idxMom(threadIdx.x, threadIdx.y, M_MYY_INDEX, blockIdx.x, blockIdx.y)] = m_yy_t45;
+	nodes[idx].mxx = m_xx_t45;
+	nodes[idx].mxy = m_xy_t90;
+	nodes[idx].myy = m_yy_t45;
 
 #include "includeFiles/popSave.inc"
 }

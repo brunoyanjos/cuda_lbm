@@ -19,4 +19,19 @@ typedef struct ghostInterfaceData
     ghostData h_fGhost;
 } GhostInterfaceData;
 
+
+typedef struct latticeNode
+{
+    unsigned int node_type;
+
+    dfloat rho;
+    dfloat ux;
+    dfloat uy;
+    dfloat mxx;
+    dfloat mxy;
+    dfloat myy;
+
+    
+} LatticeNode;
+
 #endif //__GLOBAL_STRUCTS_H

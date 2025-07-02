@@ -9,11 +9,9 @@
 #include <builtin_types.h>
 #include "var.h"
 #include "includeFiles/interface.h"
-#include "boundaryCondition.cuh"
 
 #include COLREC
 #include CASE_BC
-
 
 #include "globalStructs.h"
 
@@ -29,7 +27,7 @@
  *   @param save: if is necessary save some data
  */
 __global__ void gpuMomCollisionStream(
-	dfloat* fMom, unsigned int* dNodeType, ghostInterfaceData ghostInterface, unsigned int step
+	latticeNode* nodes, ghostInterfaceData ghostInterface, unsigned int step
 );
 
 #endif

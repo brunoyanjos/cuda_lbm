@@ -3,13 +3,13 @@
 
 #include "../../var.h"
 
-constexpr dfloat RE = 10000;
+constexpr dfloat RE = 1000;
 
 constexpr int SCALE = 1;
 
-constexpr int MACR_SAVE = 2500;
+constexpr int MACR_SAVE = 20000;
 
-constexpr int N = 64 * SCALE;
+constexpr int N = 128 * SCALE;
 constexpr int NX = N; // size x of the grid
 constexpr int NY = N; // size y of the grid
 
@@ -32,7 +32,7 @@ constexpr dfloat MACH_NUMBER = U_MAX / 0.57735026918962;
 /* --------------------- INITIALIZATION LOADING DEFINES -------------------- */
 constexpr int INI_STEP = 0; // initial simulation step (0 default)
 
-constexpr int T_STAR_FINAL = 100;
+constexpr int T_STAR_FINAL = 1200;
 constexpr int N_STEPS = T_STAR_FINAL * NX / U_MAX;
 
 #define BC_X_WALL
