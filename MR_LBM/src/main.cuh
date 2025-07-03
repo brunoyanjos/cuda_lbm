@@ -136,16 +136,16 @@ __host__ void interfaceMalloc(ghostInterfaceData &ghostInterface)
 	cudaMalloc((void **)&(ghostInterface.gGhost.Y_1), sizeof(dfloat) * NUMBER_GHOST_FACE_Y * QF);
 }
 
-__host__ void allocateHostMemory(
-	latticeNode **h_nodes)
+__host__ void allocateHostMemory(latticeNode **h_coarse_nodes, latticeNode **h_fine_nodes)
 {
-	checkCudaErrors(cudaMallocHost((void **)h_nodes, MEM_SIZE_NODES));
+	checkCudaErrors(cudaMallocHost((void **)h_coarse_nodes, MEM_SIZE_NODES));
+	checkCudaErrors(cudaMallocHost((void **)h_fine_nodes, MEM_SIZE_NODES));
 }
 
-__host__ void allocateDeviceMemory(
-	latticeNode **d_nodes, GhostInterfaceData *ghostInterface)
+__host__ void allocateDeviceMemory(latticeNode **d_coarse_nodes, latticeNode **d_fine_nodes, GhostInterfaceData *ghostInterface)
 {
-	cudaMalloc((void **)d_nodes, MEM_SIZE_NODES);
+	cudaMalloc((void **)d_coarse_nodes, MEM_SIZE_NODES);
+	cudaMalloc((void **)d_fine_nodes, MEM_SIZE_NODES);
 	interfaceMalloc(*ghostInterface);
 }
 

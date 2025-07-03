@@ -16,8 +16,12 @@ int main()
 	checkCudaErrors(cudaSetDevice(GPU_INDEX));
 
 	// variable declaration
-	latticeNode *d_nodes;
-	latticeNode *h_nodes;
+	latticeNode *d_coarse_nodes;
+	latticeNode *h_coarse_nodes;
+
+	latticeNode *d_fine_nodes;
+	latticeNode *h_fine_nodes;
+
 	ghostInterfaceData ghostInterface;
 
 	/* ----------------- GRID AND THREADS DEFINITION FOR LBM ---------------- */
@@ -27,10 +31,10 @@ int main()
 	/* ------------------------- ALLOCATION FOR CPU ------------------------- */
 	int step = 0;
 
-	allocateHostMemory(&h_nodes);
+	allocateHostMemory(&h_coarse_nodes, &h_fine_nodes);
 
 	/* -------------- ALLOCATION FOR GPU ------------- */
-	allocateDeviceMemory(&d_nodes, &ghostInterface);
+	allocateDeviceMemory(&d_coarse_nodes, &h_coarse_nodes, &ghostInterface);
 
 	// Setup Streams
 	cudaStream_t streamsLBM[1];
@@ -39,6 +43,8 @@ int main()
 	checkCudaErrors(cudaDeviceSynchronize());
 
 	initializeDomain(ghostInterface, d_nodes, h_nodes, &step, gridBlock, threadBlock);
+
+	return 0;
 
 	/* ------------------------------ TIMER EVENTS  ------------------------------ */
 	checkCudaErrors(cudaSetDevice(GPU_INDEX));
@@ -65,7 +71,7 @@ int main()
 			checkCudaErrors(cudaMemcpy(h_nodes, d_nodes, sizeof(latticeNode) * NUMBER_LBM_NODES, cudaMemcpyDeviceToHost));
 
 			kinetic_energy(h_nodes, step);
-			//saveMacr(h_nodes, step);
+			// saveMacr(h_nodes, step);
 		}
 	}
 

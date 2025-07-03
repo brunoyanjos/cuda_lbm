@@ -43,8 +43,20 @@ constexpr dfloat F_M_I_SCALE = as2;
 constexpr dfloat F_M_II_SCALE = as2 * as2 / 2;
 constexpr dfloat F_M_IJ_SCALE = as2 * as2;
 
-/* ------------------------------ MEMORY SIZE ------------------------------ */
+/* ------------------------------ FINE SIZE ------------------------------ */
 #include "arrayIndex.h"
+
+constexpr int IMMERSED_NUMBER = 1;
+constexpr int TOTAL_COARSE_NX = NX + 2 * IMMERSED_NUMBER;
+constexpr int TOTAL_COARSE_NY = NY + 2 * IMMERSED_NUMBER;
+
+constexpr int EXTRA_LINE_TO_FINE = 1;
+
+
+constexpr int NUMBER_OF_COARSE_NODES = TOTAL_COARSE_NX * TOTAL_COARSE_NY;
+constexpr int NUMBER_OF_FINE_NODES = TOTAL_COARSE_NX;
+
+/* ------------------------------ MEMORY SIZE ------------------------------ */
 
 constexpr int SHARED_MEMORY_ELEMENT_SIZE = sizeof(dfloat) * (Q - 1);
 constexpr int MAX_ELEMENTS_IN_BLOCK = 48128 / SHARED_MEMORY_ELEMENT_SIZE;

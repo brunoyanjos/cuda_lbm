@@ -9,9 +9,11 @@ constexpr int SCALE = 1;
 
 constexpr int MACR_SAVE = 20000;
 
-constexpr int N = 128 * SCALE;
+constexpr int N = 32 * SCALE;
 constexpr int NX = N; // size x of the grid
 constexpr int NY = N; // size y of the grid
+
+constexpr int ratio = 2;
 
 constexpr dfloat U_MAX = 0.0256;
 constexpr dfloat L = N;
