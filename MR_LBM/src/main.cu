@@ -10,6 +10,8 @@ int main()
 {
 	printf("BLOCK_NX: %d, BLOCK_NY: %d\n", BLOCK_NX, BLOCK_NY);
 
+	return 0;
+
 	folderSetup();
 
 	// set cuda device
@@ -42,7 +44,7 @@ int main()
 	checkCudaErrors(cudaStreamCreate(&streamsLBM[0]));
 	checkCudaErrors(cudaDeviceSynchronize());
 
-	initializeDomain(ghostInterface, d_nodes, h_nodes, &step, gridBlock, threadBlock);
+	initializeDomain(ghostInterface, d_coarse_nodes, h_coarse_nodes, &step, gridBlock, threadBlock);
 
 	return 0;
 
@@ -58,7 +60,7 @@ int main()
 	/* --------------------------------------------------------------------- */
 	for (step = INI_STEP; step < N_STEPS; step++)
 	{
-		gpuMomCollisionStream<<<gridBlock, threadBlock>>>(d_nodes, ghostInterface, step);
+		gpuMomCollisionStream<<<gridBlock, threadBlock>>>(d_coarse_nodes, ghostInterface, step);
 
 		// swap interface pointers
 		swapGhostInterfaces(ghostInterface);
@@ -68,9 +70,9 @@ int main()
 			printf("\n----------------------------------- %d -----------------------------------\n", step);
 
 			checkCudaErrors(cudaDeviceSynchronize());
-			checkCudaErrors(cudaMemcpy(h_nodes, d_nodes, sizeof(latticeNode) * NUMBER_LBM_NODES, cudaMemcpyDeviceToHost));
+			checkCudaErrors(cudaMemcpy(h_coarse_nodes, d_coarse_nodes, sizeof(latticeNode) * NUMBER_LBM_NODES, cudaMemcpyDeviceToHost));
 
-			kinetic_energy(h_nodes, step);
+			kinetic_energy(h_coarse_nodes, step);
 			// saveMacr(h_nodes, step);
 		}
 	}
@@ -88,14 +90,14 @@ int main()
 	printf("MLUPS: %f\n", MLUPS);
 
 	/* ------------------------------ POST ------------------------------ */
-	checkCudaErrors(cudaMemcpy(h_nodes, d_nodes, sizeof(latticeNode) * NUMBER_LBM_NODES, cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(h_coarse_nodes, d_coarse_nodes, sizeof(latticeNode) * NUMBER_LBM_NODES, cudaMemcpyDeviceToHost));
 	// save info file
 	saveSimInfo(step, MLUPS);
-	velocity_profiles(h_nodes, step);
+	velocity_profiles(h_coarse_nodes, step);
 
 	/* ------------------------------ FREE ------------------------------ */
-	cudaFree(d_nodes);
-	cudaFree(h_nodes);
+	// cudaFree(d_nodes);
+	// cudaFree(h_nodes);
 	interfaceFree(ghostInterface);
 	return 0;
 }
