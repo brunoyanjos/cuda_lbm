@@ -13,11 +13,11 @@ inline void pop_reconstruction(dfloat rhoVar, dfloat ux, dfloat uy, dfloat mxx, 
 	dfloat mxxy = ux * mxy + uy * mxx;
 	dfloat mxyy = uy * mxy + ux * myy;
 
-	dfloat one_cs2 = 1.0 - cs2;
+	dfloat one_cs2 = 1.0f - cs2;
 	dfloat cs2_mxxy = cs2 * mxxy;
 	dfloat cs2_mxyy = cs2 * mxyy;
 
-	dfloat pics2 = 1 - cs2 * (mxx + myy);
+	dfloat pics2 = 1.0f - cs2 * (mxx + myy);
 
 	dfloat multiplyTerm = W0 * rhoVar;
 	pop[0] = multiplyTerm * (pics2);

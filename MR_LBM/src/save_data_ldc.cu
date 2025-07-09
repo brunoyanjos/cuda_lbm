@@ -11,8 +11,8 @@ __host__ void velocity_profiles(dfloat *fMom, unsigned int step)
     source_path << PATH_FILES << "/" << ID_SIM << "/";
 
     // 3. Definign velocities files name
-    ux_path << source_path.str() << "velocity_x_" << std::setw(8) << std::setfill('0') << step << ".bin";
-    uy_path << source_path.str() << "velocity_y_" << std::setw(8) << std::setfill('0') << step << ".bin";
+    ux_path << source_path.str() << "velocity_x" << ".bin";
+    uy_path << source_path.str() << "velocity_y" << ".bin";
 
     // 4. Now we open the files in binary mode
     std::ofstream ux_file(ux_path.str(), std::ios::binary);

@@ -18,17 +18,17 @@ int main()
 	checkCudaErrors(cudaSetDevice(GPU_INDEX));
 
 	// variable declaration
-	dfloat* d_fMom;
+	dfloat *d_fMom;
 	ghostInterfaceData ghostInterface;
 
-	unsigned int* dNodeType;
-	unsigned int* hNodeType;
+	unsigned int *dNodeType;
+	unsigned int *hNodeType;
 
-	dfloat* h_fMom;
-	dfloat* rho;
+	dfloat *h_fMom;
+	dfloat *rho;
 
-	dfloat* ux;
-	dfloat* uy;
+	dfloat *ux;
+	dfloat *uy;
 
 	/* ----------------- GRID AND THREADS DEFINITION FOR LBM ---------------- */
 	dim3 threadBlock(BLOCK_NX, BLOCK_NY);
@@ -36,6 +36,7 @@ int main()
 
 	/* ------------------------- ALLOCATION FOR CPU ------------------------- */
 	int step = 0;
+	int init_step = 0;
 
 	allocateHostMemory(&h_fMom, &rho, &ux, &uy);
 
@@ -48,7 +49,11 @@ int main()
 	checkCudaErrors(cudaStreamCreate(&streamsLBM[0]));
 	checkCudaErrors(cudaDeviceSynchronize());
 
-	initializeDomain(ghostInterface, d_fMom, h_fMom, hNodeType, dNodeType, &step, gridBlock, threadBlock); 
+	bool success = initializeDomain(ghostInterface, d_fMom, h_fMom, hNodeType, dNodeType, &init_step, gridBlock, threadBlock);
+
+	if(!success) {
+		return 0;
+	}
 
 	/* ------------------------------ TIMER EVENTS  ------------------------------ */
 	checkCudaErrors(cudaSetDevice(GPU_INDEX));
@@ -60,21 +65,29 @@ int main()
 	/* --------------------------------------------------------------------- */
 	/* ---------------------------- BEGIN LOOP ------------------------------ */
 	/* --------------------------------------------------------------------- */
-	for (step = INI_STEP; step < N_STEPS; step++)
+	for (step = init_step; step <= N_STEPS; ++step)
 	{
-		gpuMomCollisionStream << <gridBlock, threadBlock >> > (d_fMom, dNodeType, ghostInterface, step);
+		gpuMomCollisionStream<<<gridBlock, threadBlock>>>(d_fMom, dNodeType, ghostInterface, step);
 
 		// swap interface pointers
 		swapGhostInterfaces(ghostInterface);
 
-		if (MACR_SAVE != 0 && step % MACR_SAVE == 0) {
+		if (step % CHECKPOINT_STEP == 0 && step != init_step)
+		{
+			checkCudaErrors(cudaDeviceSynchronize());
+			checkCudaErrors(cudaMemcpy(h_fMom, d_fMom, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyDeviceToHost));
+
+			save_checkpoint(step, h_fMom);
+		}
+
+		if (MACR_SAVE != 0 && step % MACR_SAVE == 0)
+		{
 			printf("\n----------------------------------- %d -----------------------------------\n", step);
 
 			checkCudaErrors(cudaDeviceSynchronize());
 			checkCudaErrors(cudaMemcpy(h_fMom, d_fMom, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyDeviceToHost));
-			
-			kinetic_energy(h_fMom, step);
-			// velocity_profiles(h_fMom, step);
+
+			//kinetic_energy(h_fMom, step);
 			saveMacr(h_fMom, rho, ux, uy, step);
 		}
 	}
@@ -86,13 +99,15 @@ int main()
 	checkCudaErrors(cudaDeviceSynchronize());
 
 	// Calculate MLUPS
-
 	dfloat MLUPS = recordElapsedTime(start_step, stop_step, step);
 	printf("\n--------------------------- Last Time Step %06d ---------------------------\n", step);
 	printf("MLUPS: %f\n", MLUPS);
 
 	/* ------------------------------ POST ------------------------------ */
 	checkCudaErrors(cudaMemcpy(h_fMom, d_fMom, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyDeviceToHost));
+
+	//velocity_profiles(h_fMom, step);
+
 	// save info file
 	saveSimInfo(step, MLUPS);
 
