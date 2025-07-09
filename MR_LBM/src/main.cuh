@@ -169,6 +169,8 @@ __host__ bool initializeDomain(
 		{
 			std::cout << "Restarting simulation from: " << *ini_step << " steps" << std::endl;
 
+			truncate_tke_file(*ini_step);
+
 			checkCudaErrors(cudaDeviceSynchronize());
 			checkCudaErrors(cudaMemcpy(d_fMom, h_fMom, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyHostToDevice));
 			gpuInitialization_pop<<<gridBlock, threadBlock>>>(d_fMom, ghostInterface);

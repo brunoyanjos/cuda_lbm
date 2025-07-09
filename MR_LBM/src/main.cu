@@ -6,7 +6,7 @@
 
 using namespace std;
 
-std::map<unsigned int, unsigned int> cylinder_index;
+typedef std::chrono::high_resolution_clock::time_point timestep;
 
 int main()
 {
@@ -51,7 +51,8 @@ int main()
 
 	bool success = initializeDomain(ghostInterface, d_fMom, h_fMom, hNodeType, dNodeType, &init_step, gridBlock, threadBlock);
 
-	if(!success) {
+	if (!success)
+	{
 		return 0;
 	}
 
@@ -61,6 +62,10 @@ int main()
 	initializeCudaEvents(start, stop, start_step, stop_step);
 	/* ------------------------------ LBM LOOP ------------------------------ */
 	saveSimInfo(step, 0.0);
+
+	timestep sim_start_time = std::chrono::high_resolution_clock::now();
+	timestep step_start = std::chrono::high_resolution_clock::now();
+	timestep step_end;
 
 	/* --------------------------------------------------------------------- */
 	/* ---------------------------- BEGIN LOOP ------------------------------ */
@@ -82,13 +87,40 @@ int main()
 
 		if (MACR_SAVE != 0 && step % MACR_SAVE == 0)
 		{
-			printf("\n----------------------------------- %d -----------------------------------\n", step);
+			printf("\n----------------------------------- (%d/%d) %.2f%% -----------------------------------\n", step, N_STEPS, static_cast<float>(step)/static_cast<float>(N_STEPS) * 100.0f);
+			if (step != 0)
+			{
+				step_end = std::chrono::high_resolution_clock::now();
+				double step_time = std::chrono::duration<double>(step_end - step_start).count();
+
+				// Calculate MLUPS for the current step
+				dfloat MLUPS = (NUMBER_LBM_NODES * MACR_SAVE / 1e6) / step_time;
+
+				std::cout << "Elapsed time: " << step_time << " seconds" << std::endl;
+				std::cout << "MLUPS: " << MLUPS << std::endl;
+
+				// Calculate remaining time
+				size_t steps_remaining = N_STEPS - step;
+				double total_seconds_remaining = steps_remaining * NUMBER_LBM_NODES / 1e6 / MLUPS;
+
+				// Convert to hours, minutes, seconds
+				size_t hours = static_cast<size_t>(total_seconds_remaining) / 3600;
+				size_t minutes = static_cast<size_t>((total_seconds_remaining - hours * 3600) / 60);
+				size_t seconds = static_cast<size_t>(total_seconds_remaining) % 60;
+
+				std::cout << "Estimated time left: "
+						  << hours << "h "
+						  << minutes << "min "
+						  << seconds << "s" << std::endl;
+
+				step_start = std::chrono::high_resolution_clock::now();
+			}
 
 			checkCudaErrors(cudaDeviceSynchronize());
 			checkCudaErrors(cudaMemcpy(h_fMom, d_fMom, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyDeviceToHost));
 
-			//kinetic_energy(h_fMom, step);
-			saveMacr(h_fMom, rho, ux, uy, step);
+			kinetic_energy(h_fMom, step);
+			// saveMacr(h_fMom, rho, ux, uy, step);
 		}
 	}
 
@@ -106,7 +138,7 @@ int main()
 	/* ------------------------------ POST ------------------------------ */
 	checkCudaErrors(cudaMemcpy(h_fMom, d_fMom, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyDeviceToHost));
 
-	//velocity_profiles(h_fMom, step);
+	velocity_profiles(h_fMom, step);
 
 	// save info file
 	saveSimInfo(step, MLUPS);

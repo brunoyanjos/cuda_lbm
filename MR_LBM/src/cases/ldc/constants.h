@@ -7,7 +7,7 @@ constexpr dfloat RE = 3200;
 
 constexpr int SCALE = 1;
 
-constexpr int MACR_SAVE = 1000;
+constexpr int MACR_SAVE = 50000;
 
 constexpr int N = 64 * SCALE;
 constexpr int NX = N; // size x of the grid
@@ -33,8 +33,7 @@ constexpr dfloat MACH_NUMBER = U_MAX / 0.57735026918962;
 constexpr int INI_STEP = 0; // initial simulation step (0 default)
 
 constexpr int T_STAR_FINAL = 1200;
-// constexpr int N_STEPS = T_STAR_FINAL * NX / U_MAX;
-constexpr int N_STEPS = 30000;
+constexpr int N_STEPS = T_STAR_FINAL * NX / U_MAX;
 
 #define BC_X_WALL
 #define BC_Y_WALL

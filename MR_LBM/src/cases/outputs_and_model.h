@@ -17,7 +17,7 @@
 
 #include CASE_CONSTANTS
 
-constexpr size_t CHECKPOINT_STEP = 10000;
-constexpr bool LOAD_CHECKPOINT = true; 
+constexpr size_t CHECKPOINT_STEP = 1000000;
+constexpr bool LOAD_CHECKPOINT = false; 
 
 #endif // !OUTPUTS_AND_MODEL_H

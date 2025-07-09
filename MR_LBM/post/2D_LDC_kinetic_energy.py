@@ -2,9 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Define simulation IDs and line styles/colors
-sim_ids = ['007', '008', '009', '010']
-colors = ['b', 'r', 'y', 'g']
-linestyles = ['-', '--', '-.', ':']
+sim_ids = ['018']
+colors = ['b']
+linestyles = ['-']
 
 sizes = [128, 256, 512, 1024, 2048]
 
@@ -31,8 +31,8 @@ for sim_id, color, ls in zip(sim_ids, colors, linestyles):
                  label=f'Simulation {sim_id}')
     
     except FileNotFoundError:
-        print(f"Warning: File not found - {tke_path}")
-
+        print(f"Warning: File not found - {tke_path}") 
+        
 # Configure plot
 plt.xlabel('Normalized Time (t*)')
 plt.ylabel('Total Kinetic Energy')
