@@ -8,45 +8,16 @@ using namespace std;
 
 int main()
 {
-	printf("BLOCK_NX: %d, BLOCK_NY: %d\n", BLOCK_NX, BLOCK_NY);
-
-	return 0;
-
 	folderSetup();
 
-	// set cuda device
-	checkCudaErrors(cudaSetDevice(GPU_INDEX));
-
 	// variable declaration
-	latticeNode *d_coarse_nodes;
-	latticeNode *h_coarse_nodes;
-
-	latticeNode *d_fine_nodes;
-	latticeNode *h_fine_nodes;
-
-	ghostInterfaceData ghostInterface;
-
-	/* ----------------- GRID AND THREADS DEFINITION FOR LBM ---------------- */
-	dim3 threadBlock(BLOCK_NX, BLOCK_NY);
-	dim3 gridBlock(NUM_BLOCK_X, NUM_BLOCK_Y);
+	latticeNode *fine_nodes;
+	latticeNode *coarse_nodes;
 
 	/* ------------------------- ALLOCATION FOR CPU ------------------------- */
-	int step = 0;
-
-	allocateHostMemory(&h_coarse_nodes, &h_fine_nodes);
-
-	/* -------------- ALLOCATION FOR GPU ------------- */
-	allocateDeviceMemory(&d_coarse_nodes, &h_coarse_nodes, &ghostInterface);
-
-	// Setup Streams
-	cudaStream_t streamsLBM[1];
-	checkCudaErrors(cudaSetDevice(GPU_INDEX));
-	checkCudaErrors(cudaStreamCreate(&streamsLBM[0]));
-	checkCudaErrors(cudaDeviceSynchronize());
-
-	initializeDomain(ghostInterface, d_coarse_nodes, h_coarse_nodes, &step, gridBlock, threadBlock);
-
-	return 0;
+	size_t step = 0;
+	allocateHostMemory(&coarse_nodes, &fine_nodes);
+	initializeDomain(fine_nodes, coarse_nodes);
 
 	/* ------------------------------ TIMER EVENTS  ------------------------------ */
 	checkCudaErrors(cudaSetDevice(GPU_INDEX));
@@ -58,46 +29,144 @@ int main()
 	/* --------------------------------------------------------------------- */
 	/* ---------------------------- BEGIN LOOP ------------------------------ */
 	/* --------------------------------------------------------------------- */
+
 	for (step = INI_STEP; step < N_STEPS; step++)
 	{
-		gpuMomCollisionStream<<<gridBlock, threadBlock>>>(d_coarse_nodes, ghostInterface, step);
-
-		// swap interface pointers
-		swapGhostInterfaces(ghostInterface);
-
-		if (MACR_SAVE != 0 && step % MACR_SAVE == 0)
+		for (size_t y = 0; y < NY; ++y)
 		{
-			printf("\n----------------------------------- %d -----------------------------------\n", step);
+			fine_nodes[fine_idx(FINE_WIDTH - 1, FINE_WIDTH - 1 + GRID_RATIO * y)] = coarse_nodes[coarse_idx(N_OVERLAP_LAYER, y + N_OVERLAP_LAYER)];
+			fine_nodes[fine_idx(NX_FINE_GRID - FINE_WIDTH, FINE_WIDTH - 1 + GRID_RATIO * y)] = coarse_nodes[coarse_idx(NX_COARSE_GRID - N_OVERLAP_LAYER - 1, y + N_OVERLAP_LAYER)];
 
-			checkCudaErrors(cudaDeviceSynchronize());
-			checkCudaErrors(cudaMemcpy(h_coarse_nodes, d_coarse_nodes, sizeof(latticeNode) * NUMBER_LBM_NODES, cudaMemcpyDeviceToHost));
-
-			kinetic_energy(h_coarse_nodes, step);
-			// saveMacr(h_nodes, step);
+			fine_nodes[fine_idx(FINE_WIDTH - 1, FINE_WIDTH - 1 + GRID_RATIO * y)].updated = true;
+			fine_nodes[fine_idx(NX_FINE_GRID - FINE_WIDTH, FINE_WIDTH - 1 + GRID_RATIO * y)].updated = true;
 		}
+
+		for (size_t x = 0; x < NX; ++x)
+		{
+			fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, FINE_WIDTH - 1)] = coarse_nodes[coarse_idx(x + N_OVERLAP_LAYER, N_OVERLAP_LAYER)];
+			fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, NY_FINE_GRID - FINE_WIDTH)] = coarse_nodes[coarse_idx(x + N_OVERLAP_LAYER, NX_COARSE_GRID - N_OVERLAP_LAYER - 1)];
+
+			fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, FINE_WIDTH - 1)].updated = true;
+			fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, NY_FINE_GRID - FINE_WIDTH)].updated = true;
+		}
+
+		for (size_t fine_step = 0; fine_step < GRID_RATIO; ++fine_step)
+		{
+			fine_grid_solution(fine_nodes);
+		}
+
+		int init_point = N_EXTRA_LAYER * GRID_RATIO;
+
+		for (size_t y = 0; y < NY_COARSE_GRID; ++y)
+		{
+			coarse_nodes[coarse_idx(0, y)] = fine_nodes[fine_idx(init_point, init_point + GRID_RATIO * y)];
+			coarse_nodes[coarse_idx(NX_COARSE_GRID - 1, y)] = fine_nodes[fine_idx(NX_FINE_GRID - init_point, init_point + GRID_RATIO * y)];
+		}
+
+		for (size_t x = 0; x < NX_COARSE_GRID; ++x)
+		{
+			coarse_nodes[coarse_idx(x, 0)] = fine_nodes[fine_idx(init_point + GRID_RATIO * x, init_point)];
+			coarse_nodes[coarse_idx(x, NY_COARSE_GRID - 1)] = fine_nodes[fine_idx(init_point + GRID_RATIO * x, NY_COARSE_GRID - init_point)];
+		}
+
+		coarse_grid_solution(coarse_nodes);
+
+		std::ofstream file("GRID/001/macr_" + std::to_string(step) + ".dat");
+
+		if (!file.is_open())
+		{
+			std::cerr << "Erro ao abrir arquivo para escrita!" << std::endl;
+			return 0;
+		}
+
+		file << std::fixed << std::setprecision(12); // formatação com 6 casas decimais
+
+		file << "x y rho ux uy\n";
+
+		for (size_t y = 0; y < NY_FINE_GRID; y++)
+		{
+			for (size_t x = 0; x < NX_FINE_GRID; x++)
+			{
+				dfloat x_coord = static_cast<dfloat>(x) / GRID_RATIO;
+				dfloat y_coord = static_cast<dfloat>(y) / GRID_RATIO;
+
+				int LIMIT = N_EXTRA_LAYER + N_OVERLAP_LAYER;
+				int TOP_LIMIT = NY_TOTAL_SIZE - LIMIT;
+
+				bool y_is_integer = y_coord - static_cast<int>(y_coord) == 0;
+				bool x_is_integer = x_coord - static_cast<int>(x_coord) == 0;
+
+				if (x_coord == LIMIT && y_is_integer && y_coord < TOP_LIMIT && y_coord > LIMIT - 1)
+				{
+					dfloat rho = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].rho;
+					dfloat ux = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].ux / F_M_I_SCALE;
+					dfloat uy = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].uy / F_M_I_SCALE;
+
+					file << x_coord << " " << y_coord << " " << rho << " " << ux << " " << uy << std::endl;
+				}
+				else if (x_coord == TOP_LIMIT - 1 && y_is_integer && y_coord < TOP_LIMIT && y_coord > LIMIT - 1)
+				{
+					dfloat rho = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].rho;
+					dfloat ux = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].ux / F_M_I_SCALE;
+					dfloat uy = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].uy / F_M_I_SCALE;
+
+					file << x_coord << " " << y_coord << " " << rho << " " << ux << " " << uy << std::endl;
+				}
+				else if (y_coord == LIMIT && x_is_integer && x_coord < TOP_LIMIT && x_coord > LIMIT - 1)
+				{
+					dfloat rho = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].rho;
+					dfloat ux = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].ux / F_M_I_SCALE;
+					dfloat uy = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].uy / F_M_I_SCALE;
+
+					file << x_coord << " " << y_coord << " " << rho << " " << ux << " " << uy << std::endl;
+				}
+				else if (y_coord == TOP_LIMIT - 1 && x_is_integer && x_coord < TOP_LIMIT && x_coord > LIMIT - 1)
+				{
+					dfloat rho = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].rho;
+					dfloat ux = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].ux / F_M_I_SCALE;
+					dfloat uy = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].uy / F_M_I_SCALE;
+
+					file << x_coord << " " << y_coord << " " << rho << " " << ux << " " << uy << std::endl;
+				}
+				else if (x_coord > LIMIT && x_coord < TOP_LIMIT - 1 && y_coord > LIMIT && y_coord < TOP_LIMIT - 1)
+				{
+					if (x_is_integer && y_is_integer)
+					{
+						dfloat rho = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].rho;
+						dfloat ux = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].ux / F_M_I_SCALE;
+						dfloat uy = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].uy / F_M_I_SCALE;
+
+						file << x_coord << " " << y_coord << " " << rho << " " << ux << " " << uy << std::endl;
+					}
+				}
+				else
+				{
+					dfloat rho = fine_nodes[fine_idx(x, y)].rho;
+					dfloat ux = fine_nodes[fine_idx(x, y)].ux / F_M_I_SCALE;
+					dfloat uy = fine_nodes[fine_idx(x, y)].uy / F_M_I_SCALE;
+
+					file << x_coord << " " << y_coord << " " << rho << " " << ux << " " << uy << std::endl;
+				}
+			}
+		}
+
+		file.close();
 	}
 
 	/* --------------------------------------------------------------------- */
 	/* ------------------------------ END LOOP ------------------------------ */
 	/* --------------------------------------------------------------------- */
 
-	checkCudaErrors(cudaDeviceSynchronize());
-
 	// Calculate MLUPS
-
 	dfloat MLUPS = recordElapsedTime(start_step, stop_step, step);
-	printf("\n--------------------------- Last Time Step %06d ---------------------------\n", step);
+	printf("\n--------------------------- Last Time Step %06zu ---------------------------\n", step);
 	printf("MLUPS: %f\n", MLUPS);
 
 	/* ------------------------------ POST ------------------------------ */
-	checkCudaErrors(cudaMemcpy(h_coarse_nodes, d_coarse_nodes, sizeof(latticeNode) * NUMBER_LBM_NODES, cudaMemcpyDeviceToHost));
-	// save info file
 	saveSimInfo(step, MLUPS);
-	velocity_profiles(h_coarse_nodes, step);
 
-	/* ------------------------------ FREE ------------------------------ */
-	// cudaFree(d_nodes);
-	// cudaFree(h_nodes);
-	interfaceFree(ghostInterface);
+	cudaFreeHost(fine_nodes);
+	cudaFreeHost(coarse_nodes);
+
 	return 0;
 }

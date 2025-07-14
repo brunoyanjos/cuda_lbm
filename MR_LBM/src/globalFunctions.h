@@ -70,4 +70,16 @@ idxCylinder(unsigned int x, unsigned int y)
     return x + NX * y;
 }
 
+__host__
+size_t __forceinline__
+fine_idx(size_t x, size_t y) {
+    return x + y * NX_FINE_GRID;
+}
+
+__host__
+size_t __forceinline__
+coarse_idx(size_t x, size_t y) {
+    return x + y * NX_COARSE_GRID;
+}
+
 #endif // !__GLOBAL_FUNCTIONS_H

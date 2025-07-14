@@ -17,6 +17,7 @@
 #include "lbmInitialization.cuh"
 #include "mlbm.cuh"
 #include "saveData.cuh"
+#include "lbm_solver.cuh"
 
 /*
  *   @brief Swaps the pointers of two dfloat variables.
@@ -136,10 +137,10 @@ __host__ void interfaceMalloc(ghostInterfaceData &ghostInterface)
 	cudaMalloc((void **)&(ghostInterface.gGhost.Y_1), sizeof(dfloat) * NUMBER_GHOST_FACE_Y * QF);
 }
 
-__host__ void allocateHostMemory(latticeNode **h_coarse_nodes, latticeNode **h_fine_nodes)
+__host__ void allocateHostMemory(latticeNode **coarse_nodes, latticeNode **fine_nodes)
 {
-	checkCudaErrors(cudaMallocHost((void **)h_coarse_nodes, MEM_SIZE_NODES));
-	checkCudaErrors(cudaMallocHost((void **)h_fine_nodes, MEM_SIZE_NODES));
+	checkCudaErrors(cudaMallocHost((void **)coarse_nodes, NUMBER_OF_COARSE_NODES * sizeof(latticeNode)));
+	checkCudaErrors(cudaMallocHost((void **)fine_nodes, NUMBER_OF_FINE_NODES * sizeof(latticeNode)));
 }
 
 __host__ void allocateDeviceMemory(latticeNode **d_coarse_nodes, latticeNode **d_fine_nodes, GhostInterfaceData *ghostInterface)
@@ -149,29 +150,154 @@ __host__ void allocateDeviceMemory(latticeNode **d_coarse_nodes, latticeNode **d
 	interfaceMalloc(*ghostInterface);
 }
 
-__host__ void initializeDomain(
-	GhostInterfaceData &ghostInterface,
-	latticeNode *&d_nodes, latticeNode *&h_nodes,
-	int *step,
-	dim3 gridBlock, dim3 threadBlock)
+__host__ inline void initialize_fine_grid(latticeNode *&lattice_nodes)
 {
-	// LBM Initialization
-	gpuInitialization_nodes<<<gridBlock, threadBlock>>>(d_nodes);
-	gpuInitialization_pop<<<gridBlock, threadBlock>>>(d_nodes, ghostInterface);
+	for (size_t y = 0; y < NY_FINE_GRID; ++y)
+	{
+		for (size_t x = 0; x < NX_FINE_GRID; ++x)
+		{
+			size_t idx = x + y * NX_FINE_GRID;
 
-	gpuInitialization_nodeType_bulk<<<gridBlock, threadBlock>>>(d_nodes);
-	gpuInitialization_nodeType<<<gridBlock, threadBlock>>>(d_nodes);
+			if (x < FINE_WIDTH || x >= NX_FINE_GRID - FINE_WIDTH || y < FINE_WIDTH || y >= NY_FINE_GRID - FINE_WIDTH)
+			{
+				lattice_nodes[idx].updated = false;
 
-	// Interface population initialization
-	interfaceCudaMemcpy(ghostInterface, ghostInterface.gGhost, ghostInterface.fGhost, cudaMemcpyDeviceToDevice, QF);
+				if (x == 0 && y == 0)
+				{
+					lattice_nodes[idx].node_type = SOUTH_WEST;
+				}
+				else if (x == 0 && y == NY_FINE_GRID - 1)
+				{
+					lattice_nodes[idx].node_type = NORTH_WEST;
+				}
+				else if (x == NX_FINE_GRID - 1 && y == 0)
+				{
+					lattice_nodes[idx].node_type = SOUTH_EAST;
+				}
+				else if (x == NX_FINE_GRID - 1 && y == NY_FINE_GRID - 1)
+				{
+					lattice_nodes[idx].node_type = NORTH_EAST;
+				}
+				else if (x == 0)
+				{
+					lattice_nodes[idx].node_type = WEST;
+				}
+				else if (x == NX_FINE_GRID - 1)
+				{
+					lattice_nodes[idx].node_type = EAST;
+				}
+				else if (y == 0)
+				{
+					lattice_nodes[idx].node_type = SOUTH;
+				}
+				else if (y == NY_FINE_GRID - 1)
+				{
+					lattice_nodes[idx].node_type = NORTH;
+				}
+				else if (x == FINE_WIDTH - 1 && y == FINE_WIDTH - 1)
+				{
+					lattice_nodes[idx].node_type = BB_SOUTH_WEST;
+					lattice_nodes[idx].updated = true;
+				}
+				else if (x == FINE_WIDTH - 1 && y == NY_FINE_GRID - FINE_WIDTH)
+				{
+					lattice_nodes[idx].node_type = BB_NORTH_WEST;
+					lattice_nodes[idx].updated = true;
+				}
+				else if (x == NX_FINE_GRID - FINE_WIDTH && y == FINE_WIDTH - 1)
+				{
+					lattice_nodes[idx].node_type = BB_SOUTH_EAST;
+					lattice_nodes[idx].updated = true;
+				}
+				else if (x == NX_FINE_GRID - FINE_WIDTH && y == NY_FINE_GRID - FINE_WIDTH)
+				{
+					lattice_nodes[idx].node_type = BB_NORTH_EAST;
+					lattice_nodes[idx].updated = true;
+				}
+				else if (x == FINE_WIDTH - 1 && y < NY_FINE_GRID - FINE_WIDTH && y >= FINE_WIDTH)
+				{
+					lattice_nodes[idx].node_type = BB_WEST;
+					if ((FINE_WIDTH % 2 == 0 && y % 2 == 0) || (FINE_WIDTH % 2 != 0 && y % 2 != 0))
+					{
+						lattice_nodes[idx].updated = true;
+					}
+				}
+				else if (x == NX_FINE_GRID - FINE_WIDTH && y < NY_FINE_GRID - FINE_WIDTH && y >= FINE_WIDTH)
+				{
+					lattice_nodes[idx].node_type = BB_EAST;
+					if ((FINE_WIDTH % 2 == 0 && y % 2 == 0) || (FINE_WIDTH % 2 != 0 && y % 2 != 0))
+					{
+						lattice_nodes[idx].updated = true;
+					}
+				}
+				else if (y == FINE_WIDTH - 1 && x < NX_FINE_GRID - FINE_WIDTH && x >= FINE_WIDTH)
+				{
+					lattice_nodes[idx].node_type = BB_SOUTH;
+					if ((FINE_WIDTH % 2 == 0 && x % 2 == 0) || (FINE_WIDTH % 2 != 0 && x % 2 != 0))
+					{
+						lattice_nodes[idx].updated = true;
+					}
+				}
+				else if (y == NY_FINE_GRID - FINE_WIDTH && x < NX_FINE_GRID - FINE_WIDTH && x >= FINE_WIDTH)
+				{
+					lattice_nodes[idx].node_type = BB_NORTH;
+					if ((FINE_WIDTH % 2 == 0 && x % 2 == 0) || (FINE_WIDTH % 2 != 0 && x % 2 != 0))
+					{
+						lattice_nodes[idx].updated = true;
+					}
+				}
+				else
+				{
+					lattice_nodes[idx].node_type = BULK;
+				}
 
-	// Synchronize after all initializations
-	checkCudaErrors(cudaDeviceSynchronize());
+				lattice_nodes[idx].rho = RHO_0;
+				lattice_nodes[idx].ux = 0.0;
+				lattice_nodes[idx].uy = 0.0;
+				lattice_nodes[idx].mxx = 0.0;
+				lattice_nodes[idx].mxy = 0.0;
+				lattice_nodes[idx].myy = 0.0;
 
-	// Synchronize and transfer data back to host if needed
-	checkCudaErrors(cudaDeviceSynchronize());
-	checkCudaErrors(cudaMemcpy(h_nodes, d_nodes, sizeof(latticeNode) * NUMBER_LBM_NODES, cudaMemcpyDeviceToHost));
-	checkCudaErrors(cudaDeviceSynchronize());
+				init_pop_in(&(lattice_nodes[idx]));
+
+				// printf("%03d ", lattice_nodes[idx].node_type);
+			}
+			else
+			{
+				lattice_nodes[idx].node_type = MISSING_DEFINITION;
+				// printf("000 ");
+			}
+		}
+		// printf("\n");
+	}
+}
+
+__host__ void initialize_coarse_grid(latticeNode *&lattice_nodes)
+{
+	for (size_t y = 0; y < NY_COARSE_GRID; y++)
+	{
+		for (size_t x = 0; x < NX_COARSE_GRID; x++)
+		{
+			size_t idx = x + y * NX_COARSE_GRID;
+
+			lattice_nodes[idx].node_type = BULK;
+
+			lattice_nodes[idx].rho = RHO_0;
+			lattice_nodes[idx].ux = 0.0;
+			lattice_nodes[idx].uy = 0.0;
+			lattice_nodes[idx].mxx = 0.0;
+			lattice_nodes[idx].mxy = 0.0;
+			lattice_nodes[idx].myy = 0.0;
+
+			init_pop_in(&(lattice_nodes[idx]));
+		}
+	}
+}
+
+__host__ void initializeDomain(latticeNode *&fine_nodes, latticeNode *&coarse_nodes)
+{
+	initialize_fine_grid(fine_nodes);
+	initialize_coarse_grid(coarse_nodes);
 }
 
 #endif // MAIN_CUH

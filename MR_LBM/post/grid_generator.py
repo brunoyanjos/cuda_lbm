@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-Nx = 62
+Nx = 32
 Ny = Nx
 Ni = 1
-Ne = 4
+Ne = 3
 
 # Define grid parameters
 coarse_step = 1.0  # Coarse grid spacing
@@ -64,6 +64,7 @@ similarity = (total_points) ** (1/2)
 current_accuracy = Nx_fine_grid * Ny_fine_grid
 
 print(f'total_coarse_points: {total_coarse_points}')
+print(f'total_fine_points: {2 * (Ny_fine_width * Nx_fine_grid + Nx_fine_width * (Ny_fine_grid - 2 * Ny_fine_width))}')
 print(f'total_fine_points: {total_fine_points}')
 print(f'similarity: {similarity}')
 print(f'savings: {((current_accuracy - total_points)/current_accuracy * 100):.2f}%')

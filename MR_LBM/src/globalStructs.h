@@ -24,14 +24,17 @@ typedef struct latticeNode
 {
     unsigned int node_type;
 
+    bool updated;
+
+    dfloat pop_out[9];
+    dfloat pop_in[9];
+
     dfloat rho;
     dfloat ux;
     dfloat uy;
     dfloat mxx;
     dfloat mxy;
     dfloat myy;
-
-    
 } LatticeNode;
 
 #endif //__GLOBAL_STRUCTS_H
