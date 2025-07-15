@@ -18,7 +18,6 @@
 #include "errorDef.h"
 #include "globalStructs.h"
 
-
 /*
  *   Get string with simulation information
  *   @param step: simulation's step
@@ -41,20 +40,18 @@ void saveSimInfo(int step, dfloat MLUPS);
  */
 void saveVarBin(
     std::string strFile,
-    dfloat* var,
-    size_t memSize
-);
+    dfloat *var,
+    size_t memSize);
 
-
-__host__ void velocity_profiles(dfloat* fMom, unsigned int step);
+__host__ void velocity_profiles(dfloat *fMom, unsigned int step);
 
 __host__ void kinetic_energy(dfloat *fMom, unsigned int step);
 
 void folderSetup();
 
+__host__ void saving_probes(dfloat *fMom, dfloat *probes, unsigned int step);
 
-
-__host__ void saveMacr(dfloat* h_fMom, dfloat* rho, dfloat* ux, dfloat* uy, unsigned int nSteps);
+__host__ void saveMacr(dfloat *h_fMom, dfloat *rho, dfloat *ux, dfloat *uy, unsigned int nSteps);
 
 std::string getVarFilename(const std::string varName, unsigned int step, const std::string ext);
 

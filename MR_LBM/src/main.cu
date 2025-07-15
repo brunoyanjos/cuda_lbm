@@ -1,12 +1,8 @@
 
 #include "main.cuh"
-#include <iostream>
-#include <chrono>
 #include "saveData.cuh"
 
 using namespace std;
-
-typedef std::chrono::high_resolution_clock::time_point timestep;
 
 int main()
 {
@@ -30,6 +26,8 @@ int main()
 	dfloat *ux;
 	dfloat *uy;
 
+	dfloat *probes;
+
 	/* ----------------- GRID AND THREADS DEFINITION FOR LBM ---------------- */
 	dim3 threadBlock(BLOCK_NX, BLOCK_NY);
 	dim3 gridBlock(NUM_BLOCK_X, NUM_BLOCK_Y);
@@ -38,7 +36,7 @@ int main()
 	int step = 0;
 	int init_step = 0;
 
-	allocateHostMemory(&h_fMom, &rho, &ux, &uy);
+	allocateHostMemory(&h_fMom, &rho, &ux, &uy, &probes);
 
 	/* -------------- ALLOCATION FOR GPU ------------- */
 	allocateDeviceMemory(&d_fMom, &dNodeType, &ghostInterface);
@@ -87,39 +85,14 @@ int main()
 
 		if (MACR_SAVE != 0 && step % MACR_SAVE == 0)
 		{
-			printf("\n----------------------------------- (%d/%d) %.2f%% -----------------------------------\n", step, N_STEPS, static_cast<float>(step)/static_cast<float>(N_STEPS) * 100.0f);
-			if (step != 0)
-			{
-				step_end = std::chrono::high_resolution_clock::now();
-				double step_time = std::chrono::duration<double>(step_end - step_start).count();
-
-				// Calculate MLUPS for the current step
-				dfloat MLUPS = (NUMBER_LBM_NODES * MACR_SAVE / 1e6) / step_time;
-
-				std::cout << "Elapsed time: " << step_time << " seconds" << std::endl;
-				std::cout << "MLUPS: " << MLUPS << std::endl;
-
-				// Calculate remaining time
-				size_t steps_remaining = N_STEPS - step;
-				double total_seconds_remaining = steps_remaining * NUMBER_LBM_NODES / 1e6 / MLUPS;
-
-				// Convert to hours, minutes, seconds
-				size_t hours = static_cast<size_t>(total_seconds_remaining) / 3600;
-				size_t minutes = static_cast<size_t>((total_seconds_remaining - hours * 3600) / 60);
-				size_t seconds = static_cast<size_t>(total_seconds_remaining) % 60;
-
-				std::cout << "Estimated time left: "
-						  << hours << "h "
-						  << minutes << "min "
-						  << seconds << "s" << std::endl;
-
-				step_start = std::chrono::high_resolution_clock::now();
-			}
-
+			printf("\n----------------------------------- (%d/%d) %.2f%% -----------------------------------\n", step, N_STEPS, static_cast<float>(step) / static_cast<float>(N_STEPS) * 100.0f);
+			if (step != 0) time_elapsing_count(step_end, step_start, step);
+			
 			checkCudaErrors(cudaDeviceSynchronize());
 			checkCudaErrors(cudaMemcpy(h_fMom, d_fMom, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyDeviceToHost));
 
 			kinetic_energy(h_fMom, step);
+			saving_probes(h_fMom, probes, step);
 			// saveMacr(h_fMom, rho, ux, uy, step);
 		}
 	}

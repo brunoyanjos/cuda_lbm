@@ -125,6 +125,65 @@ __host__ void kinetic_energy(dfloat *fMom, unsigned int step)
     tke_sum /= (U_MAX * U_MAX * NX * NY);
     const dfloat t_star = step * U_MAX / NX;
 
-    tke_file.write(reinterpret_cast<const char*> (&t_star), sizeof(dfloat));
-    tke_file.write(reinterpret_cast<const char*> (&tke_sum), sizeof(dfloat));
+    tke_file.write(reinterpret_cast<const char *>(&t_star), sizeof(dfloat));
+    tke_file.write(reinterpret_cast<const char *>(&tke_sum), sizeof(dfloat));
+}
+
+__host__ void saving_probes(dfloat *fMom, dfloat *probes, unsigned int step)
+{
+    // 1. Defining a variable that will store the totl kinetic energy (TKE) path
+    std::ostringstream tke_path;
+
+    // 2. Defining the path to TKE
+    tke_path << PATH_FILES << "/" << ID_SIM << "/" << "velocity_probes.bin";
+
+    // 3. Open the file as a binary
+    std::ofstream tke_file(tke_path.str(), std::ios::binary | std::ios::app);
+
+    // 4. Now we make sure that the file open properly
+    if (!tke_file)
+    {
+        std::cerr << "Error opening tke_file" << " - Reason: " << std::strerror(errno) << std::endl;
+        return;
+    }
+
+    // 5. Finally we will sum over all the domain the kinetic energy, to have a total kinetic energy
+
+    const int time_counter = step / MACR_SAVE;
+    const dfloat inv_count = 1.0f / (1.0f + time_counter);
+
+    for (size_t y = 0; y < 3; ++y)
+    {
+        for (size_t x = 0; x < 3; ++x)
+        {
+            const size_t probe_index = x + y * 3;
+
+            const size_t probe_x_coord = NX / 4 * (x  + 1);
+            const size_t probe_y_coord = NY / 4 * (y  + 1);
+
+            const int x_thread = probe_x_coord % BLOCK_NX;
+            const int y_thread = probe_x_coord % BLOCK_NY;
+
+            const int x_block = probe_y_coord / BLOCK_NX;
+            const int y_block = probe_y_coord / BLOCK_NX;
+
+            const size_t ux_idx = idxMom(x_thread, y_thread, M_UX_INDEX, x_block, y_block);
+            const size_t uy_idx = idxMom(x_thread, y_thread, M_UY_INDEX, x_block, y_block);
+
+            const dfloat ux = fMom[ux_idx]; 
+            const dfloat uy = fMom[uy_idx]; 
+
+            const dfloat ux2 = ux * ux;
+            const dfloat uy2 = uy * uy;
+
+            const dfloat u = std::sqrt(ux2 + uy2);
+
+            probes[probe_index] = (probes[probe_index] * time_counter + u) * inv_count;
+        }
+    }
+
+    const dfloat t_star = step * U_MAX / NX;
+
+    tke_file.write(reinterpret_cast<const char *>(&t_star), sizeof(dfloat));
+    tke_file.write(reinterpret_cast<const char *>(probes), 9 * sizeof(dfloat));
 }

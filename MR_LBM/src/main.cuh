@@ -17,7 +17,7 @@
 #include "lbmInitialization.cuh"
 #include "mlbm.cuh"
 #include "saveData.cuh"
-
+#include "time_elapsing.cuh"
 #include "checkpoint.cuh"
 
 /*
@@ -139,12 +139,13 @@ __host__ void interfaceMalloc(ghostInterfaceData &ghostInterface)
 }
 
 __host__ void allocateHostMemory(
-	dfloat **h_fMom, dfloat **rho, dfloat **ux, dfloat **uy)
+	dfloat **h_fMom, dfloat **rho, dfloat **ux, dfloat **uy, dfloat **probes)
 {
 	checkCudaErrors(cudaMallocHost((void **)h_fMom, MEM_SIZE_MOM));
 	checkCudaErrors(cudaMallocHost((void **)rho, MEM_SIZE_SCALAR));
 	checkCudaErrors(cudaMallocHost((void **)ux, MEM_SIZE_SCALAR));
 	checkCudaErrors(cudaMallocHost((void **)uy, MEM_SIZE_SCALAR));
+	checkCudaErrors(cudaMallocHost((void **)probes, MEM_SIZE_PROBES));
 }
 
 __host__ void allocateDeviceMemory(

@@ -10,9 +10,12 @@
 #include <cmath>
 #include <limits>
 #include <cstring>
+#include <iostream>
+#include <chrono>
 
 /* ----------------------------- PROBLEM DEFINE ---------------------------- */
 typedef float dfloat;
+typedef std::chrono::high_resolution_clock::time_point timestep;
 
 #define GPU_INDEX 0
 /* --------------------------  SIMULATION DEFINES -------------------------- */

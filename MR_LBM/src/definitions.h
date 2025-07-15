@@ -79,6 +79,7 @@ const size_t MEM_SIZE_BLOCK_TOTAL = MEM_SIZE_BLOCK_GHOST + MEM_SIZE_BLOCK_LBM;
 const size_t NUMBER_LBM_POP_NODES = NX * NY;
 
 // memory size
+const size_t MEM_SIZE_PROBES = sizeof(dfloat) * 9;
 const size_t MEM_SIZE_SCALAR = sizeof(dfloat) * NUMBER_LBM_POP_NODES;
 const size_t MEM_SIZE_POP = sizeof(dfloat) * NUMBER_LBM_POP_NODES * Q;
 const size_t MEM_SIZE_MOM = sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS;
