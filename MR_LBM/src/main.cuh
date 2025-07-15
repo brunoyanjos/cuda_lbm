@@ -260,15 +260,15 @@ __host__ inline void initialize_fine_grid(latticeNode *&lattice_nodes)
 
 				init_pop_in(&(lattice_nodes[idx]));
 
-				// printf("%03d ", lattice_nodes[idx].node_type);
+				//printf("%03d ", lattice_nodes[idx].node_type);
 			}
 			else
 			{
 				lattice_nodes[idx].node_type = MISSING_DEFINITION;
-				// printf("000 ");
+				//printf("000 ");
 			}
 		}
-		// printf("\n");
+		//printf("\n");
 	}
 }
 
