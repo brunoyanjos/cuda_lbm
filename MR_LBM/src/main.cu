@@ -27,19 +27,28 @@ int main()
 	dfloat *uy;
 
 	dfloat *probes;
+	
+	dfloat *ux_mean_device;
+	dfloat *uy_mean_device;
+	
+	dfloat *ux_mean_host;
+	dfloat *uy_mean_host;
 
 	/* ----------------- GRID AND THREADS DEFINITION FOR LBM ---------------- */
 	dim3 threadBlock(BLOCK_NX, BLOCK_NY);
 	dim3 gridBlock(NUM_BLOCK_X, NUM_BLOCK_Y);
 
+	int avg_blockSize = 512; // Otimizado para ocupação
+	int avg_gridSize = (NX + avg_blockSize - 1) / avg_blockSize;
+
 	/* ------------------------- ALLOCATION FOR CPU ------------------------- */
 	int step = 0;
 	int init_step = 0;
 
-	allocateHostMemory(&h_fMom, &rho, &ux, &uy, &probes);
+	allocateHostMemory(&h_fMom, &rho, &ux, &uy, &probes, &ux_mean_host, &uy_mean_host);
 
 	/* -------------- ALLOCATION FOR GPU ------------- */
-	allocateDeviceMemory(&d_fMom, &dNodeType, &ghostInterface);
+	allocateDeviceMemory(&d_fMom, &dNodeType, &ghostInterface, &ux_mean_device, &uy_mean_device);
 
 	// Setup Streams
 	cudaStream_t streamsLBM[1];
@@ -93,6 +102,11 @@ int main()
 
 			kinetic_energy(h_fMom, step);
 			saving_probes(h_fMom, probes, step);
+
+			if(step >= N_STAT) {
+				velocity_average<<<avg_gridSize, avg_blockSize>>>(d_fMom, ux_mean_device, uy_mean_device, step);
+			}
+
 			// saveMacr(h_fMom, rho, ux, uy, step);
 		}
 	}
@@ -110,7 +124,10 @@ int main()
 
 	/* ------------------------------ POST ------------------------------ */
 	checkCudaErrors(cudaMemcpy(h_fMom, d_fMom, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(ux_mean_host, ux_mean_device, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(uy_mean_host, uy_mean_device, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyDeviceToHost));
 
+	save_mean_velocity(ux_mean_host, uy_mean_host);
 	velocity_profiles(h_fMom, step);
 
 	// save info file

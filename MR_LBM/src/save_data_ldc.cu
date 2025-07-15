@@ -1,5 +1,43 @@
 #include "saveData.cuh"
 
+__host__ void save_mean_velocity(dfloat *ux_mean, dfloat *uy_mean)
+{
+    // 1. Defining variables to store the path
+    std::ostringstream source_path;
+    std::ostringstream ux_path;
+    std::ostringstream uy_path;
+
+    // 2. Defining the source path for all files
+    source_path << PATH_FILES << "/" << ID_SIM << "/";
+
+    // 3. Definign velocities files name
+    ux_path << source_path.str() << "velocity_avg_x" << ".bin";
+    uy_path << source_path.str() << "velocity_avg_y" << ".bin";
+
+    // 4. Now we open the files in binary mode
+    std::ofstream ux_file(ux_path.str(), std::ios::binary);
+    std::ofstream uy_file(uy_path.str(), std::ios::binary);
+
+    // 5. Make sure the files were create properly
+    // 5.1. First we make sure that ux_file is fine
+    if (!ux_file)
+    {
+        std::cerr << "Error opening ux_file" << " - Reason: " << std::strerror(errno) << std::endl;
+        return;
+    }
+
+    // 5.2. Then we do the same to the uy_file
+    if (!uy_file)
+    {
+        std::cerr << "Error opening uy_file" << " - Reason: " << std::strerror(errno) << std::endl;
+        return;
+    }
+
+    // 6. Now we are able to star the loop to calculate the velocities on he center line
+    ux_file.write(reinterpret_cast<const char *>(ux_mean), MEM_SIZE_UX_AVG);
+    uy_file.write(reinterpret_cast<const char *>(uy_mean), MEM_SIZE_UY_AVG);
+}
+
 __host__ void velocity_profiles(dfloat *fMom, unsigned int step)
 {
     // 1. Defining variables to store the path
@@ -158,8 +196,8 @@ __host__ void saving_probes(dfloat *fMom, dfloat *probes, unsigned int step)
         {
             const size_t probe_index = x + y * 3;
 
-            const size_t probe_x_coord = NX / 4 * (x  + 1);
-            const size_t probe_y_coord = NY / 4 * (y  + 1);
+            const size_t probe_x_coord = NX / 4 * (x + 1);
+            const size_t probe_y_coord = NY / 4 * (y + 1);
 
             const int x_thread = probe_x_coord % BLOCK_NX;
             const int y_thread = probe_x_coord % BLOCK_NY;
@@ -170,8 +208,8 @@ __host__ void saving_probes(dfloat *fMom, dfloat *probes, unsigned int step)
             const size_t ux_idx = idxMom(x_thread, y_thread, M_UX_INDEX, x_block, y_block);
             const size_t uy_idx = idxMom(x_thread, y_thread, M_UY_INDEX, x_block, y_block);
 
-            const dfloat ux = fMom[ux_idx]; 
-            const dfloat uy = fMom[uy_idx]; 
+            const dfloat ux = fMom[ux_idx];
+            const dfloat uy = fMom[uy_idx];
 
             const dfloat ux2 = ux * ux;
             const dfloat uy2 = uy * uy;

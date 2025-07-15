@@ -84,4 +84,7 @@ const size_t MEM_SIZE_SCALAR = sizeof(dfloat) * NUMBER_LBM_POP_NODES;
 const size_t MEM_SIZE_POP = sizeof(dfloat) * NUMBER_LBM_POP_NODES * Q;
 const size_t MEM_SIZE_MOM = sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS;
 
+const size_t MEM_SIZE_UX_AVG = sizeof(dfloat) * NY;
+const size_t MEM_SIZE_UY_AVG = sizeof(dfloat) * NX;
+
 #endif //!__DEFINITIONS_H

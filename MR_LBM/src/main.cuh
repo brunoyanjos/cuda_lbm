@@ -19,6 +19,7 @@
 #include "saveData.cuh"
 #include "time_elapsing.cuh"
 #include "checkpoint.cuh"
+#include "treat_data.cuh"
 
 /*
  *   @brief Swaps the pointers of two dfloat variables.
@@ -139,20 +140,26 @@ __host__ void interfaceMalloc(ghostInterfaceData &ghostInterface)
 }
 
 __host__ void allocateHostMemory(
-	dfloat **h_fMom, dfloat **rho, dfloat **ux, dfloat **uy, dfloat **probes)
+	dfloat **h_fMom, dfloat **rho, dfloat **ux, dfloat **uy, dfloat **probes, dfloat **ux_mean, dfloat **uy_mean)
 {
 	checkCudaErrors(cudaMallocHost((void **)h_fMom, MEM_SIZE_MOM));
 	checkCudaErrors(cudaMallocHost((void **)rho, MEM_SIZE_SCALAR));
 	checkCudaErrors(cudaMallocHost((void **)ux, MEM_SIZE_SCALAR));
 	checkCudaErrors(cudaMallocHost((void **)uy, MEM_SIZE_SCALAR));
 	checkCudaErrors(cudaMallocHost((void **)probes, MEM_SIZE_PROBES));
+	checkCudaErrors(cudaMallocHost((void **)ux_mean, MEM_SIZE_UX_AVG));
+	checkCudaErrors(cudaMallocHost((void **)uy_mean, MEM_SIZE_UY_AVG));
 }
 
 __host__ void allocateDeviceMemory(
-	dfloat **d_fMom, unsigned int **dNodeType, GhostInterfaceData *ghostInterface)
+	dfloat **d_fMom, unsigned int **dNodeType, GhostInterfaceData *ghostInterface, dfloat **ux_mean, dfloat **uy_mean)
 {
 	cudaMalloc((void **)d_fMom, MEM_SIZE_MOM);
 	cudaMalloc((void **)dNodeType, sizeof(int) * NUMBER_LBM_NODES);
+
+	cudaMalloc((void **)ux_mean, MEM_SIZE_UX_AVG);
+	cudaMalloc((void **)uy_mean, MEM_SIZE_UY_AVG);
+
 	interfaceMalloc(*ghostInterface);
 }
 

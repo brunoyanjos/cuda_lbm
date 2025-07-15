@@ -8,7 +8,6 @@
 #include <cuda_runtime.h>
 #include <builtin_types.h>
 
-#include <string>
 #include <fstream>
 #include <sstream>
 #include <iostream> // std::cout, std::fixed
@@ -42,6 +41,8 @@ void saveVarBin(
     std::string strFile,
     dfloat *var,
     size_t memSize);
+
+__host__ void save_mean_velocity(dfloat *ux_mean, dfloat *uy_mean);
 
 __host__ void velocity_profiles(dfloat *fMom, unsigned int step);
 
