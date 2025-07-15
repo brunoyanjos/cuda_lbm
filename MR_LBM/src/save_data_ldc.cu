@@ -190,33 +190,30 @@ __host__ void saving_probes(dfloat *fMom, dfloat *probes, unsigned int step)
     const int time_counter = step / MACR_SAVE;
     const dfloat inv_count = 1.0f / (1.0f + time_counter);
 
-    for (size_t y = 0; y < 3; ++y)
+    int x_pos[3] = {(NX - 1) / 21, (NX - 1) / 2, (NX - 1) * 20 / 21};
+    int y_pos[3] = {(NY - 1) / 21, (NY - 1) / 2, (NY - 1) * 20 / 21};
+
+
+    for (int y = 2; y >= 0; --y)
     {
         for (size_t x = 0; x < 3; ++x)
         {
             const size_t probe_index = x + y * 3;
 
-            const size_t probe_x_coord = NX / 4 * (x + 1);
-            const size_t probe_y_coord = NY / 4 * (y + 1);
+            const size_t probe_x_coord = x_pos[x];
+            const size_t probe_y_coord = y_pos[y];
 
             const int x_thread = probe_x_coord % BLOCK_NX;
-            const int y_thread = probe_x_coord % BLOCK_NY;
+            const int y_thread = probe_y_coord % BLOCK_NY;
 
-            const int x_block = probe_y_coord / BLOCK_NX;
-            const int y_block = probe_y_coord / BLOCK_NX;
+            const int x_block = probe_x_coord / BLOCK_NX;
+            const int y_block = probe_y_coord / BLOCK_NY;
 
             const size_t ux_idx = idxMom(x_thread, y_thread, M_UX_INDEX, x_block, y_block);
-            const size_t uy_idx = idxMom(x_thread, y_thread, M_UY_INDEX, x_block, y_block);
 
-            const dfloat ux = fMom[ux_idx];
-            const dfloat uy = fMom[uy_idx];
+            const dfloat ux = fMom[ux_idx] / F_M_I_SCALE;
 
-            const dfloat ux2 = ux * ux;
-            const dfloat uy2 = uy * uy;
-
-            const dfloat u = std::sqrt(ux2 + uy2);
-
-            probes[probe_index] = (probes[probe_index] * time_counter + u) * inv_count;
+            probes[probe_index] = (probes[probe_index] * time_counter + ux) * inv_count;
         }
     }
 

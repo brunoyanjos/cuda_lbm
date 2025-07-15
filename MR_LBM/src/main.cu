@@ -124,8 +124,8 @@ int main()
 
 	/* ------------------------------ POST ------------------------------ */
 	checkCudaErrors(cudaMemcpy(h_fMom, d_fMom, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyDeviceToHost));
-	checkCudaErrors(cudaMemcpy(ux_mean_host, ux_mean_device, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyDeviceToHost));
-	checkCudaErrors(cudaMemcpy(uy_mean_host, uy_mean_device, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(ux_mean_host, ux_mean_device, MEM_SIZE_UX_AVG, cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(uy_mean_host, uy_mean_device, MEM_SIZE_UY_AVG, cudaMemcpyDeviceToHost));
 
 	save_mean_velocity(ux_mean_host, uy_mean_host);
 	velocity_profiles(h_fMom, step);

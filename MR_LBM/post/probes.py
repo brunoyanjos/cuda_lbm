@@ -2,10 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Caminho do arquivo
-file_path = "velocity_probes.bin"
+file_path = "LDC/101/velocity_probes.bin"
 
 # Define o tipo de dado: use float32 se seu dfloat for float, float64 se for double
-dtype = np.float64  # ou np.float32, se for o caso
+dtype = np.float32  # ou np.float32, se for o caso
 
 # Parâmetros do arquivo
 num_probes = 9
@@ -24,12 +24,14 @@ probes = data[:, 1:]
 # Plotagem das 9 sondas
 plt.figure(figsize=(10, 6))
 for i in range(num_probes):
-    plt.plot(t_star, probes[:, i], label=f"Sonda {i+1}")
-
+    plt.plot(t_star, probes[:, i] / 0.0256, label=f"Sonda {i+1}")
+    
 plt.xlabel("t*")
 plt.ylabel("Valor das sondas")
 plt.title("Evolução temporal das sondas de velocidade")
-plt.legend()
+# plt.legend()
 plt.grid(True)
 plt.tight_layout()
 plt.show()
+    
+
