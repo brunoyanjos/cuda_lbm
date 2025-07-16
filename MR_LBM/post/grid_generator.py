@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-Nx = 32
+Nx = 5
 Ny = Nx
 Ni = 1
-Ne = 3
+Ne = 1
 
 # Define grid parameters
 coarse_step = 1.0  # Coarse grid spacing

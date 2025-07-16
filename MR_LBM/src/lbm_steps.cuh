@@ -410,6 +410,14 @@ __host__ inline void boundary_condition(latticeNode *node)
     }
     case BB_NORTH:
     {
+        std::cout << "pop[0]: " << pop[0] << std::endl;
+        std::cout << "pop[1]: " << pop[1] << std::endl;
+        std::cout << "pop[3]: " << pop[3] << std::endl;
+        std::cout << "pop[4]: " << pop[4] << std::endl;
+        std::cout << "pop[7]: " << pop[7] << std::endl;
+        std::cout << "pop[8]: " << pop[8] << std::endl
+                  << std::endl;
+
         const dfloat rhoIn = pop[0] + pop[1] + pop[3] + pop[4] + pop[7] + pop[8];
         const dfloat inv_rhoIn = 1.0f / rhoIn;
 
@@ -419,6 +427,14 @@ __host__ inline void boundary_condition(latticeNode *node)
         const dfloat mxxIn = (pop[1] + pop[3] + pop[7] + pop[8]) * inv_rhoIn - cs2;
         const dfloat mxyIn = (pop[7] - pop[8]) * inv_rhoIn;
         const dfloat myyIn = (pop[3] + pop[7] + pop[8]) * inv_rhoIn - cs2;
+
+        std::cout << "rhoIn: " << rhoIn << std::endl;
+        std::cout << "uxIn: " << uxIn << std::endl;
+        std::cout << "uyIn: " << uyIn << std::endl;
+        std::cout << "mxxIn: " << mxxIn << std::endl;
+        std::cout << "mxyIn: " << mxyIn << std::endl;
+        std::cout << "myyIn: " << myyIn << std::endl
+                  << std::endl;
 
         // ---------------------------------------------------------
         // Etapa 1: rho
@@ -435,6 +451,12 @@ __host__ inline void boundary_condition(latticeNode *node)
 
         const dfloat rhoVar = (1.0f / 40.0f) * (36.0f * rhoIn + 72.0f * mxxIn * rhoIn - 72.0f * myyIn * rhoIn - 252.0f * rhoIn * uyIn +
                                                 sqrtf(A * A - 80.0f * B));
+
+        std::cout << "A: " << A << std::endl;
+        std::cout << "B: " << B << std::endl;
+
+        std::cout << "sqrt_value: " << A * A - 80.0f * B << std::endl
+                  << std::endl;
 
         // ---------------------------------------------------------
         // Etapa 2: ux
@@ -499,6 +521,14 @@ __host__ inline void boundary_condition(latticeNode *node)
         (*node).mxx = mxxVar;
         (*node).mxy = mxyVar;
         (*node).myy = myyVar;
+
+        std::cout << "rho: " << rhoVar << std::endl;
+        std::cout << "ux: " << uxVar << std::endl;
+        std::cout << "uy: " << uyVar << std::endl;
+        std::cout << "mxx: " << mxxVar << std::endl;
+        std::cout << "mxy: " << mxyVar << std::endl;
+        std::cout << "myy: " << myyVar << std::endl
+                  << std::endl;
 
         break;
     }
