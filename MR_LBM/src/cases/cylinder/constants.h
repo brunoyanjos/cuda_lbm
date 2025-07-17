@@ -9,7 +9,7 @@ constexpr int SCALE = 1;
 
 constexpr int D = 32;       //Diameter of the cylinder
 
-constexpr int HD = 7 * D;    //Height of the Domain !!!!should be a odd number!!!!
+constexpr int HD = 10 * D;    //Height of the Domain !!!!should be a odd number!!!!
 constexpr int LD = 60 * D;    //Length of the Domain
 constexpr int L_front = 15 * D;
 
@@ -29,9 +29,9 @@ constexpr dfloat yc = (dfloat)(L_bot + D * 0.5);
 constexpr dfloat U_MAX = 0.1;
 constexpr dfloat L = N;
 
-constexpr int MACR_SAVE = 50 * D / U_MAX;
-constexpr int tstar = 100;         //non-dimensional time to start the statistics
-constexpr int stat_period = 10;    //period of statistics * tstar 
+constexpr int MACR_SAVE = 10 * D / U_MAX;
+constexpr int tstar = 2000;         //non-dimensional time to start the statistics
+constexpr int stat_period = 100;    //period of statistics * tstar 
 
 constexpr int N_STEPS = (tstar + stat_period) * D / U_MAX;
 

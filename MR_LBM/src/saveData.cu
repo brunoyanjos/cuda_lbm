@@ -114,14 +114,14 @@ __host__ void saveMacr(
 			for (int j = 0; j < NY; ++j)
 				for (int i = 0; i < NX; ++i)
 				{
-					float val = double(i); // already float
+					float val = (double(i) - xc) / D; // already float
 					gridfile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 				}
 
 			for (int j = 0; j < NY; ++j)
 				for (int i = 0; i < NX; ++i)
 				{
-					float val = double(j);
+					float val = (double(j) - yc) / D;
 					gridfile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 				}
 		}
