@@ -87,4 +87,7 @@ const size_t MEM_SIZE_POP = sizeof(dfloat) * NUMBER_LBM_POP_NODES * Q;
 const size_t MEM_SIZE_MOM = sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS;
 const size_t MEM_SIZE_NODES = sizeof(latticeNode)* NUMBER_LBM_NODES;
 
+const size_t MEM_SIZE_COARSE_NODES = sizeof(latticeNode)* NUMBER_OF_COARSE_NODES;
+const size_t MEM_SIZE_FINE_NODES = sizeof(latticeNode)* NUMBER_OF_FINE_NODES;
+
 #endif //!__DEFINITIONS_H

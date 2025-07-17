@@ -18,15 +18,9 @@
 #define SOUTH_WEST (8)
 #define SOUTH_EAST (4)
 // BULK_BOUNDARY
-#define BB_WEST (105)
-#define BB_EAST (110)
-#define BB_NORTH (112)
-#define BB_SOUTH (103)
-
-#define BB_NORTH_WEST (113)
-#define BB_NORTH_EAST (114)
-#define BB_SOUTH_WEST (107)
-#define BB_SOUTH_EAST (111)
+#define INT_LEFT (110)
+#define INT_TOP_LEFT (102)
+#define INT_BOTTOM_LEFT (108)
 
 #define SOLID_NODE (0)
 

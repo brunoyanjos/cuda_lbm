@@ -152,133 +152,49 @@ __host__ void allocateDeviceMemory(latticeNode **d_coarse_nodes, latticeNode **d
 
 __host__ inline void initialize_fine_grid(latticeNode *&lattice_nodes)
 {
-	for (size_t y = 0; y < NY_FINE_GRID; ++y)
+	for (size_t y = 0; y < NY_FINE; ++y)
 	{
-		for (size_t x = 0; x < NX_FINE_GRID; ++x)
+		for (size_t x = 0; x < NX_FINE; ++x)
 		{
-			size_t idx = x + y * NX_FINE_GRID;
+			size_t idx = x + y * NX_FINE;
 
-			if (x < FINE_WIDTH || x >= NX_FINE_GRID - FINE_WIDTH || y < FINE_WIDTH || y >= NY_FINE_GRID - FINE_WIDTH)
-			{
-				lattice_nodes[idx].updated = false;
+			lattice_nodes[idx].updated = false;
 
-				if (x == 0 && y == 0)
-				{
-					lattice_nodes[idx].node_type = SOUTH_WEST;
-				}
-				else if (x == 0 && y == NY_FINE_GRID - 1)
-				{
-					lattice_nodes[idx].node_type = NORTH_WEST;
-				}
-				else if (x == NX_FINE_GRID - 1 && y == 0)
-				{
-					lattice_nodes[idx].node_type = SOUTH_EAST;
-				}
-				else if (x == NX_FINE_GRID - 1 && y == NY_FINE_GRID - 1)
-				{
-					lattice_nodes[idx].node_type = NORTH_EAST;
-				}
-				else if (x == 0)
-				{
-					lattice_nodes[idx].node_type = WEST;
-				}
-				else if (x == NX_FINE_GRID - 1)
-				{
-					lattice_nodes[idx].node_type = EAST;
-				}
-				else if (y == 0)
-				{
-					lattice_nodes[idx].node_type = SOUTH;
-				}
-				else if (y == NY_FINE_GRID - 1)
-				{
-					lattice_nodes[idx].node_type = NORTH;
-				}
-				else if (x == FINE_WIDTH - 1 && y == FINE_WIDTH - 1)
-				{
-					lattice_nodes[idx].node_type = BB_SOUTH_WEST;
-					lattice_nodes[idx].updated = true;
-				}
-				else if (x == FINE_WIDTH - 1 && y == NY_FINE_GRID - FINE_WIDTH)
-				{
-					lattice_nodes[idx].node_type = BB_NORTH_WEST;
-					lattice_nodes[idx].updated = true;
-				}
-				else if (x == NX_FINE_GRID - FINE_WIDTH && y == FINE_WIDTH - 1)
-				{
-					lattice_nodes[idx].node_type = BB_SOUTH_EAST;
-					lattice_nodes[idx].updated = true;
-				}
-				else if (x == NX_FINE_GRID - FINE_WIDTH && y == NY_FINE_GRID - FINE_WIDTH)
-				{
-					lattice_nodes[idx].node_type = BB_NORTH_EAST;
-					lattice_nodes[idx].updated = true;
-				}
-				else if (x == FINE_WIDTH - 1 && y < NY_FINE_GRID - FINE_WIDTH && y >= FINE_WIDTH)
-				{
-					lattice_nodes[idx].node_type = BB_WEST;
-					if ((FINE_WIDTH % 2 == 0 && y % 2 == 0) || (FINE_WIDTH % 2 != 0 && y % 2 != 0))
-					{
-						lattice_nodes[idx].updated = true;
-					}
-				}
-				else if (x == NX_FINE_GRID - FINE_WIDTH && y < NY_FINE_GRID - FINE_WIDTH && y >= FINE_WIDTH)
-				{
-					lattice_nodes[idx].node_type = BB_EAST;
-					if ((FINE_WIDTH % 2 == 0 && y % 2 == 0) || (FINE_WIDTH % 2 != 0 && y % 2 != 0))
-					{
-						lattice_nodes[idx].updated = true;
-					}
-				}
-				else if (y == FINE_WIDTH - 1 && x < NX_FINE_GRID - FINE_WIDTH && x >= FINE_WIDTH)
-				{
-					lattice_nodes[idx].node_type = BB_SOUTH;
-					if ((FINE_WIDTH % 2 == 0 && x % 2 == 0) || (FINE_WIDTH % 2 != 0 && x % 2 != 0))
-					{
-						lattice_nodes[idx].updated = true;
-					}
-				}
-				else if (y == NY_FINE_GRID - FINE_WIDTH && x < NX_FINE_GRID - FINE_WIDTH && x >= FINE_WIDTH)
-				{
-					lattice_nodes[idx].node_type = BB_NORTH;
-					if ((FINE_WIDTH % 2 == 0 && x % 2 == 0) || (FINE_WIDTH % 2 != 0 && x % 2 != 0))
-					{
-						lattice_nodes[idx].updated = true;
-					}
-				}
-				else
-				{
-					lattice_nodes[idx].node_type = BULK;
-				}
+			if (x == 0 && y == 0) {
 
-				lattice_nodes[idx].rho = RHO_0;
-				lattice_nodes[idx].ux = 0.0;
-				lattice_nodes[idx].uy = 0.0;
-				lattice_nodes[idx].mxx = 0.0;
-				lattice_nodes[idx].mxy = 0.0;
-				lattice_nodes[idx].myy = 0.0;
+			} else if (x == 0 && y == NY_FINE - 1) {
 
-				init_pop_in(&(lattice_nodes[idx]));
+			} else if (x == NX_FINE - 1 && y == 0) {
 
-				//printf("%03d ", lattice_nodes[idx].node_type);
+			} else if (x == NX_FINE - 1 && y == NY_FINE - 1) {
+
+			} else if(x == 0) {
+
+			} else if(x == NX_FINE - 1) {
+				
 			}
-			else
-			{
-				lattice_nodes[idx].node_type = MISSING_DEFINITION;
-				//printf("000 ");
-			}
+
+			lattice_nodes[idx].node_type = BULK;
+
+			lattice_nodes[idx].rho = RHO_0;
+			lattice_nodes[idx].ux = 0.0;
+			lattice_nodes[idx].uy = 0.0;
+			lattice_nodes[idx].mxx = 0.0;
+			lattice_nodes[idx].mxy = 0.0;
+			lattice_nodes[idx].myy = 0.0;
+
+			init_pop_in(&(lattice_nodes[idx]));
 		}
-		//printf("\n");
 	}
 }
 
 __host__ void initialize_coarse_grid(latticeNode *&lattice_nodes)
 {
-	for (size_t y = 0; y < NY_COARSE_GRID; y++)
+	for (size_t y = 0; y < NY_COARSE; y++)
 	{
-		for (size_t x = 0; x < NX_COARSE_GRID; x++)
+		for (size_t x = 0; x < NX_COARSE + N_OVERLAP_LAYER; x++)
 		{
-			size_t idx = x + y * NX_COARSE_GRID;
+			size_t idx = x + y * NX_COARSE;
 
 			lattice_nodes[idx].node_type = BULK;
 

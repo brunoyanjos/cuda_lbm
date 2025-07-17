@@ -9,14 +9,11 @@
 
 __host__ inline void fine_grid_solution(latticeNode *nodes)
 {
-    // printf("\n");
-    for (size_t y = 0; y < NY_FINE_GRID; ++y)
+    for (size_t y = 0; y < NY_FINE; ++y)
     {
-        for (size_t x = 0; x < NX_FINE_GRID; ++x)
+        for (size_t x = 0; x < NX_FINE; ++x)
         {
             unsigned int nodeType = nodes[fine_idx(x, y)].node_type;
-
-            // printf("%03d ", nodeType);
 
             if (nodeType != MISSING_DEFINITION)
             {
@@ -40,7 +37,7 @@ __host__ inline void fine_grid_solution(latticeNode *nodes)
                     }
                     else
                     {
-                        boundary_condition(&nodes[fine_idx(x, y)]);
+                        boundary_condition(&nodes[fine_idx(x, y)], OMEGA_FINE);
                     }
                 }
                 else
@@ -72,20 +69,17 @@ __host__ inline void fine_grid_solution(latticeNode *nodes)
         // printf("\n");
     }
 
-    streaming(nodes, NX_FINE_GRID, NY_FINE_GRID);
+    streaming(nodes, NX_FINE, NY_FINE);
 }
 
 __host__ inline void coarse_grid_solution(latticeNode *nodes)
 {
-    // printf("\n");
 
-    for (size_t y = 0; y < NY_COARSE_GRID; y++)
+    for (size_t y = 0; y < NY_COARSE; y++)
     {
-        for (size_t x = 0; x < NX_COARSE_GRID; x++)
+        for (size_t x = 0; x < NX_COARSE; x++)
         {
             unsigned int nodeType = nodes[coarse_idx(x, y)].node_type;
-
-            // printf("%03d ", nodeType);
 
             const dfloat *pop = nodes[fine_idx(x, y)].pop_in;
 
@@ -108,11 +102,9 @@ __host__ inline void coarse_grid_solution(latticeNode *nodes)
             collision(&nodes[fine_idx(x, y)], OMEGA_FINE);
             regularization(&nodes[fine_idx(x, y)]);
         }
-
-        // printf("\n");
     }
 
-    streaming(nodes, NX_COARSE_GRID, NY_COARSE_GRID);
+    streaming(nodes, NX_COARSE, NY_COARSE);
 }
 
 #endif

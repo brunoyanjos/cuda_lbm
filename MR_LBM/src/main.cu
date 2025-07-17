@@ -32,56 +32,56 @@ int main()
 
 	for (step = INI_STEP; step < N_STEPS; step++)
 	{
-		for (size_t y = 0; y < NY; ++y)
-		{
-			unsigned int nodeType_one = fine_nodes[fine_idx(FINE_WIDTH - 1, FINE_WIDTH - 1 + GRID_RATIO * y)].node_type;
-			unsigned int nodeType_two = fine_nodes[fine_idx(NX_FINE_GRID - FINE_WIDTH, FINE_WIDTH - 1 + GRID_RATIO * y)].node_type;
+		// for (size_t y = 0; y < NY; ++y)
+		// {
+		// 	unsigned int nodeType_one = fine_nodes[fine_idx(FINE_WIDTH - 1, FINE_WIDTH - 1 + GRID_RATIO * y)].node_type;
+		// 	unsigned int nodeType_two = fine_nodes[fine_idx(NX_FINE_GRID - FINE_WIDTH, FINE_WIDTH - 1 + GRID_RATIO * y)].node_type;
 
-			fine_nodes[fine_idx(FINE_WIDTH - 1, FINE_WIDTH - 1 + GRID_RATIO * y)] = coarse_nodes[coarse_idx(N_OVERLAP_LAYER, y + N_OVERLAP_LAYER)];
-			fine_nodes[fine_idx(NX_FINE_GRID - FINE_WIDTH, FINE_WIDTH - 1 + GRID_RATIO * y)] = coarse_nodes[coarse_idx(NX_COARSE_GRID - N_OVERLAP_LAYER - 1, y + N_OVERLAP_LAYER)];
+		// 	fine_nodes[fine_idx(FINE_WIDTH - 1, FINE_WIDTH - 1 + GRID_RATIO * y)] = coarse_nodes[coarse_idx(N_OVERLAP_LAYER, y + N_OVERLAP_LAYER)];
+		// 	fine_nodes[fine_idx(NX_FINE_GRID - FINE_WIDTH, FINE_WIDTH - 1 + GRID_RATIO * y)] = coarse_nodes[coarse_idx(NX_COARSE_GRID - N_OVERLAP_LAYER - 1, y + N_OVERLAP_LAYER)];
 
-			fine_nodes[fine_idx(FINE_WIDTH - 1, FINE_WIDTH - 1 + GRID_RATIO * y)].updated = true;
-			fine_nodes[fine_idx(NX_FINE_GRID - FINE_WIDTH, FINE_WIDTH - 1 + GRID_RATIO * y)].updated = true;
+		// 	fine_nodes[fine_idx(FINE_WIDTH - 1, FINE_WIDTH - 1 + GRID_RATIO * y)].updated = true;
+		// 	fine_nodes[fine_idx(NX_FINE_GRID - FINE_WIDTH, FINE_WIDTH - 1 + GRID_RATIO * y)].updated = true;
 
-			fine_nodes[fine_idx(FINE_WIDTH - 1, FINE_WIDTH - 1 + GRID_RATIO * y)].node_type = nodeType_one;
-			fine_nodes[fine_idx(NX_FINE_GRID - FINE_WIDTH, FINE_WIDTH - 1 + GRID_RATIO * y)].node_type = nodeType_two;
-		}
+		// 	fine_nodes[fine_idx(FINE_WIDTH - 1, FINE_WIDTH - 1 + GRID_RATIO * y)].node_type = nodeType_one;
+		// 	fine_nodes[fine_idx(NX_FINE_GRID - FINE_WIDTH, FINE_WIDTH - 1 + GRID_RATIO * y)].node_type = nodeType_two;
+		// }
 
-		for (size_t x = 0; x < NX; ++x)
-		{
-			unsigned int nodeType_one = fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, FINE_WIDTH - 1)].node_type;
-			unsigned int nodeType_two = fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, NY_FINE_GRID - FINE_WIDTH)].node_type;
+		// for (size_t x = 0; x < NX; ++x)
+		// {
+		// 	unsigned int nodeType_one = fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, FINE_WIDTH - 1)].node_type;
+		// 	unsigned int nodeType_two = fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, NY_FINE_GRID - FINE_WIDTH)].node_type;
 
-			fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, FINE_WIDTH - 1)] = coarse_nodes[coarse_idx(x + N_OVERLAP_LAYER, N_OVERLAP_LAYER)];
-			fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, NY_FINE_GRID - FINE_WIDTH)] = coarse_nodes[coarse_idx(x + N_OVERLAP_LAYER, NX_COARSE_GRID - N_OVERLAP_LAYER - 1)];
+		// 	fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, FINE_WIDTH - 1)] = coarse_nodes[coarse_idx(x + N_OVERLAP_LAYER, N_OVERLAP_LAYER)];
+		// 	fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, NY_FINE_GRID - FINE_WIDTH)] = coarse_nodes[coarse_idx(x + N_OVERLAP_LAYER, NX_COARSE_GRID - N_OVERLAP_LAYER - 1)];
 
-			fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, FINE_WIDTH - 1)].updated = true;
-			fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, NY_FINE_GRID - FINE_WIDTH)].updated = true;
+		// 	fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, FINE_WIDTH - 1)].updated = true;
+		// 	fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, NY_FINE_GRID - FINE_WIDTH)].updated = true;
 
-			fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, FINE_WIDTH - 1)].node_type = nodeType_one;
-			fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, NY_FINE_GRID - FINE_WIDTH)].node_type = nodeType_two;
-		}
+		// 	fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, FINE_WIDTH - 1)].node_type = nodeType_one;
+		// 	fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, NY_FINE_GRID - FINE_WIDTH)].node_type = nodeType_two;
+		// }
 
 		for (size_t fine_step = 0; fine_step < GRID_RATIO; ++fine_step)
 		{
 			fine_grid_solution(fine_nodes);
 		}
 
-		int init_point = N_EXTRA_LAYER * GRID_RATIO;
+		// int init_point = N_EXTRA_LAYER * GRID_RATIO;
 
-		for (size_t y = 0; y < NY_COARSE_GRID; ++y)
-		{
-			coarse_nodes[coarse_idx(0, y)] = fine_nodes[fine_idx(init_point, init_point + GRID_RATIO * y)];
-			coarse_nodes[coarse_idx(NX_COARSE_GRID - 1, y)] = fine_nodes[fine_idx(NX_FINE_GRID - init_point, init_point + GRID_RATIO * y)];
-		}
+		// for (size_t y = 0; y < NY_COARSE_GRID; ++y)
+		// {
+		// 	coarse_nodes[coarse_idx(0, y)] = fine_nodes[fine_idx(init_point, init_point + GRID_RATIO * y)];
+		// 	coarse_nodes[coarse_idx(NX_COARSE_GRID - 1, y)] = fine_nodes[fine_idx(NX_FINE_GRID - init_point, init_point + GRID_RATIO * y)];
+		// }
 
-		for (size_t x = 0; x < NX_COARSE_GRID; ++x)
-		{
-			coarse_nodes[coarse_idx(x, 0)] = fine_nodes[fine_idx(init_point + GRID_RATIO * x, init_point)];
-			coarse_nodes[coarse_idx(x, NY_COARSE_GRID - 1)] = fine_nodes[fine_idx(init_point + GRID_RATIO * x, NY_COARSE_GRID - init_point)];
+		// for (size_t x = 0; x < NX_COARSE_GRID; ++x)
+		// {
+		// 	coarse_nodes[coarse_idx(x, 0)] = fine_nodes[fine_idx(init_point + GRID_RATIO * x, init_point)];
+		// 	coarse_nodes[coarse_idx(x, NY_COARSE_GRID - 1)] = fine_nodes[fine_idx(init_point + GRID_RATIO * x, NY_COARSE_GRID - init_point)];
 
-			coarse_nodes[coarse_idx(x, 0)].node_type = 100;
-		}
+		// 	coarse_nodes[coarse_idx(x, 0)].node_type = 100;
+		// }
 
 		coarse_grid_solution(coarse_nodes);
 
@@ -97,72 +97,13 @@ int main()
 
 		file << "x y rho ux uy\n";
 
-		for (size_t y = 0; y < NY_FINE_GRID; y++)
-		{
-			for (size_t x = 0; x < NX_FINE_GRID; x++)
-			{
-				dfloat x_coord = static_cast<dfloat>(x) / GRID_RATIO;
-				dfloat y_coord = static_cast<dfloat>(y) / GRID_RATIO;
-
-				int LIMIT = N_EXTRA_LAYER + N_OVERLAP_LAYER;
-				int TOP_LIMIT = NY_TOTAL_SIZE - LIMIT;
-
-				bool y_is_integer = y_coord - static_cast<int>(y_coord) == 0;
-				bool x_is_integer = x_coord - static_cast<int>(x_coord) == 0;
-
-				if (x_coord == LIMIT && y_is_integer && y_coord < TOP_LIMIT && y_coord > LIMIT - 1)
-				{
-					dfloat rho = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].rho;
-					dfloat ux = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].ux / F_M_I_SCALE;
-					dfloat uy = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].uy / F_M_I_SCALE;
-
-					file << x_coord << " " << y_coord << " " << rho << " " << ux << " " << uy << std::endl;
-				}
-				else if (x_coord == TOP_LIMIT - 1 && y_is_integer && y_coord < TOP_LIMIT && y_coord > LIMIT - 1)
-				{
-					dfloat rho = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].rho;
-					dfloat ux = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].ux / F_M_I_SCALE;
-					dfloat uy = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].uy / F_M_I_SCALE;
-
-					file << x_coord << " " << y_coord << " " << rho << " " << ux << " " << uy << std::endl;
-				}
-				else if (y_coord == LIMIT && x_is_integer && x_coord < TOP_LIMIT && x_coord > LIMIT - 1)
-				{
-					dfloat rho = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].rho;
-					dfloat ux = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].ux / F_M_I_SCALE;
-					dfloat uy = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].uy / F_M_I_SCALE;
-
-					file << x_coord << " " << y_coord << " " << rho << " " << ux << " " << uy << std::endl;
-				}
-				else if (y_coord == TOP_LIMIT - 1 && x_is_integer && x_coord < TOP_LIMIT && x_coord > LIMIT - 1)
-				{
-					dfloat rho = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].rho;
-					dfloat ux = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].ux / F_M_I_SCALE;
-					dfloat uy = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].uy / F_M_I_SCALE;
-
-					file << x_coord << " " << y_coord << " " << rho << " " << ux << " " << uy << std::endl;
-				}
-				else if (x_coord > LIMIT && x_coord < TOP_LIMIT - 1 && y_coord > LIMIT && y_coord < TOP_LIMIT - 1)
-				{
-					if (x_is_integer && y_is_integer)
-					{
-						dfloat rho = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].rho;
-						dfloat ux = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].ux / F_M_I_SCALE;
-						dfloat uy = coarse_nodes[coarse_idx(x_coord - 2, y_coord - 2)].uy / F_M_I_SCALE;
-
-						file << x_coord << " " << y_coord << " " << rho << " " << ux << " " << uy << std::endl;
-					}
-				}
-				else
-				{
-					dfloat rho = fine_nodes[fine_idx(x, y)].rho;
-					dfloat ux = fine_nodes[fine_idx(x, y)].ux / F_M_I_SCALE;
-					dfloat uy = fine_nodes[fine_idx(x, y)].uy / F_M_I_SCALE;
-
-					file << x_coord << " " << y_coord << " " << rho << " " << ux << " " << uy << std::endl;
-				}
-			}
-		}
+		// for (size_t y = 0; y < NY_FINE_GRID; y++)
+		// {
+		// 	for (size_t x = 0; x < NX_FINE_GRID; x++)
+		// 	{
+		// 		file << x_coord << " " << y_coord << " " << rho << " " << ux << " " << uy << std::endl;
+		// 	}
+		// }
 
 		file.close();
 	}
