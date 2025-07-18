@@ -32,80 +32,59 @@ int main()
 
 	for (step = INI_STEP; step < N_STEPS; step++)
 	{
-		// for (size_t y = 0; y < NY; ++y)
-		// {
-		// 	unsigned int nodeType_one = fine_nodes[fine_idx(FINE_WIDTH - 1, FINE_WIDTH - 1 + GRID_RATIO * y)].node_type;
-		// 	unsigned int nodeType_two = fine_nodes[fine_idx(NX_FINE_GRID - FINE_WIDTH, FINE_WIDTH - 1 + GRID_RATIO * y)].node_type;
+		coarse_grid_solution(coarse_nodes);
 
-		// 	fine_nodes[fine_idx(FINE_WIDTH - 1, FINE_WIDTH - 1 + GRID_RATIO * y)] = coarse_nodes[coarse_idx(N_OVERLAP_LAYER, y + N_OVERLAP_LAYER)];
-		// 	fine_nodes[fine_idx(NX_FINE_GRID - FINE_WIDTH, FINE_WIDTH - 1 + GRID_RATIO * y)] = coarse_nodes[coarse_idx(NX_COARSE_GRID - N_OVERLAP_LAYER - 1, y + N_OVERLAP_LAYER)];
-
-		// 	fine_nodes[fine_idx(FINE_WIDTH - 1, FINE_WIDTH - 1 + GRID_RATIO * y)].updated = true;
-		// 	fine_nodes[fine_idx(NX_FINE_GRID - FINE_WIDTH, FINE_WIDTH - 1 + GRID_RATIO * y)].updated = true;
-
-		// 	fine_nodes[fine_idx(FINE_WIDTH - 1, FINE_WIDTH - 1 + GRID_RATIO * y)].node_type = nodeType_one;
-		// 	fine_nodes[fine_idx(NX_FINE_GRID - FINE_WIDTH, FINE_WIDTH - 1 + GRID_RATIO * y)].node_type = nodeType_two;
-		// }
-
-		// for (size_t x = 0; x < NX; ++x)
-		// {
-		// 	unsigned int nodeType_one = fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, FINE_WIDTH - 1)].node_type;
-		// 	unsigned int nodeType_two = fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, NY_FINE_GRID - FINE_WIDTH)].node_type;
-
-		// 	fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, FINE_WIDTH - 1)] = coarse_nodes[coarse_idx(x + N_OVERLAP_LAYER, N_OVERLAP_LAYER)];
-		// 	fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, NY_FINE_GRID - FINE_WIDTH)] = coarse_nodes[coarse_idx(x + N_OVERLAP_LAYER, NX_COARSE_GRID - N_OVERLAP_LAYER - 1)];
-
-		// 	fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, FINE_WIDTH - 1)].updated = true;
-		// 	fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, NY_FINE_GRID - FINE_WIDTH)].updated = true;
-
-		// 	fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, FINE_WIDTH - 1)].node_type = nodeType_one;
-		// 	fine_nodes[fine_idx(FINE_WIDTH - 1 + GRID_RATIO * x, NY_FINE_GRID - FINE_WIDTH)].node_type = nodeType_two;
-		// }
+		coarse_to_fine(coarse_nodes, fine_nodes);
 
 		for (size_t fine_step = 0; fine_step < GRID_RATIO; ++fine_step)
 		{
 			fine_grid_solution(fine_nodes);
 		}
 
-		// int init_point = N_EXTRA_LAYER * GRID_RATIO;
+		fine_to_coarse(fine_nodes, coarse_nodes);
 
-		// for (size_t y = 0; y < NY_COARSE_GRID; ++y)
-		// {
-		// 	coarse_nodes[coarse_idx(0, y)] = fine_nodes[fine_idx(init_point, init_point + GRID_RATIO * y)];
-		// 	coarse_nodes[coarse_idx(NX_COARSE_GRID - 1, y)] = fine_nodes[fine_idx(NX_FINE_GRID - init_point, init_point + GRID_RATIO * y)];
-		// }
+		string sim_id = ID_SIM;
 
-		// for (size_t x = 0; x < NX_COARSE_GRID; ++x)
-		// {
-		// 	coarse_nodes[coarse_idx(x, 0)] = fine_nodes[fine_idx(init_point + GRID_RATIO * x, init_point)];
-		// 	coarse_nodes[coarse_idx(x, NY_COARSE_GRID - 1)] = fine_nodes[fine_idx(init_point + GRID_RATIO * x, NY_COARSE_GRID - init_point)];
+		std::ofstream coarse_file("GRID/" + sim_id + "/coarse_macr_" + std::to_string(step) + ".dat");
+		std::ofstream fine_file("GRID/" + sim_id + "/fine_macr_" + std::to_string(step) + ".dat");
 
-		// 	coarse_nodes[coarse_idx(x, 0)].node_type = 100;
-		// }
+		coarse_file << std::fixed << std::setprecision(12); // formatação com 6 casas decimais
+		fine_file << std::fixed << std::setprecision(12);
 
-		coarse_grid_solution(coarse_nodes);
-
-		std::ofstream file("GRID/001/macr_" + std::to_string(step) + ".dat");
-
-		if (!file.is_open())
+		for (size_t y = 0; y < NY_COARSE; y++)
 		{
-			std::cerr << "Erro ao abrir arquivo para escrita!" << std::endl;
-			return 0;
+			for (size_t x = 0; x < NX_COARSE; x++)
+			{
+				const dfloat ux = coarse_nodes[coarse_idx(x, y)].ux / F_M_I_SCALE;
+				const dfloat uy = coarse_nodes[coarse_idx(x, y)].uy / F_M_I_SCALE;
+
+				const dfloat u2 = ux * ux + uy * uy;
+
+				const dfloat u = std::sqrt(u2);
+
+				coarse_file << u << " ";
+			}
+			coarse_file << std::endl;
 		}
 
-		file << std::fixed << std::setprecision(12); // formatação com 6 casas decimais
+		for (size_t y = 0; y < NY_FINE; ++y)
+		{
+			for (size_t x = 0; x < NX_FINE; ++x)
+			{
+				const dfloat ux = fine_nodes[fine_idx(x, y)].ux / F_M_I_SCALE;
+				const dfloat uy = fine_nodes[fine_idx(x, y)].uy / F_M_I_SCALE;
 
-		file << "x y rho ux uy\n";
+				const dfloat u2 = ux * ux + uy * uy;
 
-		// for (size_t y = 0; y < NY_FINE_GRID; y++)
-		// {
-		// 	for (size_t x = 0; x < NX_FINE_GRID; x++)
-		// 	{
-		// 		file << x_coord << " " << y_coord << " " << rho << " " << ux << " " << uy << std::endl;
-		// 	}
-		// }
+				const dfloat u = std::sqrt(u2);
 
-		file.close();
+				fine_file << u << " ";
+			}
+			fine_file << std::endl;
+		}
+
+		coarse_file.close();
+		fine_file.close();
 	}
 
 	/* --------------------------------------------------------------------- */

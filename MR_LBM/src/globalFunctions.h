@@ -73,13 +73,13 @@ idxCylinder(unsigned int x, unsigned int y)
 __host__
 size_t __forceinline__
 fine_idx(size_t x, size_t y) {
-    return x + y * NX_FINE_GRID;
+    return x + y * NX_FINE;
 }
 
 __host__
 size_t __forceinline__
 coarse_idx(size_t x, size_t y) {
-    return x + y * NX_COARSE_GRID;
+    return x + y * (NX_COARSE + N_OVERLAP_LAYER);
 }
 
 #endif // !__GLOBAL_FUNCTIONS_H

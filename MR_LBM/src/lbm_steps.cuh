@@ -344,4 +344,27 @@ __host__ inline void collision(latticeNode *node, dfloat omega)
     (*node).mxy = (t_omegaVar * (*node).mxy + omegaVar * (*node).ux * (*node).uy);
 }
 
+__host__ inline void coarse_to_fine(latticeNode *coarse_nodes, latticeNode *fine_nodes)
+{
+    for (int y = 0; y < NY_COARSE; ++y)
+    {
+        const unsigned temp_type = fine_nodes[fine_idx(0, y * 2)].node_type;
+
+        fine_nodes[fine_idx(0, y * 2)] = coarse_nodes[coarse_idx(NX_COARSE + N_OVERLAP_LAYER - 1, y)];
+
+        fine_nodes[fine_idx(0, y * 2)].node_type = temp_type;
+        fine_nodes[fine_idx(0, y * 2)].updated = true;
+    }
+}
+
+__host__ inline void fine_to_coarse(latticeNode *fine_nodes, latticeNode *coarse_nodes)
+{
+    for (int y = 0; y < NY_COARSE; ++y)
+    {
+        coarse_nodes[coarse_idx(NX_COARSE + N_OVERLAP_LAYER - 1, y)] = fine_nodes[fine_idx(0, y * 2)];
+
+        coarse_nodes[coarse_idx(NX_COARSE + N_OVERLAP_LAYER - 1, y)].updated = true;
+    }
+}
+
 #endif

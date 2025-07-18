@@ -162,18 +162,28 @@ __host__ inline void initialize_fine_grid(latticeNode *&lattice_nodes)
 
 			if (x == 0 && y == 0)
 			{
+				lattice_nodes[idx].node_type = INT_BOTTOM_LEFT;
+
+				lattice_nodes[idx].updated = true;
 			}
 			else if (x == 0 && y == NY_FINE - 1)
 			{
+				lattice_nodes[idx].node_type = INT_TOP_LEFT;
+
+				lattice_nodes[idx].updated = true;
 			}
 			else if (x == NX_FINE - 1 && y == 0)
 			{
+				lattice_nodes[idx].node_type = SOUTH_EAST;
 			}
 			else if (x == NX_FINE - 1 && y == NY_FINE - 1)
 			{
+				lattice_nodes[idx].node_type = NORTH_EAST;
 			}
 			else if (x == 0)
 			{
+				lattice_nodes[idx].node_type = INT_LEFT;
+
 				if (y % 2 == 0)
 				{
 					lattice_nodes[idx].updated = true;
@@ -181,12 +191,15 @@ __host__ inline void initialize_fine_grid(latticeNode *&lattice_nodes)
 			}
 			else if (x == NX_FINE - 1)
 			{
+				lattice_nodes[idx].node_type = EAST;
 			}
 			else if (y == 0)
 			{
+				lattice_nodes[idx].node_type = SOUTH;
 			}
 			else if (y == NY_FINE - 1)
 			{
+				lattice_nodes[idx].node_type = NORTH;
 			}
 			else
 			{
@@ -211,9 +224,32 @@ __host__ void initialize_coarse_grid(latticeNode *&lattice_nodes)
 	{
 		for (size_t x = 0; x < NX_COARSE + N_OVERLAP_LAYER; x++)
 		{
-			size_t idx = x + y * NX_COARSE;
+			size_t idx = coarse_idx(x, y);
 
-			lattice_nodes[idx].node_type = BULK;
+			if (x == 0 && y == 0)
+			{
+				lattice_nodes[idx].node_type = SOUTH_WEST;
+			}
+			else if (x == 0 && y == NY_COARSE - 1)
+			{
+				lattice_nodes[idx].node_type = NORTH_WEST;
+			}
+			else if (x == 0)
+			{
+				lattice_nodes[idx].node_type = WEST;
+			}
+			else if (y == 0)
+			{
+				lattice_nodes[idx].node_type = SOUTH;
+			}
+			else if (y == NY_COARSE - 1)
+			{
+				lattice_nodes[idx].node_type = NORTH;
+			}
+			else
+			{
+				lattice_nodes[idx].node_type = BULK;
+			}
 
 			lattice_nodes[idx].rho = RHO_0;
 			lattice_nodes[idx].ux = 0.0;

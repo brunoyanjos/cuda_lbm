@@ -9,39 +9,20 @@
 
 __host__ inline void fine_grid_solution(latticeNode *nodes)
 {
+    printf("\n");
+
     for (size_t y = 0; y < NY_FINE; ++y)
     {
         for (size_t x = 0; x < NX_FINE; ++x)
         {
             unsigned int nodeType = nodes[fine_idx(x, y)].node_type;
 
-            if (nodeType != MISSING_DEFINITION)
+            if (nodeType != BULK)
             {
-                if (nodeType != BULK)
+                if (nodes[fine_idx(x, y)].updated)
                 {
-                    if (nodes[fine_idx(x, y)].updated)
-                    {
-                        const dfloat *pop = nodes[fine_idx(x, y)].pop_in;
+                    printf("CTF ");
 
-                        nodes[fine_idx(x, y)].rho = pop[0] + pop[1] + pop[2] + pop[3] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8];
-                        const dfloat invRho = 1.0f / nodes[fine_idx(x, y)].rho;
-
-                        nodes[fine_idx(x, y)].ux = ((pop[1] + pop[5] + pop[8]) - (pop[3] + pop[6] + pop[7])) * invRho;
-                        nodes[fine_idx(x, y)].uy = ((pop[2] + pop[5] + pop[6]) - (pop[4] + pop[7] + pop[8])) * invRho;
-
-                        nodes[fine_idx(x, y)].mxx = (pop[1] + pop[3] + pop[5] + pop[6] + pop[7] + pop[8]) * invRho - cs2;
-                        nodes[fine_idx(x, y)].mxy = ((pop[5] + pop[7]) - (pop[6] + pop[8])) * invRho;
-                        nodes[fine_idx(x, y)].myy = (pop[2] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8]) * invRho - cs2;
-
-                        nodes[fine_idx(x, y)].updated = false;
-                    }
-                    else
-                    {
-                        boundary_condition(&nodes[fine_idx(x, y)], OMEGA_FINE);
-                    }
-                }
-                else
-                {
                     const dfloat *pop = nodes[fine_idx(x, y)].pop_in;
 
                     nodes[fine_idx(x, y)].rho = pop[0] + pop[1] + pop[2] + pop[3] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8];
@@ -53,7 +34,31 @@ __host__ inline void fine_grid_solution(latticeNode *nodes)
                     nodes[fine_idx(x, y)].mxx = (pop[1] + pop[3] + pop[5] + pop[6] + pop[7] + pop[8]) * invRho - cs2;
                     nodes[fine_idx(x, y)].mxy = ((pop[5] + pop[7]) - (pop[6] + pop[8])) * invRho;
                     nodes[fine_idx(x, y)].myy = (pop[2] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8]) * invRho - cs2;
+
+                    nodes[fine_idx(x, y)].updated = false;
                 }
+                else
+                {
+                    printf("%03d ", nodeType);
+
+                    boundary_condition(&nodes[fine_idx(x, y)], OMEGA_FINE);
+                }
+            }
+            else
+            {
+                printf("%03d ", nodeType);
+
+                const dfloat *pop = nodes[fine_idx(x, y)].pop_in;
+
+                nodes[fine_idx(x, y)].rho = pop[0] + pop[1] + pop[2] + pop[3] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8];
+                const dfloat invRho = 1.0f / nodes[fine_idx(x, y)].rho;
+
+                nodes[fine_idx(x, y)].ux = ((pop[1] + pop[5] + pop[8]) - (pop[3] + pop[6] + pop[7])) * invRho;
+                nodes[fine_idx(x, y)].uy = ((pop[2] + pop[5] + pop[6]) - (pop[4] + pop[7] + pop[8])) * invRho;
+
+                nodes[fine_idx(x, y)].mxx = (pop[1] + pop[3] + pop[5] + pop[6] + pop[7] + pop[8]) * invRho - cs2;
+                nodes[fine_idx(x, y)].mxy = ((pop[5] + pop[7]) - (pop[6] + pop[8])) * invRho;
+                nodes[fine_idx(x, y)].myy = (pop[2] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8]) * invRho - cs2;
             }
 
             nodes[fine_idx(x, y)].ux = nodes[fine_idx(x, y)].ux * F_M_I_SCALE;
@@ -66,7 +71,7 @@ __host__ inline void fine_grid_solution(latticeNode *nodes)
             regularization(&nodes[fine_idx(x, y)]);
         }
 
-        // printf("\n");
+        printf("\n");
     }
 
     streaming(nodes, NX_FINE, NY_FINE);
@@ -74,34 +79,53 @@ __host__ inline void fine_grid_solution(latticeNode *nodes)
 
 __host__ inline void coarse_grid_solution(latticeNode *nodes)
 {
+    printf("\n");
 
     for (size_t y = 0; y < NY_COARSE; y++)
     {
-        for (size_t x = 0; x < NX_COARSE; x++)
+        for (size_t x = 0; x < NX_COARSE + N_OVERLAP_LAYER; x++)
         {
             unsigned int nodeType = nodes[coarse_idx(x, y)].node_type;
 
-            const dfloat *pop = nodes[fine_idx(x, y)].pop_in;
+            if (nodes[coarse_idx(x, y)].updated == true)
+            {
+                printf("FTC ");
+            }
+            else
+            {
+                printf("%03d ", nodeType);
+            }
 
-            nodes[fine_idx(x, y)].rho = pop[0] + pop[1] + pop[2] + pop[3] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8];
-            const dfloat invRho = 1.0f / nodes[fine_idx(x, y)].rho;
+            if (nodeType != BULK)
+            {
+                boundary_condition(&nodes[fine_idx(x, y)], OMEGA_COARSE);
+            }
+            else
+            {
+                const dfloat *pop = nodes[coarse_idx(x, y)].pop_in;
 
-            nodes[fine_idx(x, y)].ux = ((pop[1] + pop[5] + pop[8]) - (pop[3] + pop[6] + pop[7])) * invRho;
-            nodes[fine_idx(x, y)].uy = ((pop[2] + pop[5] + pop[6]) - (pop[4] + pop[7] + pop[8])) * invRho;
+                nodes[coarse_idx(x, y)].rho = pop[0] + pop[1] + pop[2] + pop[3] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8];
+                const dfloat invRho = 1.0f / nodes[coarse_idx(x, y)].rho;
 
-            nodes[fine_idx(x, y)].mxx = (pop[1] + pop[3] + pop[5] + pop[6] + pop[7] + pop[8]) * invRho - cs2;
-            nodes[fine_idx(x, y)].mxy = ((pop[5] + pop[7]) - (pop[6] + pop[8])) * invRho;
-            nodes[fine_idx(x, y)].myy = (pop[2] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8]) * invRho - cs2;
+                nodes[coarse_idx(x, y)].ux = ((pop[1] + pop[5] + pop[8]) - (pop[3] + pop[6] + pop[7])) * invRho;
+                nodes[coarse_idx(x, y)].uy = ((pop[2] + pop[5] + pop[6]) - (pop[4] + pop[7] + pop[8])) * invRho;
 
-            nodes[fine_idx(x, y)].ux = nodes[fine_idx(x, y)].ux * F_M_I_SCALE;
-            nodes[fine_idx(x, y)].uy = nodes[fine_idx(x, y)].uy * F_M_I_SCALE;
-            nodes[fine_idx(x, y)].mxx = nodes[fine_idx(x, y)].mxx * F_M_II_SCALE;
-            nodes[fine_idx(x, y)].mxy = nodes[fine_idx(x, y)].mxy * F_M_IJ_SCALE;
-            nodes[fine_idx(x, y)].myy = nodes[fine_idx(x, y)].myy * F_M_II_SCALE;
+                nodes[coarse_idx(x, y)].mxx = (pop[1] + pop[3] + pop[5] + pop[6] + pop[7] + pop[8]) * invRho - cs2;
+                nodes[coarse_idx(x, y)].mxy = ((pop[5] + pop[7]) - (pop[6] + pop[8])) * invRho;
+                nodes[coarse_idx(x, y)].myy = (pop[2] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8]) * invRho - cs2;
+            }
 
-            collision(&nodes[fine_idx(x, y)], OMEGA_FINE);
-            regularization(&nodes[fine_idx(x, y)]);
+            nodes[coarse_idx(x, y)].ux = nodes[coarse_idx(x, y)].ux * F_M_I_SCALE;
+            nodes[coarse_idx(x, y)].uy = nodes[coarse_idx(x, y)].uy * F_M_I_SCALE;
+            nodes[coarse_idx(x, y)].mxx = nodes[coarse_idx(x, y)].mxx * F_M_II_SCALE;
+            nodes[coarse_idx(x, y)].mxy = nodes[coarse_idx(x, y)].mxy * F_M_IJ_SCALE;
+            nodes[coarse_idx(x, y)].myy = nodes[coarse_idx(x, y)].myy * F_M_II_SCALE;
+
+            collision(&nodes[coarse_idx(x, y)], OMEGA_COARSE);
+            regularization(&nodes[coarse_idx(x, y)]);
         }
+
+        printf("\n");
     }
 
     streaming(nodes, NX_COARSE, NY_COARSE);
