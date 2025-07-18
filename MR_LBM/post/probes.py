@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Caminho do arquivo
-file_path = "LDC/101/velocity_probes.bin"
+file_path = "LDC/012/velocity_probes.bin"
 
 # Define o tipo de dado: use float32 se seu dfloat for float, float64 se for double
 dtype = np.float32  # ou np.float32, se for o caso
