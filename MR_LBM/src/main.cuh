@@ -160,21 +160,38 @@ __host__ inline void initialize_fine_grid(latticeNode *&lattice_nodes)
 
 			lattice_nodes[idx].updated = false;
 
-			if (x == 0 && y == 0) {
-
-			} else if (x == 0 && y == NY_FINE - 1) {
-
-			} else if (x == NX_FINE - 1 && y == 0) {
-
-			} else if (x == NX_FINE - 1 && y == NY_FINE - 1) {
-
-			} else if(x == 0) {
-
-			} else if(x == NX_FINE - 1) {
-				
+			if (x == 0 && y == 0)
+			{
 			}
-
-			lattice_nodes[idx].node_type = BULK;
+			else if (x == 0 && y == NY_FINE - 1)
+			{
+			}
+			else if (x == NX_FINE - 1 && y == 0)
+			{
+			}
+			else if (x == NX_FINE - 1 && y == NY_FINE - 1)
+			{
+			}
+			else if (x == 0)
+			{
+				if (y % 2 == 0)
+				{
+					lattice_nodes[idx].updated = true;
+				}
+			}
+			else if (x == NX_FINE - 1)
+			{
+			}
+			else if (y == 0)
+			{
+			}
+			else if (y == NY_FINE - 1)
+			{
+			}
+			else
+			{
+				lattice_nodes[idx].node_type = BULK;
+			}
 
 			lattice_nodes[idx].rho = RHO_0;
 			lattice_nodes[idx].ux = 0.0;
