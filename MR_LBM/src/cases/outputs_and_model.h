@@ -9,7 +9,7 @@
 
 #define BC_PROBLEM ldc
 #define CASE_DIRECTORY cases
-#define REG_ORDER 2nd_order
+#define REG_ORDER 4th_order
 
 #define COLREC STR(colrec/REG_ORDER/collision_and_reconstruction.cuh)
 #define CASE_CONSTANTS STR(BC_PROBLEM/constants.h)

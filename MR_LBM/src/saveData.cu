@@ -233,6 +233,8 @@ std::string getSimInfoString(int step, dfloat MLUPS)
 	strSimInfo << "---------------------------- SIMULATION INFORMATION ----------------------------\n";
 	strSimInfo << "      Simulation ID: " << ID_SIM << "\n";
 	strSimInfo << "       Velocity set: D2Q9\n";
+	strSimInfo << "          Reg Order: " << STR(REG_ORDER) << "\n";
+	strSimInfo << "               IRBC: " << IRBC << "\n";
 	strSimInfo << "                 Re: " << RE << "\n";
 	strSimInfo << "          Precision: float\n";
 	strSimInfo << "                 NX: " << NX << "\n";	

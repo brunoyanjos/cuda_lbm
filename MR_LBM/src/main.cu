@@ -27,10 +27,10 @@ int main()
 	dfloat *uy;
 
 	dfloat *probes;
-	
+
 	dfloat *ux_mean_device;
 	dfloat *uy_mean_device;
-	
+
 	dfloat *ux_mean_host;
 	dfloat *uy_mean_host;
 
@@ -95,15 +95,17 @@ int main()
 		if (MACR_SAVE != 0 && step % MACR_SAVE == 0)
 		{
 			printf("\n----------------------------------- (%d/%d) %.2f%% -----------------------------------\n", step, N_STEPS, static_cast<float>(step) / static_cast<float>(N_STEPS) * 100.0f);
-			if (step != 0) time_elapsing_count(step_end, step_start, step);
-			
+			if (step != 0)
+				time_elapsing_count(step_end, step_start, step);
+
 			checkCudaErrors(cudaDeviceSynchronize());
 			checkCudaErrors(cudaMemcpy(h_fMom, d_fMom, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyDeviceToHost));
 
 			kinetic_energy(h_fMom, step);
 			saving_probes(h_fMom, probes, step);
 
-			if(step >= N_STAT) {
+			if (step >= N_STAT)
+			{
 				velocity_average<<<avg_gridSize, avg_blockSize>>>(d_fMom, ux_mean_device, uy_mean_device, step);
 			}
 

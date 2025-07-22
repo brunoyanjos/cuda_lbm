@@ -15,7 +15,7 @@ except:
     font_prop = fm.FontProperties(family='DejaVu Serif', size=16)
 
 # Lista de IDs de simulação
-sim_ids = ["016", "017"]
+sim_ids = ["025"]
 
 # Define a color for the simulation lines
 green = '#61BB46'
@@ -25,34 +25,35 @@ red = '#E03A3E'
 purpple = '#963D97'
 blue = '#009DDC'
 
-linestyles = [ 'solid', 'solid']
-colors_x = [green, yellow, red, purpple, blue]
+linestyles = [ 'solid', (0, (6,2,1,2)), (0, (10,4))]
+colors_x = [red, orange, yellow]
+colors_y = [blue, purpple, green]
 
-# # Carregar dados de referência
-# benchmark_data_x = pd.read_csv('MR_LBM/post/benchmark/ghia_ux_dy.csv', header=None)
-# benchmark_data_y = pd.read_csv('MR_LBM/post/benchmark/ghia_uy_dx.csv', header=None)
+# Carregar dados de referência
+benchmark_data_x = pd.read_csv('MR_LBM/post/benchmark/ghia_ux_dy.csv', header=None)
+benchmark_data_y = pd.read_csv('MR_LBM/post/benchmark/ghia_uy_dx.csv', header=None)
 
-# # Extrair dados para perfis verticais (u_x vs y)
-# y_d = benchmark_data_x.iloc[1:, 0].astype(float).values
-# u_x_bench = benchmark_data_x.iloc[1:, 1:].astype(float).values.T
-# re_numbers = [f"Re= {int(value)}" for value in benchmark_data_x.iloc[0, 1:].values]
+# Extrair dados para perfis verticais (u_x vs y)
+y_d = benchmark_data_x.iloc[1:, 0].astype(float).values
+u_x_bench = benchmark_data_x.iloc[1:, 1:].astype(float).values.T
+re_numbers = [f"Re= {int(value)}" for value in benchmark_data_x.iloc[0, 1:].values]
 
-# # Extrair dados para perfis horizontais (u_y vs x)
-# x_d = benchmark_data_y.iloc[1:, 0].astype(float).values
-# u_y_bench = benchmark_data_y.iloc[1:, 1:].astype(float).values.T
+# Extrair dados para perfis horizontais (u_y vs x)
+x_d = benchmark_data_y.iloc[1:, 0].astype(float).values
+u_y_bench = benchmark_data_y.iloc[1:, 1:].astype(float).values.T
 
 # Configurar figura com 2 subplots
 plt.figure(figsize=(6, 6), dpi=150)
 
 # Índice para número de Reynolds desejado
-benchmark_index = 3  # Re=10000
+benchmark_index = 6  # Re=10000
 
 # Lists to store handles and labels for the legend
 legend_handles = []
 legend_labels = []
 
 # Processar cada simulação
-for sim_id, line, color in zip(sim_ids, linestyles,colors_x):
+for sim_id, line, color_x, color_y in zip(sim_ids, linestyles,colors_x, colors_y):
     # Ler parâmetros da simulação
     info_path = f"LDC/{sim_id}/info.txt"
     try:
@@ -80,30 +81,27 @@ for sim_id, line, color in zip(sim_ids, linestyles,colors_x):
 
     # Adicionar aos gráficos
     # Plot u_x, but don't add label directly here
-    plt.plot(ux_sim / (2 * umax), y_sim - 1/2, linestyle=line, color=color)
+    plt.plot(ux_sim / (2 * umax), y_sim - 1/2, linestyle=line, color=color_x)
     # Plot u_y, but don't add label directly here
-    plt.plot(x_sim - 1/2, uy_sim / (2 * umax), linestyle=line, color=color)
+    plt.plot(x_sim - 1/2, uy_sim / (2 * umax), linestyle=line, color=color_y)
 
     # Create a single dummy plot entry for the legend
     # This plot won't be visible, but its handle will have the correct linestyle and color
-    dummy_handle, = plt.plot([], [], linestyle=line, color=color, label=f"Grid Size: {nx}x{ny}")
+    dummy_handle, = plt.plot([], [], linestyle=line, color=color_x, label=f"Grid Size: {nx}x{ny}")
     legend_handles.append(dummy_handle)
     legend_labels.append(f"Grid Size: {nx}x{ny}")
 
-
 # === PERFIL VERTICAL (u_x vs y) ===
-# Add benchmark plot and its handle to the lists
-# benchmark_handle_ux, = plt.plot(u_x_bench[benchmark_index] / 2, y_d - 0.5, 'x', color='black')
-# legend_handles.append(benchmark_handle_ux)
-# legend_labels.append(f"{re_numbers[benchmark_index]} (Benchmark)")
+#Add benchmark plot and its handle to the lists
+benchmark_handle_ux, = plt.plot(u_x_bench[benchmark_index] / 2, y_d - 0.5, 'x', color='black')
+legend_handles.append(benchmark_handle_ux)
+legend_labels.append(f"{re_numbers[benchmark_index]} (Benchmark)")
 
-# # === PERFIL HORIZONTAL (u_y vs x) ===
-# # No need to add benchmark_handle_uy as it's the same style as benchmark_handle_ux
-# plt.plot(x_d - 0.5, u_y_bench[benchmark_index] / 2, 'x', color='black')
+# === PERFIL HORIZONTAL (u_y vs x) ===
+# No need to add benchmark_handle_uy as it's the same style as benchmark_handle_ux
+plt.plot(x_d - 0.5, u_y_bench[benchmark_index] / 2, 'x', color='black')
 
-# Configurar gráfico do perfil horizontal
-# plt.xlabel('Grid Size', fontproperties=font_prop, fontweight='bold')
-# plt.ylabel('$L_2$', fontproperties=font_prop, fontweight='bold')
+#Configurar gráfico do perfil horizontal
 plt.grid(True, which='both', alpha=0.2, linestyle='--')
 
 plt.tick_params(axis='x', which='both', length=4.5, width=1.2, labelsize=12)

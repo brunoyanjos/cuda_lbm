@@ -32,8 +32,8 @@ constexpr dfloat MACH_NUMBER = U_MAX / 0.57735026918962;
 /* --------------------- INITIALIZATION LOADING DEFINES -------------------- */
 constexpr int INI_STEP = 0; // initial simulation step (0 default)
 
-constexpr int T_STAR_FINAL = 1200;
-constexpr int T_STAT = 600;
+constexpr int T_STAR_FINAL = 2000;
+constexpr int T_STAT = 1500;
 constexpr int N_STEPS = T_STAR_FINAL * NX / U_MAX;
 constexpr int N_STAT = T_STAT * NX / U_MAX;
 

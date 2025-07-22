@@ -32,6 +32,7 @@ sim_*
 MR_LBM/*.dat
 LDC/*
 OUTPUT/*
+GRID/*
 CYLINDER/*
 JET_FLOW/*
 MR_LBM/OUTPUT/*

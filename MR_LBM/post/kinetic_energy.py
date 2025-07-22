@@ -27,8 +27,8 @@ purpple = '#963D97'
 blue = '#009DDC'
 
 # Define simulation IDs and custom RGB colors
-sim_ids = ['016', '017']
-labels = ['1024', '2048']  # Consider using more descriptive labels
+sim_ids = ["001"]
+labels = ['1024', '2048', '2048']  # Consider using more descriptive labels
 colors = [green, yellow, orange, red, purpple, blue]
 linestyles = [(0, (1,1,1,2,6,2)), (0, (4,4)), (0, (1,2)), (0, (10,4)), (0, (6,2,1,2))]
 
