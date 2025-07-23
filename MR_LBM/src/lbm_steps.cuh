@@ -245,13 +245,23 @@ __host__ inline void boundary_condition(latticeNode *node, dfloat omega)
         const dfloat rhoUxIn = -(pop[3] + pop[6] + pop[7]);
         const dfloat rhoUyIn = (pop[2] + pop[6]) - (pop[4] + pop[7]);
 
-        const dfloat rhoMxxIn = (pop[3] + pop[6] + pop[7]) + rhoIn * cs2;
-        const dfloat rhoMxyIn = pop[7] - pop[3];
-        const dfloat rhoMyyIn = (pop[2] + pop[4] + pop[6] + pop[7]) + rhoIn * cs2;
+        const dfloat rhoMxxIn = (pop[3] + pop[6] + pop[7]) - rhoIn * cs2;
+        const dfloat rhoMxyIn = pop[7] - pop[6];
+        const dfloat rhoMyyIn = (pop[2] + pop[4] + pop[6] + pop[7]) - rhoIn * cs2;
 
-        const dfloat sqrt_term = -25.0f * rhoIn * rhoIn - 225.0f * rhoMxyIn * rhoMxyIn + 180.0f * rhoIn * rhoMyyIn + 108.0f * rhoMyyIn * rhoMyyIn - 250.0f * rhoIn * rhoUxIn - 540.0f * rhoMyyIn * rhoUxIn + 575.0f * rhoUxIn * rhoUxIn - 450.0f * rhoMxyIn * rhoUyIn - 225.0f * rhoUyIn * rhoUyIn;
+        const dfloat sqrt_term =
+            -25.0f * rhoIn * rhoIn 
+            - 225.0f * rhoMxyIn * rhoMxyIn 
+            + 180.0f * rhoIn * rhoMyyIn 
+            + 108.0f * rhoMyyIn * rhoMyyIn 
+            - 250.0f * rhoIn * rhoUxIn 
+            - 540.0f * rhoMyyIn * rhoUxIn 
+            + 575.0f * rhoUxIn * rhoUxIn 
+            - 450.0f * rhoMxyIn * rhoUyIn 
+            - 225.0f * rhoUyIn * rhoUyIn;
 
-        const dfloat rho = (3.0f / 10.0f) * (5.0f * rhoIn + 6.0f * rhoMyyIn - 15.0 * rhoUxIn - 1.0f / std::sqrt(3.0f) * std::sqrt(sqrt_term));
+        const dfloat rho = (3.0f / 10.0f) *
+                           (5.0f * rhoIn + 6.0f * rhoMyyIn - 15.0f * rhoUxIn - (1.0f / std::sqrt(3.0f)) * std::sqrt(sqrt_term));
 
         const dfloat rhoUx = -rhoIn + rhoUxIn + rho;
         const dfloat rhoUy = (3.0f / 2.0f) * (rhoMxyIn + rhoUyIn);
@@ -259,6 +269,15 @@ __host__ inline void boundary_condition(latticeNode *node, dfloat omega)
         const dfloat rhoMxx = (1.0f / 3.0f) * (-3.0f * rhoIn - 3.0f * rhoUxIn + 2.0f * rho);
         const dfloat rhoMxy = (1.0f / 2.0f) * (5.0f * rhoMxyIn + rhoUyIn);
         const dfloat rhoMyy = (6.0f / 5.0f) * rhoMyyIn;
+
+        std::cout << "rho: " << rho << std::endl;
+        std::cout << "rhoUx: " << rhoUx / rho << std::endl;
+        std::cout << "rhoUy: " << rhoUy / rho << std::endl;
+        std::cout << "rhoMxx: " << rhoMxx / rho << std::endl;
+        std::cout << "rhoMxy: " << rhoMxy / rho << std::endl;
+        std::cout << "rhoMyy: " << rhoMyy / rho << std::endl;
+
+        std::cout << std::endl;
 
         (*node).rho = rho;
         (*node).ux = rhoUx / rho;
@@ -289,9 +308,9 @@ __host__ inline void boundary_condition(latticeNode *node, dfloat omega)
     }
     case INT_BOTTOM_LEFT:
     {
-        const dfloat rhoIn = pop[0] + pop[2] + pop[3] + pop[6];
+        const dfloat rhoIn = pop[0] + pop[3] + pop[4] + pop[7];
 
-        const dfloat rhoMxyIn = -pop[6];
+        const dfloat rhoMxyIn = pop[7];
 
         const dfloat rho = (3.0f / 2.0f) * (rhoIn - rhoMxyIn);
         const dfloat rhoMxy = (1.0f / 9.0f) * (36.0f * rhoMxyIn - rho);

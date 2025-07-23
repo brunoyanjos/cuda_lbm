@@ -9,7 +9,6 @@
 
 __host__ inline void fine_grid_solution(latticeNode *nodes)
 {
-    printf("\n");
 
     for (size_t y = 0; y < NY_FINE; ++y)
     {
@@ -21,8 +20,6 @@ __host__ inline void fine_grid_solution(latticeNode *nodes)
             {
                 if (nodes[fine_idx(x, y)].updated)
                 {
-                    printf("CTF ");
-
                     const dfloat *pop = nodes[fine_idx(x, y)].pop_in;
 
                     nodes[fine_idx(x, y)].rho = pop[0] + pop[1] + pop[2] + pop[3] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8];
@@ -39,15 +36,11 @@ __host__ inline void fine_grid_solution(latticeNode *nodes)
                 }
                 else
                 {
-                    printf("%03d ", nodeType);
-
                     boundary_condition(&nodes[fine_idx(x, y)], OMEGA_FINE);
                 }
             }
             else
             {
-                printf("%03d ", nodeType);
-
                 const dfloat *pop = nodes[fine_idx(x, y)].pop_in;
 
                 nodes[fine_idx(x, y)].rho = pop[0] + pop[1] + pop[2] + pop[3] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8];
@@ -70,8 +63,6 @@ __host__ inline void fine_grid_solution(latticeNode *nodes)
             collision(&nodes[fine_idx(x, y)], OMEGA_FINE);
             regularization(&nodes[fine_idx(x, y)]);
         }
-
-        printf("\n");
     }
 
     streaming(nodes, NX_FINE, NY_FINE);
@@ -79,7 +70,6 @@ __host__ inline void fine_grid_solution(latticeNode *nodes)
 
 __host__ inline void coarse_grid_solution(latticeNode *nodes)
 {
-    printf("\n");
 
     for (size_t y = 0; y < NY_COARSE; y++)
     {
@@ -87,18 +77,9 @@ __host__ inline void coarse_grid_solution(latticeNode *nodes)
         {
             unsigned int nodeType = nodes[coarse_idx(x, y)].node_type;
 
-            if (nodes[coarse_idx(x, y)].updated == true)
-            {
-                printf("FTC ");
-            }
-            else
-            {
-                printf("%03d ", nodeType);
-            }
-
             if (nodeType != BULK)
             {
-                boundary_condition(&nodes[fine_idx(x, y)], OMEGA_COARSE);
+                boundary_condition(&nodes[coarse_idx(x, y)], OMEGA_COARSE);
             }
             else
             {
@@ -124,8 +105,6 @@ __host__ inline void coarse_grid_solution(latticeNode *nodes)
             collision(&nodes[coarse_idx(x, y)], OMEGA_COARSE);
             regularization(&nodes[coarse_idx(x, y)]);
         }
-
-        printf("\n");
     }
 
     streaming(nodes, NX_COARSE, NY_COARSE);

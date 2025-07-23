@@ -51,9 +51,9 @@ int main()
 		coarse_file << std::fixed << std::setprecision(12); // formatação com 6 casas decimais
 		fine_file << std::fixed << std::setprecision(12);
 
-		for (size_t y = 0; y < NY_COARSE; y++)
+		for (size_t y = 0; y < NY_COARSE; ++y)
 		{
-			for (size_t x = 0; x < NX_COARSE; x++)
+			for (size_t x = 0; x < NX_COARSE; ++x)
 			{
 				const dfloat ux = coarse_nodes[coarse_idx(x, y)].ux / F_M_I_SCALE;
 				const dfloat uy = coarse_nodes[coarse_idx(x, y)].uy / F_M_I_SCALE;
