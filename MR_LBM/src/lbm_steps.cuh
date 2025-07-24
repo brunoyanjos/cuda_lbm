@@ -270,15 +270,6 @@ __host__ inline void boundary_condition(latticeNode *node, dfloat omega)
         const dfloat rhoMxy = (1.0f / 2.0f) * (5.0f * rhoMxyIn + rhoUyIn);
         const dfloat rhoMyy = (6.0f / 5.0f) * rhoMyyIn;
 
-        std::cout << "rho: " << rho << std::endl;
-        std::cout << "rhoUx: " << rhoUx / rho << std::endl;
-        std::cout << "rhoUy: " << rhoUy / rho << std::endl;
-        std::cout << "rhoMxx: " << rhoMxx / rho << std::endl;
-        std::cout << "rhoMxy: " << rhoMxy / rho << std::endl;
-        std::cout << "rhoMyy: " << rhoMyy / rho << std::endl;
-
-        std::cout << std::endl;
-
         (*node).rho = rho;
         (*node).ux = rhoUx / rho;
         (*node).uy = rhoUy / rho;
