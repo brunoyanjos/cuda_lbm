@@ -26,16 +26,14 @@ red = '#E03A3E'
 purpple = '#963D97'
 blue = '#009DDC'
 
-sim_ids = ['021']
-labels = ['1024 - IRBC', '2048 - IRBC', '1024 - RBC', '2048 - RBC']  # Consider using more descriptive labels
-linestyles = [(0, (4,4)), (0, (1,2)), 'solid', (0, (10,4)), (0, (6,2,1,2)), 'solid',]
-colors = [green, yellow, orange, red]
+sim_ids = ['018', '019']
+labels = ['1024', '2048']  # Consider using more descriptive labels
+linestyles = [(0, (4,4)), 'solid']
 
 # Configurar figura com 2 subplots
 plt.figure(figsize=(6, 6), dpi=150)
 
-for sim_id, ls, color, label in zip(sim_ids, linestyles, colors, labels):
-    print(sim_id)
+for sim_id, ls, label in zip(sim_ids, linestyles, labels):
     # Ler parâmetros da simulação
     info_path = f"LDC/{sim_id}/info.txt"
     try:
@@ -61,16 +59,18 @@ for sim_id, ls, color, label in zip(sim_ids, linestyles, colors, labels):
                             
         # # Plot with RGB color
         plt.plot(ux  / (2 * umax), pos - 1/2, 
-                 color=color, 
+                 color=blue, 
                  linestyle=ls,
                  linewidth=2,
-                 label=label)
+                )
         
         plt.plot(pos - 1/2, uy / (2 * umax),
-                 color=color, 
+                 color=red, 
                  linestyle=ls,
                  linewidth=2,
-                 label=label)
+                )
+        
+        dummy_handle, = plt.plot([], [], linestyle= ls, color='black', label=f"Grid: {nx}")
     
     except FileNotFoundError:
         print(f"Warning: File not found - {sim_id}") 
@@ -79,16 +79,16 @@ for sim_id, ls, color, label in zip(sim_ids, linestyles, colors, labels):
 plt.grid(alpha=0.2, linestyle='--')
 
 # Create legend with custom font
-# legend = plt.legend(framealpha=0.9)
-# for text in legend.get_texts():
-#     text.set_fontproperties(font_prop)
+legend = plt.legend(framealpha=0.9)
+for text in legend.get_texts():
+    text.set_fontproperties(font_prop)
 
 # Add minor ticks and improve layout
 plt.minorticks_on()
 plt.tight_layout()
 
 # Save as high-quality PDF (vector format)
-plt.savefig('average_velocity_rbc_comparison2.pdf', format='pdf', bbox_inches='tight')
+plt.savefig('average_velocity_Re_50000.pdf', format='pdf', bbox_inches='tight')
 
 plt.show()
 

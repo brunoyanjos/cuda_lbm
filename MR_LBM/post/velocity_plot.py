@@ -15,7 +15,7 @@ except:
     font_prop = fm.FontProperties(family='DejaVu Serif', size=16)
 
 # Lista de IDs de simulação
-sim_ids = ["025"]
+sim_ids = ["018", "019"]
 
 # Define a color for the simulation lines
 green = '#61BB46'
@@ -25,9 +25,8 @@ red = '#E03A3E'
 purpple = '#963D97'
 blue = '#009DDC'
 
-linestyles = [ 'solid', (0, (6,2,1,2)), (0, (10,4))]
-colors_x = [red, orange, yellow]
-colors_y = [blue, purpple, green]
+linestyles = [(0, (1,1,1,2,6,2)), (0, (4,4)), (0, (1,2)), (0, (10,4)), 'solid']
+colors_x = [green, orange, red, purpple, blue]
 
 # Carregar dados de referência
 benchmark_data_x = pd.read_csv('MR_LBM/post/benchmark/ghia_ux_dy.csv', header=None)
@@ -46,14 +45,14 @@ u_y_bench = benchmark_data_y.iloc[1:, 1:].astype(float).values.T
 plt.figure(figsize=(6, 6), dpi=150)
 
 # Índice para número de Reynolds desejado
-benchmark_index = 6  # Re=10000
+benchmark_index = 3  # Re=10000
 
 # Lists to store handles and labels for the legend
 legend_handles = []
 legend_labels = []
 
 # Processar cada simulação
-for sim_id, line, color_x, color_y in zip(sim_ids, linestyles,colors_x, colors_y):
+for sim_id, line, color_x in zip(sim_ids, linestyles,colors_x):
     # Ler parâmetros da simulação
     info_path = f"LDC/{sim_id}/info.txt"
     try:
@@ -83,7 +82,7 @@ for sim_id, line, color_x, color_y in zip(sim_ids, linestyles,colors_x, colors_y
     # Plot u_x, but don't add label directly here
     plt.plot(ux_sim / (2 * umax), y_sim - 1/2, linestyle=line, color=color_x)
     # Plot u_y, but don't add label directly here
-    plt.plot(x_sim - 1/2, uy_sim / (2 * umax), linestyle=line, color=color_y)
+    plt.plot(x_sim - 1/2, uy_sim / (2 * umax), linestyle=line, color=color_x)
 
     # Create a single dummy plot entry for the legend
     # This plot won't be visible, but its handle will have the correct linestyle and color

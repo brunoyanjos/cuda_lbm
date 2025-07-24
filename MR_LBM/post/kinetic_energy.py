@@ -27,8 +27,8 @@ purpple = '#963D97'
 blue = '#009DDC'
 
 # Define simulation IDs and custom RGB colors
-sim_ids = ["001"]
-labels = ['1024', '2048', '2048']  # Consider using more descriptive labels
+sim_ids = ["018","019"]
+labels = ["1024","1024"]  # Consider using more descriptive labels
 colors = [green, yellow, orange, red, purpple, blue]
 linestyles = [(0, (1,1,1,2,6,2)), (0, (4,4)), (0, (1,2)), (0, (10,4)), (0, (6,2,1,2))]
 
@@ -56,7 +56,12 @@ for sim_id, color, ls, label in zip(sim_ids, colors, linestyles, labels):
                  label=f'Grid = {label}')
     
     except FileNotFoundError:
-        print(f"Warning: File not found - {tke_path}") 
+        print(f"Warning: File not found - {tke_path}")
+        
+    
+
+# for var in t_star[]:
+#     print(var)
 
 # Configure plot with professional styling
 plt.xlabel('Normalized Time (t*)', fontproperties=font_prop, fontweight='bold')
