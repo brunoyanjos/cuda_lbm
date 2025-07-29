@@ -27,8 +27,8 @@ purpple = '#963D97'
 blue = '#009DDC'
 
 # Define simulation IDs and custom RGB colors
-sim_ids = ["018","019"]
-labels = ["1024","1024"]  # Consider using more descriptive labels
+sim_ids = ["018", "019"]
+labels = ["3rd","4th"]  # Consider using more descriptive labels
 colors = [green, yellow, orange, red, purpple, blue]
 linestyles = [(0, (1,1,1,2,6,2)), (0, (4,4)), (0, (1,2)), (0, (10,4)), (0, (6,2,1,2))]
 
@@ -47,21 +47,28 @@ for sim_id, color, ls, label in zip(sim_ids, colors, linestyles, labels):
         # Extract time and kinetic energy
         t_star = data[::2]    # Even indices
         tke_sum = data[1::2]  # Odd indices
+        
+        t_star_clean = []
+        tke_sum_clean = []
+        
+        maxValue = 0.0
+        
+        for t, tke in zip(t_star,tke_sum):
+            if(t >= maxValue):
+                maxValue = t
+                t_star_clean.append(t)
+                tke_sum_clean.append(tke)
                 
         # Plot with RGB color
-        plt.plot(t_star, tke_sum, 
+        plt.plot(t_star_clean, tke_sum_clean, 
                  color=color, 
                  linestyle=ls,
                  linewidth=2,
-                 label=f'Grid = {label}')
+                 label=f'Order = {label}')
     
     except FileNotFoundError:
         print(f"Warning: File not found - {tke_path}")
         
-    
-
-# for var in t_star[]:
-#     print(var)
 
 # Configure plot with professional styling
 plt.xlabel('Normalized Time (t*)', fontproperties=font_prop, fontweight='bold')
@@ -78,6 +85,6 @@ plt.minorticks_on()
 plt.tight_layout()
 
 # Save as high-quality PDF (vector format)
-plt.savefig('kinetic_energy_plot_Re_50000.pdf', format='pdf', bbox_inches='tight')
+plt.savefig('kinetic_energy_plot_high_order.pdf', format='pdf', bbox_inches='tight')
 
 plt.show()
