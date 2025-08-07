@@ -65,12 +65,11 @@ __host__ inline void fine_grid_solution(latticeNode *nodes)
         }
     }
 
-    streaming(nodes, NX_FINE, NY_FINE);
+    streaming_fine(nodes, NX_FINE, NY_FINE);
 }
 
 __host__ inline void coarse_grid_solution(latticeNode *nodes)
 {
-
     for (size_t y = 0; y < NY_COARSE; y++)
     {
         for (size_t x = 0; x < NX_COARSE + N_OVERLAP_LAYER; x++)
@@ -107,7 +106,7 @@ __host__ inline void coarse_grid_solution(latticeNode *nodes)
         }
     }
 
-    streaming(nodes, NX_COARSE, NY_COARSE);
+    streaming_coarse(nodes, NX_COARSE, NY_COARSE);
 }
 
 #endif

@@ -34,57 +34,63 @@ int main()
 	{
 		coarse_grid_solution(coarse_nodes);
 
-		coarse_to_fine(coarse_nodes, fine_nodes);
-
 		for (size_t fine_step = 0; fine_step < GRID_RATIO; ++fine_step)
 		{
 			fine_grid_solution(fine_nodes);
 		}
 
+		coarse_to_fine(coarse_nodes, fine_nodes);
+
 		fine_to_coarse(fine_nodes, coarse_nodes);
 
-		string sim_id = ID_SIM;
+		// string sim_id = ID_SIM;
 
-		std::ofstream coarse_file("GRID/" + sim_id + "/coarse_macr_" + std::to_string(step) + ".dat");
-		std::ofstream fine_file("GRID/" + sim_id + "/fine_macr_" + std::to_string(step) + ".dat");
+		// std::ofstream coarse_file("GRID/" + sim_id + "/coarse_macr_" + std::to_string(step) + ".dat");
+		// std::ofstream fine_file("GRID/" + sim_id + "/fine_macr_" + std::to_string(step) + ".dat");
 
-		coarse_file << std::fixed << std::setprecision(12); // formatação com 6 casas decimais
-		fine_file << std::fixed << std::setprecision(12);
+		// coarse_file << std::fixed << std::setprecision(12); // formatação com 6 casas decimais
+		// fine_file << std::fixed << std::setprecision(12);
 
-		for (int y = NY_COARSE - 1; y >= 0; --y)
+		// for (int y = NY_COARSE - 1; y >= 0; --y)
+		// {
+		// 	for (size_t x = 0; x < NX_COARSE; ++x)
+		// 	{
+		// 		const dfloat ux = coarse_nodes[coarse_idx(x, y)].ux / F_M_I_SCALE;
+		// 		const dfloat uy = coarse_nodes[coarse_idx(x, y)].uy / F_M_I_SCALE;
+
+		// 		const dfloat u2 = ux * ux + uy * uy;
+
+		// 		const dfloat u = std::sqrt(u2);
+
+		// 		coarse_file << u << " ";
+		// 	}
+		// 	coarse_file << std::endl;
+		// }
+
+		// for (int y = NY_FINE - 1; y >= 0; --y)
+		// {
+		// 	for (size_t x = 0; x < NX_FINE; ++x)
+		// 	{
+		// 		const dfloat ux = fine_nodes[fine_idx(x, y)].ux / F_M_I_SCALE;
+		// 		const dfloat uy = fine_nodes[fine_idx(x, y)].uy / F_M_I_SCALE;
+
+		// 		const dfloat u2 = ux * ux + uy * uy;
+
+		// 		const dfloat u = std::sqrt(u2);
+
+		// 		fine_file << u << " ";
+		// 	}
+		// 	fine_file << std::endl;
+		// }
+
+		// coarse_file.close();
+		// fine_file.close();
+
+		if (step % MACR_SAVE == 0)
 		{
-			for (size_t x = 0; x < NX_COARSE; ++x)
-			{
-				const dfloat ux = coarse_nodes[coarse_idx(x, y)].ux / F_M_I_SCALE;
-				const dfloat uy = coarse_nodes[coarse_idx(x, y)].uy / F_M_I_SCALE;
-
-				const dfloat u2 = ux * ux + uy * uy;
-
-				const dfloat u = std::sqrt(u2);
-
-				coarse_file << u << " ";
-			}
-			coarse_file << std::endl;
+			saveMacr(coarse_nodes, step, "002", NX_COARSE + N_OVERLAP_LAYER, NY_COARSE);
+			saveMacr(fine_nodes, step, "003", NX_FINE, NY_FINE);
 		}
-
-		for (int y = NY_FINE - 1; y >= 0; --y)
-		{
-			for (size_t x = 0; x < NX_FINE; ++x)
-			{
-				const dfloat ux = fine_nodes[fine_idx(x, y)].ux / F_M_I_SCALE;
-				const dfloat uy = fine_nodes[fine_idx(x, y)].uy / F_M_I_SCALE;
-
-				const dfloat u2 = ux * ux + uy * uy;
-
-				const dfloat u = std::sqrt(u2);
-
-				fine_file << u << " ";
-			}
-			fine_file << std::endl;
-		}
-
-		coarse_file.close();
-		fine_file.close();
 	}
 
 	/* --------------------------------------------------------------------- */

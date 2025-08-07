@@ -57,28 +57,30 @@ __host__ __device__
 }
 
 __host__ __device__
-size_t __forceinline__
-idxScalarGlobal(unsigned int x, unsigned int y)
+    size_t __forceinline__
+    idxScalarGlobal(unsigned int x, unsigned int y)
 {
     return x + NX * y;
 }
 
 __host__ __device__
-size_t __forceinline__
-idxCylinder(unsigned int x, unsigned int y)
+    size_t __forceinline__
+    idxCylinder(unsigned int x, unsigned int y)
 {
     return x + NX * y;
 }
 
 __host__
-size_t __forceinline__
-fine_idx(size_t x, size_t y) {
+    size_t __forceinline__
+    fine_idx(size_t x, size_t y)
+{
     return x + y * NX_FINE;
 }
 
 __host__
-size_t __forceinline__
-coarse_idx(size_t x, size_t y) {
+    size_t __forceinline__
+    coarse_idx(size_t x, size_t y)
+{
     return x + y * (NX_COARSE + N_OVERLAP_LAYER);
 }
 

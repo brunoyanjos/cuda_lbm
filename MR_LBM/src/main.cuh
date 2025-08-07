@@ -162,12 +162,20 @@ __host__ inline void initialize_fine_grid(latticeNode *&lattice_nodes)
 
 			if (x == 0 && y == 0)
 			{
+				lattice_nodes[idx].node_type = SOUTH;
+
+				boundary_condition(&(lattice_nodes[idx]), OMEGA_FINE);
+
 				lattice_nodes[idx].node_type = INT_BOTTOM_LEFT;
 
 				lattice_nodes[idx].updated = true;
 			}
 			else if (x == 0 && y == NY_FINE - 1)
 			{
+				lattice_nodes[idx].node_type = NORTH;
+
+				boundary_condition(&(lattice_nodes[idx]), OMEGA_FINE);
+
 				lattice_nodes[idx].node_type = INT_TOP_LEFT;
 
 				lattice_nodes[idx].updated = true;
@@ -234,6 +242,18 @@ __host__ void initialize_coarse_grid(latticeNode *&lattice_nodes)
 			{
 				lattice_nodes[idx].node_type = NORTH_WEST;
 			}
+			// else if (x == NX_COARSE - 1 && y == 0)
+			// {
+			// 	lattice_nodes[idx].node_type = SOUTH_EAST;
+			// }
+			// else if (x == NX_COARSE - 1 && y == NY_COARSE - 1)
+			// {
+			// 	lattice_nodes[idx].node_type = NORTH_EAST;
+			// }
+			// else if (x == NX_COARSE - 1)
+			// {
+			// 	lattice_nodes[idx].node_type = EAST;
+			// }
 			else if (x == 0)
 			{
 				lattice_nodes[idx].node_type = WEST;

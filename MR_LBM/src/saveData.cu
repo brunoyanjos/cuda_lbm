@@ -1,14 +1,14 @@
 #include "saveData.cuh"
 
 __host__ void saveMacr(
-	latticeNode *nodes, unsigned int nSteps)
+	latticeNode *nodes, unsigned int nSteps, std::string id, int nx, int ny)
 {
 	// Sakthi-modifications
 	// Creating master.p3d file
 	// ======================================================================================================================
 	std::string strInf = PATH_FILES;
 	strInf += "/";
-	strInf += ID_SIM;
+	strInf += id;
 	strInf += "/";
 	strInf += "master.p3d"; // generate file name (with path)
 	std::string prefix = "data";
@@ -17,17 +17,11 @@ __host__ void saveMacr(
 	master_file << strInf;
 	std::ofstream out(master_file.str());
 	out << "{" << std::endl;
-	;
 	out << std::endl;
-	;
 	out << " \"auto-detect-format\": true," << std::endl;
-	;
 	out << std::endl;
-	;
 	out << " \"filenames\": [" << std::endl;
-	;
 	out << std::endl;
-	;
 
 	for (int iter = 1; iter < N_STEPS; iter++)
 	{
@@ -40,7 +34,6 @@ __host__ void saveMacr(
 			if (out.is_open())
 			{
 				out << "{ \"time\" :  " << iter / MACR_SAVE << ", \"xyz\" : \"grid.x\", \"function\" : \"" << filename << "\" }," << std::endl;
-				;
 			}
 			else
 			{
@@ -49,11 +42,8 @@ __host__ void saveMacr(
 		}
 	}
 	out << std::endl;
-	;
 	out << "]" << std::endl;
-	;
 	out << "}" << std::endl;
-	;
 	out.close();
 	// ======================================================================================================================
 
@@ -64,7 +54,7 @@ __host__ void saveMacr(
 	{
 		std::string strInf2 = PATH_FILES;
 		strInf2 += "/";
-		strInf2 += ID_SIM;
+		strInf2 += id;
 		strInf2 += "/";
 		strInf2 += "grid.x"; // generate file name (with path)
 
@@ -80,23 +70,23 @@ __host__ void saveMacr(
 		// Write (nx, ny) for each processor (Fortran loop: m = 1 to nprocs)
 		for (int m = 1; m <= nprocs; ++m)
 		{
-			gridfile.write(reinterpret_cast<const char *>(&NX), sizeof(int));
-			gridfile.write(reinterpret_cast<const char *>(&NY), sizeof(int));
+			gridfile.write(reinterpret_cast<const char *>(&nx), sizeof(int));
+			gridfile.write(reinterpret_cast<const char *>(&ny), sizeof(int));
 		}
 
 		// Write x and y arrays for each processor (m = 0 to nprocs - 1)
 		for (int m = 0; m < nprocs; ++m)
 		{
 			// Fortran is column-major: loop j outer, i inner
-			for (int j = 0; j < NY; ++j)
-				for (int i = 0; i < NX; ++i)
+			for (int j = 0; j < ny; ++j)
+				for (int i = 0; i < nx; ++i)
 				{
 					float val = double(i); // already float
 					gridfile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 				}
 
-			for (int j = 0; j < NY; ++j)
-				for (int i = 0; i < NX; ++i)
+			for (int j = 0; j < ny; ++j)
+				for (int i = 0; i < nx; ++i)
 				{
 					float val = double(j);
 					gridfile.write(reinterpret_cast<const char *>(&val), sizeof(float));
@@ -110,7 +100,7 @@ __host__ void saveMacr(
 
 	std::string strInf3 = PATH_FILES;
 	strInf3 += "/";
-	strInf3 += ID_SIM;
+	strInf3 += id;
 	strInf3 += "/";
 	filename_temp << strInf3 << prefix << (10000000 + nSteps) << suffix;
 	std::string filename = filename_temp.str();
@@ -127,8 +117,8 @@ __host__ void saveMacr(
 	// Write (nx, ny) for each processor (Fortran loop: m = 1 to nprocs)
 	for (int l = 0; l < nprocs; ++l)
 	{
-		datafile.write(reinterpret_cast<const char *>(&NX), sizeof(int));
-		datafile.write(reinterpret_cast<const char *>(&NY), sizeof(int));
+		datafile.write(reinterpret_cast<const char *>(&nx), sizeof(int));
+		datafile.write(reinterpret_cast<const char *>(&ny), sizeof(int));
 		int nf = 3; // 3 fields: rho, ux, uy
 		datafile.write(reinterpret_cast<const char *>(&nf), sizeof(int));
 	}
@@ -137,50 +127,33 @@ __host__ void saveMacr(
 	for (int m = 0; m < nprocs; ++m)
 	{
 		// Fortran is column-major: loop j outer, i inner
-		for (int j = 0; j < NY; ++j)
-			for (int i = 0; i < NX; ++i)
+		for (int j = 0; j < ny; ++j)
+			for (int i = 0; i < nx; ++i)
 			{
-				const std::size_t x_thread = i % BLOCK_NX;
-				const std::size_t y_thread = j % BLOCK_NY;
-
-				const std::size_t x_block = i / BLOCK_NX;
-				const std::size_t y_block = j / BLOCK_NY;
-
-				size_t idx = idxScalarBlock(x_thread, y_thread, x_block, y_block);
+				size_t idx = i + j * nx;
 				float val = nodes[idx].rho; // already float
 				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 			}
 
-		for (int j = 0; j < NY; ++j)
-			for (int i = 0; i < NX; ++i)
+		for (int j = 0; j < ny; ++j)
+			for (int i = 0; i < nx; ++i)
 			{
-				const std::size_t x_thread = i % BLOCK_NX;
-				const std::size_t y_thread = j % BLOCK_NY;
-
-				const std::size_t x_block = i / BLOCK_NX;
-				const std::size_t y_block = j / BLOCK_NY;
-
-				size_t idx = idxScalarBlock(x_thread, y_thread, x_block, y_block);
+				size_t idx = i + j * nx;
 
 				float val = nodes[idx].ux; // already float
 				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 			}
 
-		for (int j = 0; j < NY; ++j)
-			for (int i = 0; i < NX; ++i)
+		for (int j = 0; j < ny; ++j)
+			for (int i = 0; i < nx; ++i)
 			{
-				const std::size_t x_thread = i % BLOCK_NX;
-				const std::size_t y_thread = j % BLOCK_NY;
+				size_t idx = i + j * nx;
 
-				const std::size_t x_block = i / BLOCK_NX;
-				const std::size_t y_block = j / BLOCK_NY;
-
-				size_t idx = idxScalarBlock(x_thread, y_thread, x_block, y_block);
-				
 				float val = nodes[idx].uy; // already float
 				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 			}
 	}
+
 	datafile.close();
 
 	std::string strFileRho, strFileUx, strFileUy;
