@@ -7,7 +7,7 @@ constexpr dfloat RE = 3200;
 
 constexpr int SCALE = 1;
 
-constexpr int MACR_SAVE = 100;
+constexpr int MACR_SAVE = 10;
 
 constexpr int N = 65 * SCALE;
 constexpr int NX = N; // size x of the grid
@@ -17,6 +17,7 @@ constexpr int N_OVERLAP_LAYER = 1;
 
 constexpr int GRID_RATIO = 2;
 
+// constexpr dfloat U_MAX = 0.0256;
 constexpr dfloat U_MAX = 0.0256;
 
 constexpr size_t NX_COARSE = static_cast<int>(N / 2) + 1;
@@ -50,7 +51,7 @@ constexpr dfloat MACH_NUMBER = U_MAX / 0.57735026918962;
 constexpr int INI_STEP = 0; // initial simulation step (0 default)
 
 // constexpr int T_STAR_FINAL = 1200;
-constexpr int N_STEPS = 500;
+constexpr int N_STEPS = 200;
 
 #define BC_X_WALL
 #define BC_Y_WALL

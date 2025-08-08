@@ -34,4 +34,4 @@ typedef struct latticeNode
     dfloat myy;
 } LatticeNode;
 
-#endif //__GLOBAL_STRUCTS_H
+#endif

@@ -65,7 +65,7 @@ __host__ inline void coarse_grid_solution(latticeNode *nodes)
         }
     }
 
-    streaming_coarse(nodes, NX_COARSE, NY_COARSE);
+    streaming_coarse(nodes, NX_COARSE + N_OVERLAP_LAYER, NY_COARSE);
 
     for (size_t y = 0; y < NY_COARSE; y++)
     {

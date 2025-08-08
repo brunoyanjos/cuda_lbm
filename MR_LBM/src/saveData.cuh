@@ -49,7 +49,8 @@ __host__ void kinetic_energy(latticeNode *nodes, unsigned int step);
 
 void folderSetup();
 
-__host__ void saveMacr(latticeNode *nodes, unsigned int nSteps, std::string id, int nx, int ny);
+__host__ void saveMacr_coarse(latticeNode *nodes, unsigned int nSteps, std::string id);
+__host__ void saveMacr_fine(latticeNode *nodes, unsigned int nSteps, std::string id);
 
 std::string getVarFilename(const std::string varName, unsigned int step, const std::string ext);
 

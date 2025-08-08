@@ -2,7 +2,7 @@
 #define __VAR_H
 
 #include <builtin_types.h> // for devices variables
-#include <stdint.h>        // for uint32_t
+#include <stdint.h>		   // for uint32_t
 #include <map>
 
 #define _USE_MATH_DEFINES
@@ -68,7 +68,7 @@ constexpr BlockDim findOptimalBlockDimensions(size_t maxElements)
 			}
 		}
 	}
-	return { bestX, bestY };
+	return {bestX, bestY};
 }
 
 #include "cases/outputs_and_model.h"

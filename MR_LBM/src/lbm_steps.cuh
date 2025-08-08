@@ -76,6 +76,7 @@ __host__ inline void boundary_condition(latticeNode *node, dfloat omega)
         const dfloat rhoVar = 6.0f * rhoIn / 5.0f;
 
         (*node).mxx = U_MAX * U_MAX;
+        (*node).mxx = 0.0f;
         (*node).mxy = 5.0f * mxyIn / 3.0f - U_MAX / 3.0f;
         (*node).myy = 0.0f;
 
@@ -159,6 +160,7 @@ __host__ inline void boundary_condition(latticeNode *node, dfloat omega)
         const dfloat myyIn = (pop[4] + pop[7]) * inv_rhoIn - cs2;
 
         (*node).ux = 0.0f;
+        (*node).uy = 0.0f;
 
         const dfloat rhoVar = 36.0f * (rhoIn - mxyIn * rhoIn + mxyIn * omega * rhoIn) /
                               (24.0f + omega);
@@ -182,6 +184,7 @@ __host__ inline void boundary_condition(latticeNode *node, dfloat omega)
         const dfloat myyIn = (pop[4] + pop[8]) * inv_rhoIn - cs2;
 
         (*node).uy = 0.0f;
+        (*node).ux = 0.0f;
 
         const dfloat rhoVar = -36.0f * (mxyIn * omega * rhoIn - rhoIn - mxyIn * rhoIn) /
                               (24 + omega);
@@ -284,18 +287,20 @@ __host__ inline void boundary_condition(latticeNode *node, dfloat omega)
     case INT_TOP_LEFT:
     {
         const dfloat rhoIn = pop[0] + pop[2] + pop[3] + pop[6];
+        const dfloat inv_rho_In = 1.0f / rhoIn;
 
-        const dfloat rhoMxyIn = -pop[6];
+        const dfloat mxyIn = -pop[6] * inv_rho_In;
 
-        const dfloat rho = -6.0f * (rhoIn + rhoMxyIn) /
-                           (-4.0f + 2.0f * U_MAX + 3.0f * U_MAX * U_MAX);
-        const dfloat rhoMxy = (1.0f / 9.0f) * (36.0f * rhoMxyIn + rho - 3.0f * U_MAX * rho + 3.0f * U_MAX * U_MAX * rho);
+        const dfloat rho = -36.0f * (-rhoIn - mxyIn * rhoIn + rhoIn * mxyIn * omega) /
+                           (24.0f + 18.0f * U_MAX - 18.0f * U_MAX * U_MAX + omega - 3.0f * U_MAX * omega + 3.0f * U_MAX * U_MAX * omega);
+        const dfloat mxy = (36.0f * mxyIn * rhoIn + rho - 3.0f * U_MAX * rho + 3.0f * U_MAX * U_MAX * rho) /
+                           (9.0f * rho);
 
         (*node).rho = rho;
         (*node).ux = U_MAX;
         (*node).uy = 0.0f;
         (*node).mxx = U_MAX * U_MAX;
-        (*node).mxy = rhoMxy / rho;
+        (*node).mxy = mxy;
         (*node).myy = 0.0f;
 
         break;
@@ -303,18 +308,22 @@ __host__ inline void boundary_condition(latticeNode *node, dfloat omega)
     case INT_BOTTOM_LEFT:
     {
         const dfloat rhoIn = pop[0] + pop[3] + pop[4] + pop[7];
+        const dfloat inv_rho_In = 1.0f / rhoIn;
 
-        const dfloat rhoMxyIn = pop[7];
+        const dfloat mxyIn = pop[7] * inv_rho_In;
 
-        const dfloat rho = (3.0f / 2.0f) * (rhoIn - rhoMxyIn);
-        const dfloat rhoMxy = (1.0f / 9.0f) * (36.0f * rhoMxyIn - rho);
+        const dfloat rho = 36.0f * (rhoIn - mxyIn * rhoIn + rhoIn * mxyIn * omega) /
+                           (24.0f + omega);
+        const dfloat mxy = (36.0f * mxyIn * rhoIn - rho) /
+                           (9.0f * rho);
 
         (*node).rho = rho;
         (*node).ux = 0.0f;
         (*node).uy = 0.0f;
         (*node).mxx = 0.0f;
-        (*node).mxy = rhoMxy / rho;
+        (*node).mxy = mxy;
         (*node).myy = 0.0f;
+
         break;
     }
     default:
@@ -398,7 +407,7 @@ __host__ inline void fine_to_coarse(latticeNode *fine_nodes, latticeNode *coarse
 {
     for (int y = 0; y < NY_COARSE; ++y)
     {
-        coarse_nodes[coarse_idx(NX_COARSE + N_OVERLAP_LAYER - 1, y)] = fine_nodes[fine_idx(0, y * 2)];
+        coarse_nodes[coarse_idx(NX_COARSE + N_OVERLAP_LAYER - 1, y)] = fine_nodes[fine_idx(2, y * 2)];
     }
 }
 

@@ -8,6 +8,9 @@ using namespace std;
 
 int main()
 {
+	std::cout << "TAU_FINE: " << TAU_FINE << std::endl;
+	std::cout << "TAU_COARSE: " << TAU_COARSE << std::endl;
+
 	folderSetup();
 
 	// variable declaration
@@ -26,10 +29,9 @@ int main()
 	/* ------------------------------ LBM LOOP ------------------------------ */
 	saveSimInfo(step, 0.0);
 
-	/* --------------------------------------------------------------------- */
+	/* ---------------------------------------------------------------------- */
 	/* ---------------------------- BEGIN LOOP ------------------------------ */
-	/* --------------------------------------------------------------------- */
-
+	/* ---------------------------------------------------------------------- */
 	for (step = INI_STEP; step < N_STEPS; step++)
 	{
 		coarse_to_fine(coarse_nodes, fine_nodes);
@@ -44,14 +46,14 @@ int main()
 
 		if (step % MACR_SAVE == 0)
 		{
-			saveMacr(coarse_nodes, step, "002", NX_COARSE + N_OVERLAP_LAYER, NY_COARSE);
-			saveMacr(fine_nodes, step, "003", NX_FINE, NY_FINE);
+			saveMacr_coarse(coarse_nodes, step, "002");
+			saveMacr_fine(fine_nodes, step, "003");
 		}
 	}
 
-	/* --------------------------------------------------------------------- */
+	/* ---------------------------------------------------------------------- */
 	/* ------------------------------ END LOOP ------------------------------ */
-	/* --------------------------------------------------------------------- */
+	/* ---------------------------------------------------------------------- */
 
 	// Calculate MLUPS
 	dfloat MLUPS = recordElapsedTime(start_step, stop_step, step);

@@ -1,7 +1,7 @@
 #include "saveData.cuh"
 
-__host__ void saveMacr(
-	latticeNode *nodes, unsigned int nSteps, std::string id, int nx, int ny)
+__host__ void saveMacr_coarse(
+	latticeNode *nodes, unsigned int nSteps, std::string id)
 {
 	// Sakthi-modifications
 	// Creating master.p3d file
@@ -70,23 +70,23 @@ __host__ void saveMacr(
 		// Write (nx, ny) for each processor (Fortran loop: m = 1 to nprocs)
 		for (int m = 1; m <= nprocs; ++m)
 		{
-			gridfile.write(reinterpret_cast<const char *>(&nx), sizeof(int));
-			gridfile.write(reinterpret_cast<const char *>(&ny), sizeof(int));
+			gridfile.write(reinterpret_cast<const char *>(&NX_COARSE), sizeof(int));
+			gridfile.write(reinterpret_cast<const char *>(&NY_COARSE), sizeof(int));
 		}
 
 		// Write x and y arrays for each processor (m = 0 to nprocs - 1)
 		for (int m = 0; m < nprocs; ++m)
 		{
 			// Fortran is column-major: loop j outer, i inner
-			for (int j = 0; j < ny; ++j)
-				for (int i = 0; i < nx; ++i)
+			for (int j = 0; j < NY_COARSE; ++j)
+				for (int i = 0; i < NX_COARSE; ++i)
 				{
 					float val = double(i); // already float
 					gridfile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 				}
 
-			for (int j = 0; j < ny; ++j)
-				for (int i = 0; i < nx; ++i)
+			for (int j = 0; j < NY_COARSE; ++j)
+				for (int i = 0; i < NX_COARSE; ++i)
 				{
 					float val = double(j);
 					gridfile.write(reinterpret_cast<const char *>(&val), sizeof(float));
@@ -117,8 +117,8 @@ __host__ void saveMacr(
 	// Write (nx, ny) for each processor (Fortran loop: m = 1 to nprocs)
 	for (int l = 0; l < nprocs; ++l)
 	{
-		datafile.write(reinterpret_cast<const char *>(&nx), sizeof(int));
-		datafile.write(reinterpret_cast<const char *>(&ny), sizeof(int));
+		datafile.write(reinterpret_cast<const char *>(&NX_COARSE), sizeof(int));
+		datafile.write(reinterpret_cast<const char *>(&NY_COARSE), sizeof(int));
 		int nf = 3; // 3 fields: rho, ux, uy
 		datafile.write(reinterpret_cast<const char *>(&nf), sizeof(int));
 	}
@@ -127,27 +127,188 @@ __host__ void saveMacr(
 	for (int m = 0; m < nprocs; ++m)
 	{
 		// Fortran is column-major: loop j outer, i inner
-		for (int j = 0; j < ny; ++j)
-			for (int i = 0; i < nx; ++i)
+		for (int j = 0; j < NY_COARSE; ++j)
+			for (int i = 0; i < NX_COARSE; ++i)
 			{
-				size_t idx = i + j * nx;
-				float val = nodes[idx].rho; // already float
+				size_t idx = coarse_idx(i, j);
+				float val = nodes[idx].rho - RHO_0; // already float
 				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 			}
 
-		for (int j = 0; j < ny; ++j)
-			for (int i = 0; i < nx; ++i)
+		for (int j = 0; j < NY_COARSE; ++j)
+			for (int i = 0; i < NX_COARSE; ++i)
 			{
-				size_t idx = i + j * nx;
+				size_t idx = coarse_idx(i, j);
+				float val = nodes[idx].ux; // already float
+				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
+			}
+
+		for (int j = 0; j < NY_COARSE; ++j)
+			for (int i = 0; i < NX_COARSE; ++i)
+			{
+				size_t idx = coarse_idx(i, j);
+				float val = nodes[idx].uy; // already float
+				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
+			}
+	}
+
+	datafile.close();
+
+	std::string strFileRho, strFileUx, strFileUy;
+
+	strFileRho = getVarFilename("rho", nSteps, ".bin");
+	strFileUx = getVarFilename("ux", nSteps, ".bin");
+	strFileUy = getVarFilename("uy", nSteps, ".bin");
+}
+
+__host__ void saveMacr_fine(
+	latticeNode *nodes, unsigned int nSteps, std::string id)
+{
+	// Sakthi-modifications
+	// Creating master.p3d file
+	// ======================================================================================================================
+	std::string strInf = PATH_FILES;
+	strInf += "/";
+	strInf += id;
+	strInf += "/";
+	strInf += "master.p3d"; // generate file name (with path)
+	std::string prefix = "data";
+	std::string suffix = ".f";
+	std::ostringstream master_file;
+	master_file << strInf;
+	std::ofstream out(master_file.str());
+	out << "{" << std::endl;
+	out << std::endl;
+	out << " \"auto-detect-format\": true," << std::endl;
+	out << std::endl;
+	out << " \"filenames\": [" << std::endl;
+	out << std::endl;
+
+	for (int iter = 1; iter < N_STEPS; iter++)
+	{
+		if (iter % MACR_SAVE == 0)
+		{
+			std::ostringstream filename_temp;
+			filename_temp << prefix << (10000000 + iter) << suffix;
+			std::string filename = filename_temp.str();
+
+			if (out.is_open())
+			{
+				out << "{ \"time\" :  " << iter / MACR_SAVE << ", \"xyz\" : \"grid.x\", \"function\" : \"" << filename << "\" }," << std::endl;
+			}
+			else
+			{
+				std::cerr << "Failed to open file: master.p3d" << std::endl;
+			}
+		}
+	}
+	out << std::endl;
+	out << "]" << std::endl;
+	out << "}" << std::endl;
+	out.close();
+	// ======================================================================================================================
+
+	// writing grid.x file
+	// -------------------------------------------------------------------------------------------------------
+	int nprocs = 1;
+	if (nSteps == 0)
+	{
+		std::string strInf2 = PATH_FILES;
+		strInf2 += "/";
+		strInf2 += id;
+		strInf2 += "/";
+		strInf2 += "grid.x"; // generate file name (with path)
+
+		std::ofstream gridfile(strInf2, std::ios::binary);
+		if (!gridfile)
+		{
+			std::cerr << "Error opening grid file" << std::endl;
+		}
+
+		// Write nprocs
+		gridfile.write(reinterpret_cast<const char *>(&nprocs), sizeof(int));
+
+		// Write (nx, ny) for each processor (Fortran loop: m = 1 to nprocs)
+		for (int m = 1; m <= nprocs; ++m)
+		{
+			gridfile.write(reinterpret_cast<const char *>(&NX_FINE), sizeof(int));
+			gridfile.write(reinterpret_cast<const char *>(&NY_FINE), sizeof(int));
+		}
+
+		// Write x and y arrays for each processor (m = 0 to nprocs - 1)
+		for (int m = 0; m < nprocs; ++m)
+		{
+			// Fortran is column-major: loop j outer, i inner
+			for (int j = 0; j < NY_FINE; ++j)
+				for (int i = 0; i < NX_FINE; ++i)
+				{
+					float val = double(i) * 0.5 + (NX_COARSE - 1); // already float
+					gridfile.write(reinterpret_cast<const char *>(&val), sizeof(float));
+				}
+
+			for (int j = 0; j < NY_FINE; ++j)
+				for (int i = 0; i < NX_FINE; ++i)
+				{
+					float val = double(j) * 0.5;
+					gridfile.write(reinterpret_cast<const char *>(&val), sizeof(float));
+				}
+		}
+	}
+
+	// datafile
+
+	std::ostringstream filename_temp;
+
+	std::string strInf3 = PATH_FILES;
+	strInf3 += "/";
+	strInf3 += id;
+	strInf3 += "/";
+	filename_temp << strInf3 << prefix << (10000000 + nSteps) << suffix;
+	std::string filename = filename_temp.str();
+
+	std::ofstream datafile(filename, std::ios::binary);
+	if (!datafile)
+	{
+		std::cerr << "Error opening grid file" << std::endl;
+	}
+
+	// Write nprocs
+	datafile.write(reinterpret_cast<const char *>(&nprocs), sizeof(int));
+
+	// Write (nx, ny) for each processor (Fortran loop: m = 1 to nprocs)
+	for (int l = 0; l < nprocs; ++l)
+	{
+		datafile.write(reinterpret_cast<const char *>(&NX_FINE), sizeof(int));
+		datafile.write(reinterpret_cast<const char *>(&NY_FINE), sizeof(int));
+		int nf = 3; // 3 fields: rho, ux, uy
+		datafile.write(reinterpret_cast<const char *>(&nf), sizeof(int));
+	}
+
+	// Write x and y arrays for each processor (m = 0 to nprocs - 1)
+	for (int m = 0; m < nprocs; ++m)
+	{
+		// Fortran is column-major: loop j outer, i inner
+		for (int j = 0; j < NY_FINE; ++j)
+			for (int i = 0; i < NX_FINE; ++i)
+			{
+				size_t idx = fine_idx(i, j);
+				float val = nodes[idx].rho - RHO_0; // already float
+				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
+			}
+
+		for (int j = 0; j < NY_FINE; ++j)
+			for (int i = 0; i < NX_FINE; ++i)
+			{
+				size_t idx = fine_idx(i, j);
 
 				float val = nodes[idx].ux; // already float
 				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 			}
 
-		for (int j = 0; j < ny; ++j)
-			for (int i = 0; i < nx; ++i)
+		for (int j = 0; j < NY_FINE; ++j)
+			for (int i = 0; i < NX_FINE; ++i)
 			{
-				size_t idx = i + j * nx;
+				size_t idx = fine_idx(i, j);
 
 				float val = nodes[idx].uy; // already float
 				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
