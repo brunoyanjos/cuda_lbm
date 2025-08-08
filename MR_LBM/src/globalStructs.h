@@ -19,12 +19,9 @@ typedef struct ghostInterfaceData
     ghostData h_fGhost;
 } GhostInterfaceData;
 
-
 typedef struct latticeNode
 {
     unsigned int node_type;
-
-    bool updated;
 
     dfloat pop_out[9];
     dfloat pop_in[9];

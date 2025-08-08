@@ -158,27 +158,22 @@ __host__ inline void initialize_fine_grid(latticeNode *&lattice_nodes)
 		{
 			size_t idx = x + y * NX_FINE;
 
-			lattice_nodes[idx].updated = false;
+			lattice_nodes[idx].rho = RHO_0;
+
+			dfloat inv_rho = static_cast<dfloat>(1) / lattice_nodes[idx].rho;
+
+			lattice_nodes[idx].uy = 0.0;
+			lattice_nodes[idx].ux = 0.0;
 
 			if (x == 0 && y == 0)
 			{
-				lattice_nodes[idx].node_type = SOUTH;
-
-				boundary_condition(&(lattice_nodes[idx]), OMEGA_FINE);
-
 				lattice_nodes[idx].node_type = INT_BOTTOM_LEFT;
-
-				lattice_nodes[idx].updated = true;
 			}
 			else if (x == 0 && y == NY_FINE - 1)
 			{
-				lattice_nodes[idx].node_type = NORTH;
-
-				boundary_condition(&(lattice_nodes[idx]), OMEGA_FINE);
 
 				lattice_nodes[idx].node_type = INT_TOP_LEFT;
-
-				lattice_nodes[idx].updated = true;
+				lattice_nodes[idx].ux = U_MAX;
 			}
 			else if (x == NX_FINE - 1 && y == 0)
 			{
@@ -187,15 +182,11 @@ __host__ inline void initialize_fine_grid(latticeNode *&lattice_nodes)
 			else if (x == NX_FINE - 1 && y == NY_FINE - 1)
 			{
 				lattice_nodes[idx].node_type = NORTH_EAST;
+				lattice_nodes[idx].ux = U_MAX;
 			}
 			else if (x == 0)
 			{
 				lattice_nodes[idx].node_type = INT_LEFT;
-
-				if (y % 2 == 0)
-				{
-					lattice_nodes[idx].updated = true;
-				}
 			}
 			else if (x == NX_FINE - 1)
 			{
@@ -208,20 +199,20 @@ __host__ inline void initialize_fine_grid(latticeNode *&lattice_nodes)
 			else if (y == NY_FINE - 1)
 			{
 				lattice_nodes[idx].node_type = NORTH;
+				lattice_nodes[idx].ux = U_MAX;
 			}
 			else
 			{
 				lattice_nodes[idx].node_type = BULK;
 			}
 
-			lattice_nodes[idx].rho = RHO_0;
-			lattice_nodes[idx].ux = 0.0;
-			lattice_nodes[idx].uy = 0.0;
-			lattice_nodes[idx].mxx = 0.0;
-			lattice_nodes[idx].mxy = 0.0;
-			lattice_nodes[idx].myy = 0.0;
+			init_pop_eq(&lattice_nodes[idx]);
 
-			init_pop_in(&(lattice_nodes[idx]));
+			dfloat *pop = lattice_nodes[idx].pop_in;
+
+			lattice_nodes[idx].mxx = (pop[1] + pop[3] + pop[5] + pop[6] + pop[7] + pop[8]) * inv_rho - cs2;
+			lattice_nodes[idx].mxy = ((pop[5] + pop[7]) - (pop[6] + pop[8])) * inv_rho;
+			lattice_nodes[idx].myy = (pop[2] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8]) * inv_rho - cs2;
 		}
 	}
 }
@@ -234,6 +225,13 @@ __host__ void initialize_coarse_grid(latticeNode *&lattice_nodes)
 		{
 			size_t idx = coarse_idx(x, y);
 
+			lattice_nodes[idx].rho = RHO_0;
+
+			dfloat inv_rho = static_cast<dfloat>(1) / lattice_nodes[idx].rho;
+
+			lattice_nodes[idx].ux = 0.0;
+			lattice_nodes[idx].uy = 0.0;
+
 			if (x == 0 && y == 0)
 			{
 				lattice_nodes[idx].node_type = SOUTH_WEST;
@@ -241,19 +239,8 @@ __host__ void initialize_coarse_grid(latticeNode *&lattice_nodes)
 			else if (x == 0 && y == NY_COARSE - 1)
 			{
 				lattice_nodes[idx].node_type = NORTH_WEST;
+				lattice_nodes[idx].ux = U_MAX;
 			}
-			// else if (x == NX_COARSE - 1 && y == 0)
-			// {
-			// 	lattice_nodes[idx].node_type = SOUTH_EAST;
-			// }
-			// else if (x == NX_COARSE - 1 && y == NY_COARSE - 1)
-			// {
-			// 	lattice_nodes[idx].node_type = NORTH_EAST;
-			// }
-			// else if (x == NX_COARSE - 1)
-			// {
-			// 	lattice_nodes[idx].node_type = EAST;
-			// }
 			else if (x == 0)
 			{
 				lattice_nodes[idx].node_type = WEST;
@@ -265,20 +252,20 @@ __host__ void initialize_coarse_grid(latticeNode *&lattice_nodes)
 			else if (y == NY_COARSE - 1)
 			{
 				lattice_nodes[idx].node_type = NORTH;
+				lattice_nodes[idx].ux = U_MAX;
 			}
 			else
 			{
 				lattice_nodes[idx].node_type = BULK;
 			}
 
-			lattice_nodes[idx].rho = RHO_0;
-			lattice_nodes[idx].ux = 0.0;
-			lattice_nodes[idx].uy = 0.0;
-			lattice_nodes[idx].mxx = 0.0;
-			lattice_nodes[idx].mxy = 0.0;
-			lattice_nodes[idx].myy = 0.0;
+			init_pop_eq(&lattice_nodes[idx]);
 
-			init_pop_in(&(lattice_nodes[idx]));
+			dfloat *pop = lattice_nodes[idx].pop_in;
+
+			lattice_nodes[idx].mxx = (pop[1] + pop[3] + pop[5] + pop[6] + pop[7] + pop[8]) * inv_rho - cs2;
+			lattice_nodes[idx].mxy = ((pop[5] + pop[7]) - (pop[6] + pop[8])) * inv_rho;
+			lattice_nodes[idx].myy = (pop[2] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8]) * inv_rho - cs2;
 		}
 	}
 }

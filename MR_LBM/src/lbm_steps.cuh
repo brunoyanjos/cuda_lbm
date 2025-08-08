@@ -3,31 +3,28 @@
 
 #include "var.h"
 
-__host__ inline void init_pop_in(latticeNode *node)
+__host__ inline void init_pop_eq(latticeNode *node)
 {
     dfloat rho = (*node).rho;
-    dfloat ux = (*node).ux;
-    dfloat uy = (*node).uy;
-    dfloat mxx = (*node).mxx;
-    dfloat mxy = (*node).mxy;
-    dfloat myy = (*node).myy;
+    dfloat ux = (*node).ux * F_M_I_SCALE;
+    dfloat uy = (*node).uy * F_M_I_SCALE;
 
-    dfloat pics2 = 1 - cs2 * (mxx + myy);
+    dfloat pics2 = 1 - cs2 * (ux * ux + uy * uy);
 
     dfloat multiplyTerm = W0 * rho;
     (*node).pop_in[0] = multiplyTerm * (pics2);
 
     multiplyTerm = W1 * rho;
-    (*node).pop_in[1] = multiplyTerm * (pics2 + ux + mxx);
-    (*node).pop_in[2] = multiplyTerm * (pics2 + uy + myy);
-    (*node).pop_in[3] = multiplyTerm * (pics2 - ux + mxx);
-    (*node).pop_in[4] = multiplyTerm * (pics2 - uy + myy);
+    (*node).pop_in[1] = multiplyTerm * (pics2 + ux + static_cast<dfloat>(0.5) * ux * ux);
+    (*node).pop_in[2] = multiplyTerm * (pics2 + uy + static_cast<dfloat>(0.5) * uy * uy);
+    (*node).pop_in[3] = multiplyTerm * (pics2 - ux + static_cast<dfloat>(0.5) * ux * ux);
+    (*node).pop_in[4] = multiplyTerm * (pics2 - uy + static_cast<dfloat>(0.5) * uy * uy);
 
     multiplyTerm = W2 * rho;
-    (*node).pop_in[5] = multiplyTerm * (pics2 + ux + uy + mxx + myy + mxy);
-    (*node).pop_in[6] = multiplyTerm * (pics2 - ux + uy + mxx + myy - mxy);
-    (*node).pop_in[7] = multiplyTerm * (pics2 - ux - uy + mxx + myy + mxy);
-    (*node).pop_in[8] = multiplyTerm * (pics2 + ux - uy + mxx + myy - mxy);
+    (*node).pop_in[5] = multiplyTerm * (pics2 + ux + uy + static_cast<dfloat>(0.5) * ux * ux + static_cast<dfloat>(0.5) * uy * uy + ux * uy);
+    (*node).pop_in[6] = multiplyTerm * (pics2 - ux + uy + static_cast<dfloat>(0.5) * ux * ux + static_cast<dfloat>(0.5) * uy * uy - ux * uy);
+    (*node).pop_in[7] = multiplyTerm * (pics2 - ux - uy + static_cast<dfloat>(0.5) * ux * ux + static_cast<dfloat>(0.5) * uy * uy + ux * uy);
+    (*node).pop_in[8] = multiplyTerm * (pics2 + ux - uy + static_cast<dfloat>(0.5) * ux * ux + static_cast<dfloat>(0.5) * uy * uy - ux * uy);
 }
 
 __host__ inline void regularization(latticeNode *node)
@@ -394,7 +391,6 @@ __host__ inline void coarse_to_fine(latticeNode *coarse_nodes, latticeNode *fine
         fine_nodes[fine_idx(0, y * 2)] = coarse_nodes[coarse_idx(NX_COARSE + N_OVERLAP_LAYER - 1, y)];
 
         fine_nodes[fine_idx(0, y * 2)].node_type = temp_type;
-        fine_nodes[fine_idx(0, y * 2)].updated = true;
     }
 }
 
@@ -403,8 +399,6 @@ __host__ inline void fine_to_coarse(latticeNode *fine_nodes, latticeNode *coarse
     for (int y = 0; y < NY_COARSE; ++y)
     {
         coarse_nodes[coarse_idx(NX_COARSE + N_OVERLAP_LAYER - 1, y)] = fine_nodes[fine_idx(0, y * 2)];
-
-        coarse_nodes[coarse_idx(NX_COARSE + N_OVERLAP_LAYER - 1, y)].updated = true;
     }
 }
 
