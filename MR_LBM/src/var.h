@@ -14,6 +14,12 @@
 /* ----------------------------- PROBLEM DEFINE ---------------------------- */
 typedef float dfloat;
 
+template <const std::size_t N>
+struct arrayType
+{
+	dfloat f[N];
+};
+
 #define GPU_INDEX 0
 /* --------------------------  SIMULATION DEFINES -------------------------- */
 

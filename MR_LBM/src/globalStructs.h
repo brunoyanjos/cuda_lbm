@@ -23,6 +23,9 @@ typedef struct latticeNode
 {
     unsigned int node_type;
 
+    bool incomings[9];
+    bool outgoings[9];
+
     dfloat pop_out[9];
     dfloat pop_in[9];
 
@@ -32,6 +35,7 @@ typedef struct latticeNode
     dfloat mxx;
     dfloat mxy;
     dfloat myy;
+
 } LatticeNode;
 
 #endif

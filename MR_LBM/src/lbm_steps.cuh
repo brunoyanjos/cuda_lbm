@@ -27,6 +27,36 @@ __host__ inline void init_pop_eq(latticeNode *node)
     (*node).pop_in[8] = multiplyTerm * (pics2 + ux - uy + static_cast<dfloat>(0.5) * ux * ux + static_cast<dfloat>(0.5) * uy * uy - ux * uy);
 }
 
+__host__ [[nodiscard]] inline arrayType<9> regularization_mass(const latticeNode &node) noexcept
+{
+    const dfloat rho = node.rho;
+    const dfloat ux = node.ux;
+    const dfloat uy = node.uy;
+    const dfloat mxx = node.mxx;
+    const dfloat mxy = node.mxy;
+    const dfloat myy = node.myy;
+
+    arrayType<9> pop;
+
+    const dfloat pics2 = 1 - cs2 * (mxx + myy);
+    dfloat multiplyTerm = W0 * rho;
+
+    pop.f[0] = multiplyTerm * (pics2);
+    multiplyTerm = W1 * rho;
+    pop.f[1] = multiplyTerm * (pics2 + ux + mxx);
+    pop.f[2] = multiplyTerm * (pics2 + uy + myy);
+    pop.f[3] = multiplyTerm * (pics2 - ux + mxx);
+    pop.f[4] = multiplyTerm * (pics2 - uy + myy);
+
+    multiplyTerm = W2 * rho;
+    pop.f[5] = multiplyTerm * (pics2 + ux + uy + mxx + myy + mxy);
+    pop.f[6] = multiplyTerm * (pics2 - ux + uy + mxx + myy - mxy);
+    pop.f[7] = multiplyTerm * (pics2 - ux - uy + mxx + myy + mxy);
+    pop.f[8] = multiplyTerm * (pics2 + ux - uy + mxx + myy - mxy);
+
+    return pop;
+}
+
 __host__ inline void regularization(latticeNode *node)
 {
     dfloat rho = (*node).rho;
@@ -54,7 +84,8 @@ __host__ inline void regularization(latticeNode *node)
     (*node).pop_out[8] = multiplyTerm * (pics2 + ux - uy + mxx + myy - mxy);
 }
 
-__host__ inline void boundary_condition(latticeNode *node, dfloat omega)
+__host__ inline void
+boundary_condition(latticeNode *node, dfloat omega)
 {
     unsigned int nodeType = (*node).node_type;
     const dfloat *pop = (*node).pop_in;
