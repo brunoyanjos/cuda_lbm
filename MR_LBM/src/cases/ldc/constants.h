@@ -16,7 +16,6 @@ constexpr int NY = N; // size y of the grid
 constexpr int N_OVERLAP_LAYER = 1;
 
 constexpr int GRID_RATIO = 2;
-
 constexpr dfloat U_MAX = 0.0256;
 
 constexpr size_t NX_COARSE = static_cast<int>(N / 2) + 1;
@@ -50,7 +49,7 @@ constexpr dfloat MACH_NUMBER = U_MAX / 0.57735026918962;
 constexpr int INI_STEP = 0; // initial simulation step (0 default)
 
 // constexpr int T_STAR_FINAL = 1200;
-constexpr int N_STEPS = 1000;
+constexpr int N_STEPS = 750;
 
 #define BC_X_WALL
 #define BC_Y_WALL

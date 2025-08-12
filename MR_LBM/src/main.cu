@@ -40,9 +40,6 @@ int main()
 	/* ---------------------------------------------------------------------- */
 	for (step = INI_STEP; step < N_STEPS; step++)
 	{
-		coarse_to_fine(coarse_nodes, fine_nodes);
-		fine_to_coarse(fine_nodes, coarse_nodes);
-
 		coarse_grid_solution(coarse_nodes);
 
 		if (calculate_mass)
@@ -101,8 +98,7 @@ int main()
 
 		for (size_t fine_step = 0; fine_step < GRID_RATIO; ++fine_step)
 		{
-
-			fine_grid_solution(fine_nodes, fine_step == 0);
+			fine_grid_solution(fine_nodes);
 
 			if (calculate_mass)
 			{
@@ -152,6 +148,9 @@ int main()
 				// ---------------------------------------------
 			}
 		}
+
+		coarse_to_fine(coarse_nodes, fine_nodes);
+		fine_to_coarse(fine_nodes, coarse_nodes);
 
 		if (calculate_mass)
 		{

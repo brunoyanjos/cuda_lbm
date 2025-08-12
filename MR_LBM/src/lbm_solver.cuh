@@ -7,7 +7,7 @@
 #include "globalFunctions.h"
 #include "nodeTypeMap.h"
 
-__host__ inline void fine_grid_solution(latticeNode *nodes, bool isEven)
+__host__ inline void fine_grid_solution(latticeNode *nodes)
 {
     for (size_t y = 0; y < NY_FINE; ++y)
     {
@@ -18,7 +18,7 @@ __host__ inline void fine_grid_solution(latticeNode *nodes, bool isEven)
         }
     }
 
-    streaming_fine(nodes, NX_FINE, NY_FINE);
+    streaming_fine(nodes);
 
     for (size_t y = 0; y < NY_FINE; ++y)
     {
@@ -65,7 +65,7 @@ __host__ inline void coarse_grid_solution(latticeNode *nodes)
         }
     }
 
-    streaming_coarse(nodes, NX_COARSE + N_OVERLAP_LAYER, NY_COARSE);
+    streaming_coarse(nodes);
 
     for (size_t y = 0; y < NY_COARSE; y++)
     {

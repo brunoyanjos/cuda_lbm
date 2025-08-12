@@ -352,16 +352,16 @@ boundary_condition(latticeNode *node, dfloat omega)
     }
 }
 
-__host__ inline void streaming_fine(latticeNode *nodes, size_t x_lattices, size_t y_lattices)
+__host__ inline void streaming_fine(latticeNode *nodes)
 {
-    for (size_t y = 0; y < y_lattices; ++y)
+    for (size_t y = 0; y < NY_FINE; ++y)
     {
-        for (size_t x = 0; x < x_lattices; ++x)
+        for (size_t x = 0; x < NX_FINE; ++x)
         {
-            size_t xp1 = (x + 1 + x_lattices) % x_lattices;
-            size_t xm1 = (x - 1 + x_lattices) % x_lattices;
-            size_t yp1 = (y + 1 + y_lattices) % y_lattices;
-            size_t ym1 = (y - 1 + y_lattices) % y_lattices;
+            size_t xp1 = (x + 1 + NX_FINE) % NX_FINE;
+            size_t xm1 = (x - 1 + NX_FINE) % NX_FINE;
+            size_t yp1 = (y + 1 + NY_FINE) % NY_FINE;
+            size_t ym1 = (y - 1 + NY_FINE) % NY_FINE;
 
             nodes[fine_idx(x, y)].pop_in[0] = nodes[fine_idx(x, y)].pop_out[0];
             nodes[fine_idx(xp1, y)].pop_in[1] = nodes[fine_idx(x, y)].pop_out[1];
@@ -376,16 +376,16 @@ __host__ inline void streaming_fine(latticeNode *nodes, size_t x_lattices, size_
     }
 }
 
-__host__ inline void streaming_coarse(latticeNode *nodes, size_t x_lattices, size_t y_lattices)
+__host__ inline void streaming_coarse(latticeNode *nodes)
 {
-    for (size_t y = 0; y < y_lattices; ++y)
+    for (size_t y = 0; y < NY_COARSE; ++y)
     {
-        for (size_t x = 0; x < x_lattices; ++x)
+        for (size_t x = 0; x < NX_COARSE + N_OVERLAP_LAYER; ++x)
         {
-            size_t xp1 = (x + 1 + x_lattices) % x_lattices;
-            size_t xm1 = (x - 1 + x_lattices) % x_lattices;
-            size_t yp1 = (y + 1 + y_lattices) % y_lattices;
-            size_t ym1 = (y - 1 + y_lattices) % y_lattices;
+            size_t xp1 = (x + 1 + NX_COARSE + N_OVERLAP_LAYER) % (NX_COARSE + N_OVERLAP_LAYER);
+            size_t xm1 = (x - 1 + NX_COARSE + N_OVERLAP_LAYER) % (NX_COARSE + N_OVERLAP_LAYER);
+            size_t yp1 = (y + 1 + NY_COARSE) % NY_COARSE;
+            size_t ym1 = (y - 1 + NY_COARSE) % NY_COARSE;
 
             nodes[coarse_idx(x, y)].pop_in[0] = nodes[coarse_idx(x, y)].pop_out[0];
             nodes[coarse_idx(xp1, y)].pop_in[1] = nodes[coarse_idx(x, y)].pop_out[1];
