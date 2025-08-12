@@ -2,6 +2,7 @@
 #define LBM_STEPS_CUH
 
 #include "var.h"
+#include "newton_raphson.cuh"
 
 __host__ inline void init_pop_eq(latticeNode *node)
 {
@@ -285,26 +286,15 @@ boundary_condition(latticeNode *node, dfloat omega)
         const dfloat rhoMxyIn = pop[7] - pop[6];
         const dfloat rhoMyyIn = (pop[2] + pop[4] + pop[6] + pop[7]) - rhoIn * cs2;
 
-        const dfloat sqrt_term =
-            -25.0f * rhoIn * rhoIn -
-            225.0f * rhoMxyIn * rhoMxyIn +
-            180.0f * rhoIn * rhoMyyIn +
-            108.0f * rhoMyyIn * rhoMyyIn -
-            250.0f * rhoIn * rhoUxIn -
-            540.0f * rhoMyyIn * rhoUxIn +
-            575.0f * rhoUxIn * rhoUxIn -
-            450.0f * rhoMxyIn * rhoUyIn -
-            225.0f * rhoUyIn * rhoUyIn;
+        dfloat rho, rhoMxx;
 
-        const dfloat rho = (3.0f / 10.0f) *
-                           (5.0f * rhoIn + 6.0f * rhoMyyIn - 15.0f * rhoUxIn - (1.0f / std::sqrt(3.0f)) * std::sqrt(sqrt_term));
+        const dfloat rhoUy = static_cast<dfloat>(1.5) * (rhoMxyIn + rhoUyIn);
+        const dfloat rhoMxy = static_cast<dfloat>(0.5) * (static_cast<dfloat>(5) * rhoMxyIn + rhoUyIn);
+        const dfloat rhoMyy = static_cast<dfloat>(1.2) * rhoMyyIn;
 
-        const dfloat rhoUx = -rhoIn + rhoUxIn + rho;
-        const dfloat rhoUy = (3.0f / 2.0f) * (rhoMxyIn + rhoUyIn);
+        newton_raphson(rhoIn, rhoUxIn, omega, &rho, rhoUy, &rhoMxx, rhoMyy);
 
-        const dfloat rhoMxx = (1.0f / 3.0f) * (-3.0f * rhoIn - 3.0f * rhoUxIn + 2.0f * rho);
-        const dfloat rhoMxy = (1.0f / 2.0f) * (5.0f * rhoMxyIn + rhoUyIn);
-        const dfloat rhoMyy = (6.0f / 5.0f) * rhoMyyIn;
+        const dfloat rhoUx = (static_cast<dfloat>(6) * rhoUxIn + rho + static_cast<dfloat>(3) * rhoMxx) / static_cast<dfloat>(3);
 
         (*node).rho = rho;
         (*node).ux = rhoUx / rho;

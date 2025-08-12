@@ -170,6 +170,8 @@ int main()
 
 		if (step % MACR_SAVE == 0)
 		{
+			printf("\n--------------------------- Last Time Step %06zu ---------------------------\n", step);
+
 			saveMacr_coarse(coarse_nodes, step, "002");
 			saveMacr_fine(fine_nodes, step, "003");
 		}
