@@ -49,7 +49,7 @@ constexpr dfloat MACH_NUMBER = U_MAX / 0.57735026918962;
 constexpr int INI_STEP = 0; // initial simulation step (0 default)
 
 // constexpr int T_STAR_FINAL = 1200;
-constexpr int N_STEPS = 750;
+constexpr int N_STEPS = 1;
 
 #define BC_X_WALL
 #define BC_Y_WALL
