@@ -292,7 +292,7 @@ boundary_condition(latticeNode *node, dfloat omega)
         const dfloat rhoMxy = static_cast<dfloat>(0.5) * (static_cast<dfloat>(5) * rhoMxyIn + rhoUyIn);
         const dfloat rhoMyy = static_cast<dfloat>(1.2) * rhoMyyIn;
 
-        newton_raphson(rhoIn, rhoUxIn, omega, &rho, rhoUy, &rhoMxx, rhoMyy);
+        // newton_raphson(rhoIn, rhoUxIn, omega, &rho, rhoUy, &rhoMxx, rhoMyy);
 
         const dfloat rhoUx = (static_cast<dfloat>(6) * rhoUxIn + rho + static_cast<dfloat>(3) * rhoMxx) / static_cast<dfloat>(3);
 
@@ -312,9 +312,26 @@ boundary_condition(latticeNode *node, dfloat omega)
         const dfloat rhoUxIn = (pop[1] + pop[5]) - (pop[3] + pop[6]);
         const dfloat rhoUyIn = pop[2] + pop[5] + pop[6];
 
-        const dfloat mxxIn = (pop[1] + pop[3] + pop[5] + pop[6]) - rhoIn * cs2;
-        const dfloat mxyIn = (pop[5] - pop[6]);
-        const dfloat myyIn = (pop[2] + pop[5] + pop[6]) - rhoIn * cs2;
+        const dfloat rhoMxxIn = (pop[1] + pop[3] + pop[5] + pop[6]) - rhoIn * cs2;
+        const dfloat rhoMxyIn = (pop[5] - pop[6]);
+        const dfloat rhoMyyIn = (pop[2] + pop[5] + pop[6]) - rhoIn * cs2;
+
+        dfloat rho, rhoMyy;
+
+        const dfloat rhoUx = -static_cast<dfloat>(1.5) * (rhoMxyIn - rhoUxIn);
+        const dfloat rhoMxx = static_cast<dfloat>(1.2) * rhoMxxIn;
+        const dfloat rhoMxy = static_cast<dfloat>(0.5) * (static_cast<dfloat>(5) * rhoMxyIn - rhoUxIn);
+
+        newton_raphson(rhoIn, rhoUyIn, omega, &rho, rhoUx, rhoMxx, &rhoMyy);
+
+        const dfloat rhoUy = (static_cast<dfloat>(6) * rhoUyIn + rho - static_cast<dfloat>(3) * rhoMyy);
+
+        (*node).rho = rho;
+        (*node).ux = rhoUx / rho;
+        (*node).uy = rhoUy / rho;
+        (*node).mxx = rhoMxx / rho;
+        (*node).mxy = rhoMxy / rho;
+        (*node).myy = rhoMyy / rho;
     }
     case INT_TOP_RIGHT:
     {
