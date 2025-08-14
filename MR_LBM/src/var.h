@@ -15,6 +15,7 @@
 typedef float dfloat;
 
 template <const std::size_t N>
+
 struct arrayType
 {
 	dfloat f[N];

@@ -47,8 +47,6 @@ __host__ void saveMacr_coarse(
 	out.close();
 	// ======================================================================================================================
 
-	const size_t nx_total_size = NX_COARSE + N_OVERLAP_LAYER;
-
 	// writing grid.x file
 	// -------------------------------------------------------------------------------------------------------
 	int nprocs = 1;
@@ -72,7 +70,7 @@ __host__ void saveMacr_coarse(
 		// Write (nx, ny) for each processor (Fortran loop: m = 1 to nprocs)
 		for (int m = 1; m <= nprocs; ++m)
 		{
-			gridfile.write(reinterpret_cast<const char *>(&nx_total_size), sizeof(int));
+			gridfile.write(reinterpret_cast<const char *>(&NX_COARSE), sizeof(int));
 			gridfile.write(reinterpret_cast<const char *>(&NY_COARSE), sizeof(int));
 		}
 
@@ -81,14 +79,14 @@ __host__ void saveMacr_coarse(
 		{
 			// Fortran is column-major: loop j outer, i inner
 			for (int j = 0; j < NY_COARSE; ++j)
-				for (int i = 0; i < nx_total_size; ++i)
+				for (int i = 0; i < NX_COARSE; ++i)
 				{
 					float val = double(i); // already float
 					gridfile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 				}
 
 			for (int j = 0; j < NY_COARSE; ++j)
-				for (int i = 0; i < nx_total_size; ++i)
+				for (int i = 0; i < NX_COARSE; ++i)
 				{
 					float val = double(j);
 					gridfile.write(reinterpret_cast<const char *>(&val), sizeof(float));
@@ -119,7 +117,7 @@ __host__ void saveMacr_coarse(
 	// Write (nx, ny) for each processor (Fortran loop: m = 1 to nprocs)
 	for (int l = 0; l < nprocs; ++l)
 	{
-		datafile.write(reinterpret_cast<const char *>(&nx_total_size), sizeof(int));
+		datafile.write(reinterpret_cast<const char *>(&NX_COARSE), sizeof(int));
 		datafile.write(reinterpret_cast<const char *>(&NY_COARSE), sizeof(int));
 		int nf = 3; // 3 fields: rho, ux, uy
 		datafile.write(reinterpret_cast<const char *>(&nf), sizeof(int));
@@ -130,7 +128,7 @@ __host__ void saveMacr_coarse(
 	{
 		// Fortran is column-major: loop j outer, i inner
 		for (int j = 0; j < NY_COARSE; ++j)
-			for (int i = 0; i < nx_total_size; ++i)
+			for (int i = 0; i < NX_COARSE; ++i)
 			{
 				size_t idx = coarse_idx(i, j);
 				float val = nodes[idx].rho; // already float
@@ -138,7 +136,7 @@ __host__ void saveMacr_coarse(
 			}
 
 		for (int j = 0; j < NY_COARSE; ++j)
-			for (int i = 0; i < nx_total_size; ++i)
+			for (int i = 0; i < NX_COARSE; ++i)
 			{
 				size_t idx = coarse_idx(i, j);
 				float val = nodes[idx].ux; // already float
@@ -146,7 +144,7 @@ __host__ void saveMacr_coarse(
 			}
 
 		for (int j = 0; j < NY_COARSE; ++j)
-			for (int i = 0; i < nx_total_size; ++i)
+			for (int i = 0; i < NX_COARSE; ++i)
 			{
 				size_t idx = coarse_idx(i, j);
 				float val = nodes[idx].uy; // already float

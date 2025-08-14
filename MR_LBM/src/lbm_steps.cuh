@@ -277,7 +277,7 @@ boundary_condition(latticeNode *node, dfloat omega)
     }
     case INT_LEFT:
     {
-        const dfloat rhoIn = pop[0] + pop[2] + pop[3] + pop[4] + pop[6] + pop[7];
+        const dfloat rhoIn = pop[0] + pop[2] + pop[2] + pop[3] + pop[4] + pop[6] + pop[7];
 
         const dfloat rhoUxIn = -(pop[3] + pop[6] + pop[7]);
         const dfloat rhoUyIn = (pop[2] + pop[6]) - (pop[4] + pop[7]);
@@ -304,6 +304,20 @@ boundary_condition(latticeNode *node, dfloat omega)
         (*node).myy = rhoMyy / rho;
 
         break;
+    }
+    case INT_TOP:
+    {
+        const dfloat rhoIn = pop[0] + pop[1] + pop[2] + pop[3] + pop[5] + pop[6];
+
+        const dfloat rhoUxIn = (pop[1] + pop[5]) - (pop[3] + pop[6]);
+        const dfloat rhoUyIn = pop[2] + pop[5] + pop[6];
+
+        const dfloat mxxIn = (pop[1] + pop[3] + pop[5] + pop[6]) - rhoIn * cs2;
+        const dfloat mxyIn = (pop[5] - pop[6]);
+        const dfloat myyIn = (pop[2] + pop[5] + pop[6]) - rhoIn * cs2;
+    }
+    case INT_TOP_RIGHT:
+    {
     }
     case INT_TOP_LEFT:
     {

@@ -166,108 +166,7 @@ __host__ inline void initialize_fine_grid(latticeNode *&lattice_nodes)
 			lattice_nodes[idx].uy = 0.0;
 			lattice_nodes[idx].ux = 0.0;
 
-			if (x == 0 && y == 0)
-			{
-				lattice_nodes[idx].node_type = INT_BOTTOM_LEFT;
-
-				//					0, 1, 2, 3, 4, 5, 6, 7, 8
-				bool incomings[] = {1, 0, 0, 1, 1, 0, 0, 1, 0}; // 9 elementos
-				bool outgoings[] = {1, 1, 1, 0, 0, 1, 0, 0, 0}; // 9 elementos
-
-				memcpy(lattice_nodes[idx].incomings, incomings, sizeof(incomings));
-				memcpy(lattice_nodes[idx].outgoings, outgoings, sizeof(outgoings));
-			}
-			else if (x == 0 && y == NY_FINE - 1)
-			{
-				lattice_nodes[idx].node_type = INT_TOP_LEFT;
-				lattice_nodes[idx].ux = U_MAX;
-
-				//					0, 1, 2, 3, 4, 5, 6, 7, 8
-				bool incomings[] = {1, 0, 1, 1, 0, 0, 1, 0, 0}; // 9 elementos
-				bool outgoings[] = {1, 1, 0, 0, 1, 0, 0, 0, 1}; // 9 elementos
-
-				memcpy(lattice_nodes[idx].incomings, incomings, sizeof(incomings));
-				memcpy(lattice_nodes[idx].outgoings, outgoings, sizeof(outgoings));
-			}
-			else if (x == NX_FINE - 1 && y == 0)
-			{
-				lattice_nodes[idx].node_type = SOUTH_EAST;
-
-				//					0, 1, 2, 3, 4, 5, 6, 7, 8
-				bool incomings[] = {1, 1, 0, 0, 1, 0, 0, 0, 1}; // 9 elementos
-				bool outgoings[] = {1, 0, 1, 1, 0, 0, 1, 0, 0}; // 9 elementos
-
-				memcpy(lattice_nodes[idx].incomings, incomings, sizeof(incomings));
-				memcpy(lattice_nodes[idx].outgoings, outgoings, sizeof(outgoings));
-			}
-			else if (x == NX_FINE - 1 && y == NY_FINE - 1)
-			{
-				lattice_nodes[idx].node_type = NORTH_EAST;
-				lattice_nodes[idx].ux = U_MAX;
-
-				//					0, 1, 2, 3, 4, 5, 6, 7, 8
-				bool incomings[] = {1, 1, 1, 0, 0, 1, 0, 0, 0}; // 9 elementos
-				bool outgoings[] = {1, 0, 0, 1, 1, 0, 0, 1, 0}; // 9 elementos
-
-				memcpy(lattice_nodes[idx].incomings, incomings, sizeof(incomings));
-				memcpy(lattice_nodes[idx].outgoings, outgoings, sizeof(outgoings));
-			}
-			else if (x == 0)
-			{
-				lattice_nodes[idx].node_type = INT_LEFT;
-
-				//					0, 1, 2, 3, 4, 5, 6, 7, 8
-				bool incomings[] = {1, 0, 1, 1, 1, 0, 1, 1, 0}; // 9 elementos
-				bool outgoings[] = {1, 1, 1, 0, 1, 1, 0, 0, 1}; // 9 elementos
-
-				memcpy(lattice_nodes[idx].incomings, incomings, sizeof(incomings));
-				memcpy(lattice_nodes[idx].outgoings, outgoings, sizeof(outgoings));
-			}
-			else if (x == NX_FINE - 1)
-			{
-				lattice_nodes[idx].node_type = EAST;
-
-				//					0, 1, 2, 3, 4, 5, 6, 7, 8
-				bool incomings[] = {1, 1, 1, 0, 1, 1, 0, 0, 1}; // 9 elementos
-				bool outgoings[] = {1, 0, 1, 1, 1, 0, 1, 1, 0}; // 9 elementos
-
-				memcpy(lattice_nodes[idx].incomings, incomings, sizeof(incomings));
-				memcpy(lattice_nodes[idx].outgoings, outgoings, sizeof(outgoings));
-			}
-			else if (y == 0)
-			{
-				lattice_nodes[idx].node_type = SOUTH;
-
-				//					0, 1, 2, 3, 4, 5, 6, 7, 8
-				bool incomings[] = {1, 1, 0, 1, 1, 0, 0, 1, 1}; // 9 elementos
-				bool outgoings[] = {1, 1, 1, 1, 0, 1, 1, 0, 0}; // 9 elementos
-
-				memcpy(lattice_nodes[idx].incomings, incomings, sizeof(incomings));
-				memcpy(lattice_nodes[idx].outgoings, outgoings, sizeof(outgoings));
-			}
-			else if (y == NY_FINE - 1)
-			{
-				lattice_nodes[idx].node_type = NORTH;
-				lattice_nodes[idx].ux = U_MAX;
-
-				//					0, 1, 2, 3, 4, 5, 6, 7, 8
-				bool incomings[] = {1, 1, 1, 1, 0, 1, 1, 0, 0}; // 9 elementos
-				bool outgoings[] = {1, 1, 0, 1, 1, 0, 0, 1, 1}; // 9 elementos
-
-				memcpy(lattice_nodes[idx].incomings, incomings, sizeof(incomings));
-				memcpy(lattice_nodes[idx].outgoings, outgoings, sizeof(outgoings));
-			}
-			else
-			{
-				lattice_nodes[idx].node_type = BULK;
-
-				//					0, 1, 2, 3, 4, 5, 6, 7, 8
-				bool incomings[] = {1, 1, 1, 1, 1, 1, 1, 1, 1}; // 9 elementos
-				bool outgoings[] = {1, 1, 1, 1, 1, 1, 1, 1, 1}; // 9 elementos
-
-				memcpy(lattice_nodes[idx].incomings, incomings, sizeof(incomings));
-				memcpy(lattice_nodes[idx].outgoings, outgoings, sizeof(outgoings));
-			}
+			lattice_nodes[idx].node_type = BULK;
 
 			init_pop_eq(&lattice_nodes[idx]);
 
@@ -282,9 +181,9 @@ __host__ inline void initialize_fine_grid(latticeNode *&lattice_nodes)
 
 __host__ void initialize_coarse_grid(latticeNode *&lattice_nodes)
 {
-	for (size_t y = 0; y < NY_COARSE; y++)
+	for (size_t y = 0; y < NY_COARSE + N_OVERLAP_LAYER; y++)
 	{
-		for (size_t x = 0; x < NX_COARSE + N_OVERLAP_LAYER; x++)
+		for (size_t x = 0; x < NX_COARSE; x++)
 		{
 			size_t idx = coarse_idx(x, y);
 
@@ -295,74 +194,7 @@ __host__ void initialize_coarse_grid(latticeNode *&lattice_nodes)
 			lattice_nodes[idx].ux = 0.0;
 			lattice_nodes[idx].uy = 0.0;
 
-			if (x == 0 && y == 0)
-			{
-				lattice_nodes[idx].node_type = SOUTH_WEST;
-
-				//					0, 1, 2, 3, 4, 5, 6, 7, 8
-				bool incomings[] = {1, 0, 0, 1, 1, 0, 0, 1, 0}; // 9 elementos
-				bool outgoings[] = {1, 1, 1, 0, 0, 1, 0, 0, 0}; // 9 elementos
-
-				memcpy(lattice_nodes[idx].incomings, incomings, sizeof(incomings));
-				memcpy(lattice_nodes[idx].outgoings, outgoings, sizeof(outgoings));
-			}
-			else if (x == 0 && y == NY_COARSE - 1)
-			{
-				lattice_nodes[idx].node_type = NORTH_WEST;
-				lattice_nodes[idx].ux = U_MAX;
-
-				//					0, 1, 2, 3, 4, 5, 6, 7, 8
-				bool incomings[] = {1, 0, 1, 1, 0, 0, 1, 0, 0}; // 9 elementos
-				bool outgoings[] = {1, 1, 0, 0, 1, 0, 0, 0, 1}; // 9 elementos
-
-				memcpy(lattice_nodes[idx].incomings, incomings, sizeof(incomings));
-				memcpy(lattice_nodes[idx].outgoings, outgoings, sizeof(outgoings));
-			}
-			else if (x == 0)
-			{
-				lattice_nodes[idx].node_type = WEST;
-
-				//					0, 1, 2, 3, 4, 5, 6, 7, 8
-				bool incomings[] = {1, 0, 1, 1, 1, 0, 1, 1, 0}; // 9 elementos
-				bool outgoings[] = {1, 1, 1, 0, 1, 1, 0, 0, 1}; // 9 elementos
-
-				memcpy(lattice_nodes[idx].incomings, incomings, sizeof(incomings));
-				memcpy(lattice_nodes[idx].outgoings, outgoings, sizeof(outgoings));
-			}
-			else if (y == 0)
-			{
-				lattice_nodes[idx].node_type = SOUTH;
-
-				//					0, 1, 2, 3, 4, 5, 6, 7, 8
-				bool incomings[] = {1, 1, 0, 1, 1, 0, 0, 1, 1}; // 9 elementos
-				bool outgoings[] = {1, 1, 1, 1, 0, 1, 1, 0, 0}; // 9 elementos
-
-				memcpy(lattice_nodes[idx].incomings, incomings, sizeof(incomings));
-				memcpy(lattice_nodes[idx].outgoings, outgoings, sizeof(outgoings));
-			}
-			else if (y == NY_COARSE - 1)
-			{
-				lattice_nodes[idx].node_type = NORTH;
-				lattice_nodes[idx].ux = U_MAX;
-
-				//					0, 1, 2, 3, 4, 5, 6, 7, 8
-				bool incomings[] = {1, 1, 1, 1, 0, 1, 1, 0, 0}; // 9 elementos
-				bool outgoings[] = {1, 1, 0, 1, 1, 0, 0, 1, 1}; // 9 elementos
-
-				memcpy(lattice_nodes[idx].incomings, incomings, sizeof(incomings));
-				memcpy(lattice_nodes[idx].outgoings, outgoings, sizeof(outgoings));
-			}
-			else
-			{
-				lattice_nodes[idx].node_type = BULK;
-
-				//					0, 1, 2, 3, 4, 5, 6, 7, 8
-				bool incomings[] = {1, 1, 1, 1, 1, 1, 1, 1, 1}; // 9 elementos
-				bool outgoings[] = {1, 1, 1, 1, 1, 1, 1, 1, 1}; // 9 elementos
-
-				memcpy(lattice_nodes[idx].incomings, incomings, sizeof(incomings));
-				memcpy(lattice_nodes[idx].outgoings, outgoings, sizeof(outgoings));
-			}
+			lattice_nodes[idx].node_type = BULK;
 
 			init_pop_eq(&lattice_nodes[idx]);
 

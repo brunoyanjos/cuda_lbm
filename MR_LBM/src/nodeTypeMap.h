@@ -11,15 +11,17 @@
 #define NORTH (3)
 #define SOUTH (12)
 #define WEST (10)
-#define EAST (5) 
+#define EAST (5)
 // CORNER
 #define NORTH_WEST (2)
 #define NORTH_EAST (1)
 #define SOUTH_WEST (8)
 #define SOUTH_EAST (4)
 // BULK_BOUNDARY
+#define INT_TOP (103)
 #define INT_LEFT (110)
 #define INT_TOP_LEFT (102)
+#define INT_TOP_RIGHT (101)
 #define INT_BOTTOM_LEFT (108)
 
 #define SOLID_NODE (0)
