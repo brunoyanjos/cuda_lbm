@@ -26,15 +26,6 @@ int main()
 	/* ------------------------------ LBM LOOP ------------------------------ */
 	saveSimInfo(step, 0.0);
 
-	dfloat sys_mass_in = 0.0;
-	dfloat sys_mass_out = 0.0;
-	dfloat coarse_mass_in = 0.0;
-	dfloat fine_mass_in = 0.0;
-	dfloat coarse_mass_out = 0.0;
-	dfloat fine_mass_out = 0.0;
-
-	bool calculate_mass = false;
-
 	/* ---------------------------------------------------------------------- */
 	/* ---------------------------- BEGIN LOOP ------------------------------ */
 	/* ---------------------------------------------------------------------- */

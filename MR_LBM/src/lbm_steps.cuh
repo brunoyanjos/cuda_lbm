@@ -277,31 +277,31 @@ boundary_condition(latticeNode *node, dfloat omega)
     }
     case INT_LEFT:
     {
-        const dfloat rhoIn = pop[0] + pop[2] + pop[2] + pop[3] + pop[4] + pop[6] + pop[7];
+        // const dfloat rhoIn = pop[0] + pop[2] + pop[2] + pop[3] + pop[4] + pop[6] + pop[7];
 
-        const dfloat rhoUxIn = -(pop[3] + pop[6] + pop[7]);
-        const dfloat rhoUyIn = (pop[2] + pop[6]) - (pop[4] + pop[7]);
+        // const dfloat rhoUxIn = -(pop[3] + pop[6] + pop[7]);
+        // const dfloat rhoUyIn = (pop[2] + pop[6]) - (pop[4] + pop[7]);
 
-        const dfloat rhoMxxIn = (pop[3] + pop[6] + pop[7]) - rhoIn * cs2;
-        const dfloat rhoMxyIn = pop[7] - pop[6];
-        const dfloat rhoMyyIn = (pop[2] + pop[4] + pop[6] + pop[7]) - rhoIn * cs2;
+        // const dfloat rhoMxxIn = (pop[3] + pop[6] + pop[7]) - rhoIn * cs2;
+        // const dfloat rhoMxyIn = pop[7] - pop[6];
+        // const dfloat rhoMyyIn = (pop[2] + pop[4] + pop[6] + pop[7]) - rhoIn * cs2;
 
-        dfloat rho, rhoMxx;
+        // dfloat rho, rhoMxx;
 
-        const dfloat rhoUy = static_cast<dfloat>(1.5) * (rhoMxyIn + rhoUyIn);
-        const dfloat rhoMxy = static_cast<dfloat>(0.5) * (static_cast<dfloat>(5) * rhoMxyIn + rhoUyIn);
-        const dfloat rhoMyy = static_cast<dfloat>(1.2) * rhoMyyIn;
+        // const dfloat rhoUy = static_cast<dfloat>(1.5) * (rhoMxyIn + rhoUyIn);
+        // const dfloat rhoMxy = static_cast<dfloat>(0.5) * (static_cast<dfloat>(5) * rhoMxyIn + rhoUyIn);
+        // const dfloat rhoMyy = static_cast<dfloat>(1.2) * rhoMyyIn;
 
-        // newton_raphson(rhoIn, rhoUxIn, omega, &rho, rhoUy, &rhoMxx, rhoMyy);
+        // // newton_raphson(rhoIn, rhoUxIn, omega, &rho, rhoUy, &rhoMxx, rhoMyy);
 
-        const dfloat rhoUx = (static_cast<dfloat>(6) * rhoUxIn + rho + static_cast<dfloat>(3) * rhoMxx) / static_cast<dfloat>(3);
+        // const dfloat rhoUx = (static_cast<dfloat>(6) * rhoUxIn + rho + static_cast<dfloat>(3) * rhoMxx) / static_cast<dfloat>(3);
 
-        (*node).rho = rho;
-        (*node).ux = rhoUx / rho;
-        (*node).uy = rhoUy / rho;
-        (*node).mxx = rhoMxx / rho;
-        (*node).mxy = rhoMxy / rho;
-        (*node).myy = rhoMyy / rho;
+        // (*node).rho = rho;
+        // (*node).ux = rhoUx / rho;
+        // (*node).uy = rhoUy / rho;
+        // (*node).mxx = rhoMxx / rho;
+        // (*node).mxy = rhoMxy / rho;
+        // (*node).myy = rhoMyy / rho;
 
         break;
     }
