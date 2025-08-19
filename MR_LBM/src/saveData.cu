@@ -1,7 +1,7 @@
 #include "saveData.cuh"
 
 __host__ void saveMacr_coarse(
-	latticeNode *nodes, unsigned int nSteps, std::string id)
+	dfloat *moments, unsigned int nSteps, std::string id)
 {
 	// Sakthi-modifications
 	// Creating master.p3d file
@@ -41,6 +41,7 @@ __host__ void saveMacr_coarse(
 			}
 		}
 	}
+
 	out << std::endl;
 	out << "]" << std::endl;
 	out << "}" << std::endl;
@@ -50,6 +51,8 @@ __host__ void saveMacr_coarse(
 	// writing grid.x file
 	// -------------------------------------------------------------------------------------------------------
 	int nprocs = 1;
+	const size_t totalNy = NY_COARSE;
+
 	if (nSteps == 0)
 	{
 		std::string strInf2 = PATH_FILES;
@@ -71,24 +74,24 @@ __host__ void saveMacr_coarse(
 		for (int m = 1; m <= nprocs; ++m)
 		{
 			gridfile.write(reinterpret_cast<const char *>(&NX_COARSE), sizeof(int));
-			gridfile.write(reinterpret_cast<const char *>(&NY_COARSE), sizeof(int));
+			gridfile.write(reinterpret_cast<const char *>(&totalNy), sizeof(int));
 		}
 
 		// Write x and y arrays for each processor (m = 0 to nprocs - 1)
 		for (int m = 0; m < nprocs; ++m)
 		{
 			// Fortran is column-major: loop j outer, i inner
-			for (int j = 0; j < NY_COARSE; ++j)
+			for (int j = 0; j < totalNy; ++j)
 				for (int i = 0; i < NX_COARSE; ++i)
 				{
 					float val = double(i); // already float
 					gridfile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 				}
 
-			for (int j = 0; j < NY_COARSE; ++j)
+			for (int j = 0; j < totalNy; ++j)
 				for (int i = 0; i < NX_COARSE; ++i)
 				{
-					float val = double(j) + (NY_COARSE - 1);
+					float val = double(j) + (NY_COARSE - 1) + 2;
 					gridfile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 				}
 		}
@@ -118,7 +121,7 @@ __host__ void saveMacr_coarse(
 	for (int l = 0; l < nprocs; ++l)
 	{
 		datafile.write(reinterpret_cast<const char *>(&NX_COARSE), sizeof(int));
-		datafile.write(reinterpret_cast<const char *>(&NY_COARSE), sizeof(int));
+		datafile.write(reinterpret_cast<const char *>(&totalNy), sizeof(int));
 		int nf = 3; // 3 fields: rho, ux, uy
 		datafile.write(reinterpret_cast<const char *>(&nf), sizeof(int));
 	}
@@ -127,27 +130,24 @@ __host__ void saveMacr_coarse(
 	for (int m = 0; m < nprocs; ++m)
 	{
 		// Fortran is column-major: loop j outer, i inner
-		for (int j = 0; j < NY_COARSE; ++j)
+		for (int j = 0; j < totalNy; ++j)
 			for (int i = 0; i < NX_COARSE; ++i)
 			{
-				size_t idx = coarse_idx(i, j);
-				float val = nodes[idx].rho; // already float
+				float val = moments[coarse_moment_idx(i, j, M_RHO_INDEX)]; // already float
 				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 			}
 
-		for (int j = 0; j < NY_COARSE; ++j)
+		for (int j = 0; j < totalNy; ++j)
 			for (int i = 0; i < NX_COARSE; ++i)
 			{
-				size_t idx = coarse_idx(i, j);
-				float val = nodes[idx].ux; // already float
+				float val = moments[coarse_moment_idx(i, j, M_UX_INDEX)] / F_M_I_SCALE; // already float
 				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 			}
 
-		for (int j = 0; j < NY_COARSE; ++j)
+		for (int j = 0; j < totalNy; ++j)
 			for (int i = 0; i < NX_COARSE; ++i)
 			{
-				size_t idx = coarse_idx(i, j);
-				float val = nodes[idx].uy; // already float
+				float val = moments[coarse_moment_idx(i, j, M_UY_INDEX)] / F_M_I_SCALE; // already float
 				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 			}
 	}
@@ -162,7 +162,7 @@ __host__ void saveMacr_coarse(
 }
 
 __host__ void saveMacr_fine(
-	latticeNode *nodes, unsigned int nSteps, std::string id)
+	dfloat *moments, unsigned int nSteps, std::string id)
 {
 	// Sakthi-modifications
 	// Creating master.p3d file
@@ -291,26 +291,21 @@ __host__ void saveMacr_fine(
 		for (int j = 0; j < NY_FINE; ++j)
 			for (int i = 0; i < NX_FINE; ++i)
 			{
-				size_t idx = fine_idx(i, j);
-				float val = nodes[idx].rho; // already float
+				float val = moments[fine_moment_idx(i, j, M_RHO_INDEX)]; // already float
 				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 			}
 
 		for (int j = 0; j < NY_FINE; ++j)
 			for (int i = 0; i < NX_FINE; ++i)
 			{
-				size_t idx = fine_idx(i, j);
-
-				float val = nodes[idx].ux; // already float
+				float val = moments[fine_moment_idx(i, j, M_UX_INDEX)] / F_M_I_SCALE; // already float
 				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 			}
 
 		for (int j = 0; j < NY_FINE; ++j)
 			for (int i = 0; i < NX_FINE; ++i)
 			{
-				size_t idx = fine_idx(i, j);
-
-				float val = nodes[idx].uy; // already float
+				float val = moments[fine_moment_idx(i, j, M_UY_INDEX)] / F_M_I_SCALE; // already float
 				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 			}
 	}

@@ -79,9 +79,37 @@ __host__
 
 __host__
     size_t __forceinline__
+    fine_moment_idx(size_t x, size_t y, size_t mom_idx)
+{
+    return (x + y * NX_FINE) * NUMBER_MOMENTS + mom_idx;
+}
+
+__host__
+    size_t __forceinline__
+    fine_pop_idx(size_t x, size_t y, size_t pop_idx)
+{
+    return (x + y * NX_FINE) * Q + pop_idx;
+}
+
+__host__
+    size_t __forceinline__
     coarse_idx(size_t x, size_t y)
 {
-    return x + y * (NX_COARSE + N_OVERLAP_LAYER);
+    return x + y * NX_COARSE;
+}
+
+__host__
+    size_t __forceinline__
+    coarse_moment_idx(size_t x, size_t y, size_t mom_idx)
+{
+    return (x + y * NX_COARSE) * NUMBER_MOMENTS + mom_idx;
+}
+
+__host__
+    size_t __forceinline__
+    coarse_pop_idx(size_t x, size_t y, size_t pop_idx)
+{
+    return (x + y * NX_COARSE) * Q + pop_idx;
 }
 
 #endif // !__GLOBAL_FUNCTIONS_H

@@ -23,6 +23,8 @@ typedef struct latticeNode
 {
     unsigned int node_type;
 
+    unsigned int idx;
+
     bool incomings[9];
     bool outgoings[9];
 

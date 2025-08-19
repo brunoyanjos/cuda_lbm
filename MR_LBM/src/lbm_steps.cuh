@@ -4,28 +4,25 @@
 #include "var.h"
 #include "newton_raphson.cuh"
 
-__host__ inline void init_pop_eq(latticeNode *node)
+__host__ inline void init_pop_eq(dfloat *pop_in,
+                                 dfloat rho, dfloat ux, dfloat uy)
 {
-    dfloat rho = (*node).rho;
-    dfloat ux = (*node).ux * F_M_I_SCALE;
-    dfloat uy = (*node).uy * F_M_I_SCALE;
-
     dfloat pics2 = 1 - cs2 * (ux * ux + uy * uy);
 
     dfloat multiplyTerm = W0 * rho;
-    (*node).pop_in[0] = multiplyTerm * (pics2);
+    pop_in[0] = multiplyTerm * (pics2);
 
     multiplyTerm = W1 * rho;
-    (*node).pop_in[1] = multiplyTerm * (pics2 + ux + static_cast<dfloat>(0.5) * ux * ux);
-    (*node).pop_in[2] = multiplyTerm * (pics2 + uy + static_cast<dfloat>(0.5) * uy * uy);
-    (*node).pop_in[3] = multiplyTerm * (pics2 - ux + static_cast<dfloat>(0.5) * ux * ux);
-    (*node).pop_in[4] = multiplyTerm * (pics2 - uy + static_cast<dfloat>(0.5) * uy * uy);
+    pop_in[1] = multiplyTerm * (pics2 + ux + static_cast<dfloat>(0.5) * ux * ux);
+    pop_in[2] = multiplyTerm * (pics2 + uy + static_cast<dfloat>(0.5) * uy * uy);
+    pop_in[3] = multiplyTerm * (pics2 - ux + static_cast<dfloat>(0.5) * ux * ux);
+    pop_in[4] = multiplyTerm * (pics2 - uy + static_cast<dfloat>(0.5) * uy * uy);
 
     multiplyTerm = W2 * rho;
-    (*node).pop_in[5] = multiplyTerm * (pics2 + ux + uy + static_cast<dfloat>(0.5) * ux * ux + static_cast<dfloat>(0.5) * uy * uy + ux * uy);
-    (*node).pop_in[6] = multiplyTerm * (pics2 - ux + uy + static_cast<dfloat>(0.5) * ux * ux + static_cast<dfloat>(0.5) * uy * uy - ux * uy);
-    (*node).pop_in[7] = multiplyTerm * (pics2 - ux - uy + static_cast<dfloat>(0.5) * ux * ux + static_cast<dfloat>(0.5) * uy * uy + ux * uy);
-    (*node).pop_in[8] = multiplyTerm * (pics2 + ux - uy + static_cast<dfloat>(0.5) * ux * ux + static_cast<dfloat>(0.5) * uy * uy - ux * uy);
+    pop_in[5] = multiplyTerm * (pics2 + ux + uy + static_cast<dfloat>(0.5) * ux * ux + static_cast<dfloat>(0.5) * uy * uy + ux * uy);
+    pop_in[6] = multiplyTerm * (pics2 - ux + uy + static_cast<dfloat>(0.5) * ux * ux + static_cast<dfloat>(0.5) * uy * uy - ux * uy);
+    pop_in[7] = multiplyTerm * (pics2 - ux - uy + static_cast<dfloat>(0.5) * ux * ux + static_cast<dfloat>(0.5) * uy * uy + ux * uy);
+    pop_in[8] = multiplyTerm * (pics2 + ux - uy + static_cast<dfloat>(0.5) * ux * ux + static_cast<dfloat>(0.5) * uy * uy - ux * uy);
 }
 
 __host__ [[nodiscard]] inline arrayType<9> regularization_mass(const latticeNode &node) noexcept
@@ -58,40 +55,36 @@ __host__ [[nodiscard]] inline arrayType<9> regularization_mass(const latticeNode
     return pop;
 }
 
-__host__ inline void regularization(latticeNode *node)
+__host__ inline void regularization(
+    dfloat *pop_out,
+    dfloat rho, dfloat ux, dfloat uy,
+    dfloat mxx, dfloat mxy, dfloat myy)
 {
-    dfloat rho = (*node).rho;
-    dfloat ux = (*node).ux;
-    dfloat uy = (*node).uy;
-    dfloat mxx = (*node).mxx;
-    dfloat mxy = (*node).mxy;
-    dfloat myy = (*node).myy;
-
     dfloat pics2 = 1 - cs2 * (mxx + myy);
 
     dfloat multiplyTerm = W0 * rho;
-    (*node).pop_out[0] = multiplyTerm * (pics2);
+    pop_out[0] = multiplyTerm * (pics2);
 
     multiplyTerm = W1 * rho;
-    (*node).pop_out[1] = multiplyTerm * (pics2 + ux + mxx);
-    (*node).pop_out[2] = multiplyTerm * (pics2 + uy + myy);
-    (*node).pop_out[3] = multiplyTerm * (pics2 - ux + mxx);
-    (*node).pop_out[4] = multiplyTerm * (pics2 - uy + myy);
+    pop_out[1] = multiplyTerm * (pics2 + ux + mxx);
+    pop_out[2] = multiplyTerm * (pics2 + uy + myy);
+    pop_out[3] = multiplyTerm * (pics2 - ux + mxx);
+    pop_out[4] = multiplyTerm * (pics2 - uy + myy);
 
     multiplyTerm = W2 * rho;
-    (*node).pop_out[5] = multiplyTerm * (pics2 + ux + uy + mxx + myy + mxy);
-    (*node).pop_out[6] = multiplyTerm * (pics2 - ux + uy + mxx + myy - mxy);
-    (*node).pop_out[7] = multiplyTerm * (pics2 - ux - uy + mxx + myy + mxy);
-    (*node).pop_out[8] = multiplyTerm * (pics2 + ux - uy + mxx + myy - mxy);
+    pop_out[5] = multiplyTerm * (pics2 + ux + uy + mxx + myy + mxy);
+    pop_out[6] = multiplyTerm * (pics2 - ux + uy + mxx + myy - mxy);
+    pop_out[7] = multiplyTerm * (pics2 - ux - uy + mxx + myy + mxy);
+    pop_out[8] = multiplyTerm * (pics2 + ux - uy + mxx + myy - mxy);
 }
 
 __host__ inline void
-boundary_condition(latticeNode *node, dfloat omega)
+boundary_condition(unsigned int node_type, const dfloat *pop,
+                   dfloat *rho, dfloat *ux, dfloat *uy,
+                   dfloat *mxx, dfloat *mxy, dfloat *myy,
+                   dfloat omega)
 {
-    unsigned int nodeType = (*node).node_type;
-    const dfloat *pop = (*node).pop_in;
-
-    switch (nodeType)
+    switch (node_type)
     {
     case NORTH:
     {
@@ -102,17 +95,17 @@ boundary_condition(latticeNode *node, dfloat omega)
         const dfloat mxyIn = (pop[5] - pop[6]) * inv_rhoIn;
         const dfloat myyIn = (pop[2] + pop[5] + pop[6]) * inv_rhoIn - cs2;
 
-        (*node).ux = U_MAX;
-        (*node).uy = 0.0f;
+        *ux = U_MAX;
+        *uy = 0.0f;
 
         const dfloat rhoVar = 6.0f * rhoIn / 5.0f;
 
-        (*node).mxx = U_MAX * U_MAX;
-        (*node).mxx = 0.0f;
-        (*node).mxy = 5.0f * mxyIn / 3.0f - U_MAX / 3.0f;
-        (*node).myy = 0.0f;
+        *mxx = U_MAX * U_MAX;
+        *mxx = 0.0f;
+        *mxy = 5.0f * mxyIn / 3.0f - U_MAX / 3.0f;
+        *myy = 0.0f;
 
-        (*node).rho = rhoVar;
+        *rho = rhoVar;
 
         break;
     }
@@ -125,16 +118,16 @@ boundary_condition(latticeNode *node, dfloat omega)
         const dfloat mxyIn = (pop[7] - pop[8]) * inv_rhoIn;
         const dfloat myyIn = (pop[3] + pop[7] + pop[8]) * inv_rhoIn - cs2;
 
-        (*node).ux = 0.0f;
-        (*node).uy = 0.0f;
+        *ux = 0.0f;
+        *uy = 0.0f;
 
         const dfloat rhoVar = 6.0f * rhoIn / 5.0f;
 
-        (*node).mxx = 0.0f;
-        (*node).mxy = 5.0f * mxyIn / 3.0f;
-        (*node).myy = 0.0f;
+        *mxx = 0.0f;
+        *mxy = 5.0f * mxyIn / 3.0f;
+        *myy = 0.0f;
 
-        (*node).rho = rhoVar;
+        *rho = rhoVar;
 
         break;
     }
@@ -147,16 +140,16 @@ boundary_condition(latticeNode *node, dfloat omega)
         const dfloat mxyIn = (pop[7] - pop[6]) * inv_rhoIn;
         const dfloat myyIn = (pop[2] + pop[4] + pop[6] + pop[7]) * inv_rhoIn - cs2;
 
-        (*node).ux = 0.0f;
-        (*node).uy = 0.0f;
+        *ux = 0.0f;
+        *uy = 0.0f;
 
         const dfloat rhoVar = 6.0f * rhoIn / 5.0f;
 
-        (*node).mxx = 0.0f;
-        (*node).mxy = 5.0f * mxyIn / 3.0f;
-        (*node).myy = 0.0f;
+        *mxx = 0.0f;
+        *mxy = 5.0f * mxyIn / 3.0f;
+        *myy = 0.0f;
 
-        (*node).rho = rhoVar;
+        *rho = rhoVar;
 
         break;
     }
@@ -169,16 +162,16 @@ boundary_condition(latticeNode *node, dfloat omega)
         const dfloat mxyIn = (pop[5] - pop[8]) * inv_rhoIn;
         const dfloat myyIn = (pop[2] + pop[4] + pop[5] + pop[8]) * inv_rhoIn - cs2;
 
-        (*node).ux = 0.0f;
-        (*node).uy = 0.0f;
+        *ux = 0.0f;
+        *uy = 0.0f;
 
         const dfloat rhoVar = 6.0f * rhoIn / 5.0f;
 
-        (*node).mxx = 0.0f;
-        (*node).mxy = 5.0f * mxyIn / 3.0f;
-        (*node).myy = 0.0f;
+        *mxx = 0.0f;
+        *mxy = 5.0f * mxyIn / 3.0f;
+        *myy = 0.0f;
 
-        (*node).rho = rhoVar;
+        *rho = rhoVar;
 
         break;
     }
@@ -191,18 +184,18 @@ boundary_condition(latticeNode *node, dfloat omega)
         const dfloat mxyIn = pop[7] * inv_rhoIn;
         const dfloat myyIn = (pop[4] + pop[7]) * inv_rhoIn - cs2;
 
-        (*node).ux = 0.0f;
-        (*node).uy = 0.0f;
+        *ux = 0.0f;
+        *uy = 0.0f;
 
         const dfloat rhoVar = 36.0f * (rhoIn - mxyIn * rhoIn + mxyIn * omega * rhoIn) /
                               (24.0f + omega);
 
-        (*node).mxx = 0.0f;
-        (*node).mxy = (36.0f * mxyIn * rhoIn - (rhoVar)) /
-                      (9.0f * (rhoVar));
-        (*node).myy = 0.0f;
+        *mxx = 0.0f;
+        *mxy = (36.0f * mxyIn * rhoIn - (rhoVar)) /
+               (9.0f * (rhoVar));
+        *myy = 0.0f;
 
-        (*node).rho = rhoVar;
+        *rho = rhoVar;
 
         break;
     }
@@ -215,17 +208,17 @@ boundary_condition(latticeNode *node, dfloat omega)
         const dfloat mxyIn = -pop[8] * inv_rhoIn;
         const dfloat myyIn = (pop[4] + pop[8]) * inv_rhoIn - cs2;
 
-        (*node).uy = 0.0f;
-        (*node).ux = 0.0f;
+        *uy = 0.0f;
+        *ux = 0.0f;
 
         const dfloat rhoVar = -36.0f * (mxyIn * omega * rhoIn - rhoIn - mxyIn * rhoIn) /
                               (24 + omega);
 
-        (*node).mxx = 0.0f;
-        (*node).mxy = (36.0f * mxyIn * rhoIn + (rhoVar)) / (9.0f * (rhoVar));
-        (*node).myy = 0.0f;
+        *mxx = 0.0f;
+        *mxy = (36.0f * mxyIn * rhoIn + (rhoVar)) / (9.0f * (rhoVar));
+        *myy = 0.0f;
 
-        (*node).rho = rhoVar;
+        *rho = rhoVar;
 
         break;
     }
@@ -238,17 +231,17 @@ boundary_condition(latticeNode *node, dfloat omega)
         const dfloat mxyIn = -pop[6] * inv_rhoIn;
         const dfloat myyIn = (pop[2] + pop[6]) * inv_rhoIn - cs2;
 
-        (*node).ux = U_MAX;
-        (*node).uy = 0.0f;
+        *ux = U_MAX;
+        *uy = 0.0f;
 
         const dfloat rhoVar = -36.0f * (mxyIn * omega * rhoIn - rhoIn - mxyIn * rhoIn) /
                               (24.0f + omega + 18.0f * U_MAX - 3.0f * omega * U_MAX - 18.0f * U_MAX * U_MAX + 3.0f * omega * U_MAX * U_MAX);
 
-        (*node).mxx = U_MAX * U_MAX;
-        (*node).mxy = (36.0f * mxyIn * rhoIn + (rhoVar)-3.0f * U_MAX * (rhoVar) + 3.0f * U_MAX * U_MAX * (rhoVar)) / (9.0f * (rhoVar));
-        (*node).myy = 0.0f;
+        *mxx = U_MAX * U_MAX;
+        *mxy = (36.0f * mxyIn * rhoIn + (rhoVar)-3.0f * U_MAX * (rhoVar) + 3.0f * U_MAX * U_MAX * (rhoVar)) / (9.0f * (rhoVar));
+        *myy = 0.0f;
 
-        (*node).rho = rhoVar;
+        *rho = rhoVar;
 
         break;
     }
@@ -261,17 +254,17 @@ boundary_condition(latticeNode *node, dfloat omega)
         const dfloat mxyIn = pop[5] * inv_rhoIn;
         const dfloat myyIn = (pop[2] + pop[5]) * inv_rhoIn - cs2;
 
-        (*node).ux = U_MAX;
-        (*node).uy = 0.0f;
+        *ux = U_MAX;
+        *uy = 0.0f;
 
         const dfloat rhoVar = 36.0f * (mxyIn * omega * rhoIn + rhoIn - mxyIn * rhoIn) /
                               (24.0f + omega - 18.0f * U_MAX + 3.0f * omega * U_MAX - 18.0f * U_MAX * U_MAX + 3.0f * omega * U_MAX * U_MAX);
 
-        (*node).mxx = U_MAX * U_MAX;
-        (*node).mxy = (36.0f * mxyIn * rhoIn - (rhoVar)-3.0f * U_MAX * (rhoVar)-3.0f * U_MAX * U_MAX * (rhoVar)) / (9.0f * (rhoVar));
-        (*node).myy = 0.0f;
+        *mxx = U_MAX * U_MAX;
+        *mxy = (36.0f * mxyIn * rhoIn - (rhoVar)-3.0f * U_MAX * (rhoVar)-3.0f * U_MAX * U_MAX * (rhoVar)) / (9.0f * (rhoVar));
+        *myy = 0.0f;
 
-        (*node).rho = rhoVar;
+        *rho = rhoVar;
 
         break;
     }
@@ -296,12 +289,12 @@ boundary_condition(latticeNode *node, dfloat omega)
 
         // const dfloat rhoUx = (static_cast<dfloat>(6) * rhoUxIn + rho + static_cast<dfloat>(3) * rhoMxx) / static_cast<dfloat>(3);
 
-        // (*node).rho = rho;
-        // (*node).ux = rhoUx / rho;
-        // (*node).uy = rhoUy / rho;
-        // (*node).mxx = rhoMxx / rho;
-        // (*node).mxy = rhoMxy / rho;
-        // (*node).myy = rhoMyy / rho;
+        // *rho = rho;
+        // *ux = rhoUx / rho;
+        // *uy = rhoUy / rho;
+        // *mxx = rhoMxx / rho;
+        // *mxy = rhoMxy / rho;
+        // *myy = rhoMyy / rho;
 
         break;
     }
@@ -316,22 +309,22 @@ boundary_condition(latticeNode *node, dfloat omega)
         const dfloat rhoMxyIn = (pop[5] - pop[6]);
         const dfloat rhoMyyIn = (pop[2] + pop[5] + pop[6]) - rhoIn * cs2;
 
-        dfloat rho, rhoMyy;
+        dfloat rhoVar, rhoMyy;
 
         const dfloat rhoUx = -static_cast<dfloat>(1.5) * (rhoMxyIn - rhoUxIn);
         const dfloat rhoMxx = static_cast<dfloat>(1.2) * rhoMxxIn;
         const dfloat rhoMxy = static_cast<dfloat>(0.5) * (static_cast<dfloat>(5) * rhoMxyIn - rhoUxIn);
 
-        newton_raphson(rhoIn, rhoUyIn, omega, &rho, rhoUx, rhoMxx, &rhoMyy);
+        newton_raphson(rhoIn, rhoUyIn, omega, &rhoVar, rhoUx, rhoMxx, &rhoMyy);
 
-        const dfloat rhoUy = (static_cast<dfloat>(6) * rhoUyIn + rho - static_cast<dfloat>(3) * rhoMyy);
+        const dfloat rhoUy = (static_cast<dfloat>(6) * rhoUyIn - rhoVar - static_cast<dfloat>(3) * rhoMyy) / static_cast<dfloat>(3);
 
-        (*node).rho = rho;
-        (*node).ux = rhoUx / rho;
-        (*node).uy = rhoUy / rho;
-        (*node).mxx = rhoMxx / rho;
-        (*node).mxy = rhoMxy / rho;
-        (*node).myy = rhoMyy / rho;
+        *rho = rhoVar;
+        *ux = rhoUx / rhoVar;
+        *uy = rhoUy / rhoVar;
+        *mxx = rhoMxx / rhoVar;
+        *mxy = rhoMxy / rhoVar;
+        *myy = rhoMyy / rhoVar;
     }
     case INT_TOP_RIGHT:
     {
@@ -343,17 +336,17 @@ boundary_condition(latticeNode *node, dfloat omega)
 
         const dfloat mxyIn = -pop[6] * inv_rho_In;
 
-        const dfloat rho = -36.0f * (-rhoIn - mxyIn * rhoIn + rhoIn * mxyIn * omega) /
-                           (24.0f + 18.0f * U_MAX - 18.0f * U_MAX * U_MAX + omega - 3.0f * U_MAX * omega + 3.0f * U_MAX * U_MAX * omega);
-        const dfloat mxy = (36.0f * mxyIn * rhoIn + rho - 3.0f * U_MAX * rho + 3.0f * U_MAX * U_MAX * rho) /
-                           (9.0f * rho);
+        const dfloat rhoVar = -36.0f * (-rhoIn - mxyIn * rhoIn + rhoIn * mxyIn * omega) /
+                              (24.0f + 18.0f * U_MAX - 18.0f * U_MAX * U_MAX + omega - 3.0f * U_MAX * omega + 3.0f * U_MAX * U_MAX * omega);
+        const dfloat mxyVar = (36.0f * mxyIn * rhoIn + rhoVar - 3.0f * U_MAX * rhoVar + 3.0f * U_MAX * U_MAX * rhoVar) /
+                              (9.0f * rhoVar);
 
-        (*node).rho = rho;
-        (*node).ux = U_MAX;
-        (*node).uy = 0.0f;
-        (*node).mxx = U_MAX * U_MAX;
-        (*node).mxy = mxy;
-        (*node).myy = 0.0f;
+        *rho = rhoVar;
+        *ux = U_MAX;
+        *uy = 0.0f;
+        *mxx = U_MAX * U_MAX;
+        *mxy = mxyVar;
+        *myy = 0.0f;
 
         break;
     }
@@ -364,17 +357,17 @@ boundary_condition(latticeNode *node, dfloat omega)
 
         const dfloat mxyIn = pop[7] * inv_rho_In;
 
-        const dfloat rho = 36.0f * (rhoIn - mxyIn * rhoIn + rhoIn * mxyIn * omega) /
-                           (24.0f + omega);
-        const dfloat mxy = (36.0f * mxyIn * rhoIn - rho) /
-                           (9.0f * rho);
+        const dfloat rhoVar = 36.0f * (rhoIn - mxyIn * rhoIn + rhoIn * mxyIn * omega) /
+                              (24.0f + omega);
+        const dfloat mxyVar = (36.0f * mxyIn * rhoIn - rhoVar) /
+                              (9.0f * rhoVar);
 
-        (*node).rho = rho;
-        (*node).ux = 0.0f;
-        (*node).uy = 0.0f;
-        (*node).mxx = 0.0f;
-        (*node).mxy = mxy;
-        (*node).myy = 0.0f;
+        *rho = rhoVar;
+        *ux = 0.0f;
+        *uy = 0.0f;
+        *mxx = 0.0f;
+        *mxy = mxyVar;
+        *myy = 0.0f;
 
         break;
     }
@@ -383,7 +376,7 @@ boundary_condition(latticeNode *node, dfloat omega)
     }
 }
 
-__host__ inline void streaming_fine(latticeNode *nodes)
+__host__ inline void streaming_fine(dfloat *&pop_in, dfloat *&pop_out)
 {
     for (size_t y = 0; y < NY_FINE; ++y)
     {
@@ -394,72 +387,78 @@ __host__ inline void streaming_fine(latticeNode *nodes)
             size_t yp1 = (y + 1 + NY_FINE) % NY_FINE;
             size_t ym1 = (y - 1 + NY_FINE) % NY_FINE;
 
-            nodes[fine_idx(x, y)].pop_in[0] = nodes[fine_idx(x, y)].pop_out[0];
-            nodes[fine_idx(xp1, y)].pop_in[1] = nodes[fine_idx(x, y)].pop_out[1];
-            nodes[fine_idx(x, yp1)].pop_in[2] = nodes[fine_idx(x, y)].pop_out[2];
-            nodes[fine_idx(xm1, y)].pop_in[3] = nodes[fine_idx(x, y)].pop_out[3];
-            nodes[fine_idx(x, ym1)].pop_in[4] = nodes[fine_idx(x, y)].pop_out[4];
-            nodes[fine_idx(xp1, yp1)].pop_in[5] = nodes[fine_idx(x, y)].pop_out[5];
-            nodes[fine_idx(xm1, yp1)].pop_in[6] = nodes[fine_idx(x, y)].pop_out[6];
-            nodes[fine_idx(xm1, ym1)].pop_in[7] = nodes[fine_idx(x, y)].pop_out[7];
-            nodes[fine_idx(xp1, ym1)].pop_in[8] = nodes[fine_idx(x, y)].pop_out[8];
+            pop_in[fine_pop_idx(x, y, 0)] = pop_out[fine_pop_idx(x, y, 0)];
+            pop_in[fine_pop_idx(xp1, y, 1)] = pop_out[fine_pop_idx(x, y, 1)];
+            pop_in[fine_pop_idx(x, yp1, 2)] = pop_out[fine_pop_idx(x, y, 2)];
+            pop_in[fine_pop_idx(xm1, y, 3)] = pop_out[fine_pop_idx(x, y, 3)];
+            pop_in[fine_pop_idx(x, ym1, 4)] = pop_out[fine_pop_idx(x, y, 4)];
+            pop_in[fine_pop_idx(xp1, yp1, 5)] = pop_out[fine_pop_idx(x, y, 5)];
+            pop_in[fine_pop_idx(xm1, yp1, 6)] = pop_out[fine_pop_idx(x, y, 6)];
+            pop_in[fine_pop_idx(xm1, ym1, 7)] = pop_out[fine_pop_idx(x, y, 7)];
+            pop_in[fine_pop_idx(xp1, ym1, 8)] = pop_out[fine_pop_idx(x, y, 8)];
         }
     }
 }
 
-__host__ inline void streaming_coarse(latticeNode *nodes)
+__host__ inline void streaming_coarse(dfloat *&pop_in, dfloat *&pop_out)
 {
-    for (size_t y = 0; y < NY_COARSE; ++y)
+    for (size_t y = 0; y < NY_COARSE + N_OVERLAP_LAYER; ++y)
     {
-        for (size_t x = 0; x < NX_COARSE + N_OVERLAP_LAYER; ++x)
+        for (size_t x = 0; x < NX_COARSE; ++x)
         {
-            size_t xp1 = (x + 1 + NX_COARSE + N_OVERLAP_LAYER) % (NX_COARSE + N_OVERLAP_LAYER);
-            size_t xm1 = (x - 1 + NX_COARSE + N_OVERLAP_LAYER) % (NX_COARSE + N_OVERLAP_LAYER);
-            size_t yp1 = (y + 1 + NY_COARSE) % NY_COARSE;
-            size_t ym1 = (y - 1 + NY_COARSE) % NY_COARSE;
+            size_t xp1 = (x + 1 + NX_COARSE) % NX_COARSE;
+            size_t xm1 = (x - 1 + NX_COARSE) % NX_COARSE;
+            size_t yp1 = (y + 1 + (NY_COARSE + N_OVERLAP_LAYER)) % (NY_COARSE + N_OVERLAP_LAYER);
+            size_t ym1 = (y - 1 + (NY_COARSE + N_OVERLAP_LAYER)) % (NY_COARSE + N_OVERLAP_LAYER);
 
-            nodes[coarse_idx(x, y)].pop_in[0] = nodes[coarse_idx(x, y)].pop_out[0];
-            nodes[coarse_idx(xp1, y)].pop_in[1] = nodes[coarse_idx(x, y)].pop_out[1];
-            nodes[coarse_idx(x, yp1)].pop_in[2] = nodes[coarse_idx(x, y)].pop_out[2];
-            nodes[coarse_idx(xm1, y)].pop_in[3] = nodes[coarse_idx(x, y)].pop_out[3];
-            nodes[coarse_idx(x, ym1)].pop_in[4] = nodes[coarse_idx(x, y)].pop_out[4];
-            nodes[coarse_idx(xp1, yp1)].pop_in[5] = nodes[coarse_idx(x, y)].pop_out[5];
-            nodes[coarse_idx(xm1, yp1)].pop_in[6] = nodes[coarse_idx(x, y)].pop_out[6];
-            nodes[coarse_idx(xm1, ym1)].pop_in[7] = nodes[coarse_idx(x, y)].pop_out[7];
-            nodes[coarse_idx(xp1, ym1)].pop_in[8] = nodes[coarse_idx(x, y)].pop_out[8];
+            pop_in[coarse_pop_idx(x, y, 0)] = pop_out[coarse_pop_idx(x, y, 0)];
+            pop_in[coarse_pop_idx(xp1, y, 1)] = pop_out[coarse_pop_idx(x, y, 1)];
+            pop_in[coarse_pop_idx(x, yp1, 2)] = pop_out[coarse_pop_idx(x, y, 2)];
+            pop_in[coarse_pop_idx(xm1, y, 3)] = pop_out[coarse_pop_idx(x, y, 3)];
+            pop_in[coarse_pop_idx(x, ym1, 4)] = pop_out[coarse_pop_idx(x, y, 4)];
+            pop_in[coarse_pop_idx(xp1, yp1, 5)] = pop_out[coarse_pop_idx(x, y, 5)];
+            pop_in[coarse_pop_idx(xm1, yp1, 6)] = pop_out[coarse_pop_idx(x, y, 6)];
+            pop_in[coarse_pop_idx(xm1, ym1, 7)] = pop_out[coarse_pop_idx(x, y, 7)];
+            pop_in[coarse_pop_idx(xp1, ym1, 8)] = pop_out[coarse_pop_idx(x, y, 8)];
         }
     }
 }
 
-__host__ inline void collision(latticeNode *node, dfloat omega)
+__host__ inline void collision(dfloat *mxx, dfloat *mxy, dfloat *myy, dfloat ux, dfloat uy, dfloat omega)
 {
     const dfloat omegaVar = omega;
     const dfloat t_omegaVar = 1 - omegaVar;
     const dfloat omegaVar_d2 = omegaVar / 2;
 
-    (*node).mxx = (t_omegaVar * (*node).mxx + omegaVar_d2 * (*node).ux * (*node).ux);
-    (*node).myy = (t_omegaVar * (*node).myy + omegaVar_d2 * (*node).uy * (*node).uy);
+    *mxx = (t_omegaVar * (*mxx) + omegaVar_d2 * ux * ux);
+    *myy = (t_omegaVar * (*myy) + omegaVar_d2 * uy * uy);
 
-    (*node).mxy = (t_omegaVar * (*node).mxy + omegaVar * (*node).ux * (*node).uy);
+    *mxy = (t_omegaVar * (*mxy) + omegaVar * ux * uy);
 }
 
 __host__ inline void coarse_to_fine(latticeNode *coarse_nodes, latticeNode *fine_nodes)
 {
-    for (int y = 0; y < NY_COARSE; ++y)
+    for (int x = 0; x < NX_COARSE; ++x)
     {
-        const unsigned temp_type = fine_nodes[fine_idx(0, y * 2)].node_type;
+        const size_t fine_id = fine_idx(x * 2, NY_FINE - 1);
+        const size_t coarse_id = coarse_idx(x, 0);
 
-        fine_nodes[fine_idx(0, y * 2)] = coarse_nodes[coarse_idx(NX_COARSE + N_OVERLAP_LAYER - 1, y)];
+        const unsigned temp_type = fine_nodes[fine_id].node_type;
 
-        fine_nodes[fine_idx(0, y * 2)].node_type = temp_type;
+        fine_nodes[fine_id] = coarse_nodes[coarse_id];
+
+        fine_nodes[fine_id].node_type = temp_type;
     }
 }
 
 __host__ inline void fine_to_coarse(latticeNode *fine_nodes, latticeNode *coarse_nodes)
 {
-    for (int y = 0; y < NY_COARSE; ++y)
+    for (int x = 0; x < NX_COARSE; ++x)
     {
-        coarse_nodes[coarse_idx(NX_COARSE + N_OVERLAP_LAYER - 1, y)] = fine_nodes[fine_idx(2, y * 2)];
+        const size_t fine_id = fine_idx(x * 2, (NY_FINE - 1) - 2);
+        const size_t coarse_id = coarse_idx(x, 0);
+
+        coarse_nodes[coarse_id] = fine_nodes[fine_id];
     }
 }
 

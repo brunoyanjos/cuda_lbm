@@ -3,32 +3,30 @@
 
 #include "../../var.h"
 
-constexpr dfloat RE = 3200;
+constexpr dfloat RE = 1000;
 
 constexpr int SCALE = 1;
 
-constexpr int MACR_SAVE = 1;
+constexpr int N = 33 * SCALE;
+constexpr int NX = 4 * N; // size x of the grid
+constexpr int NY = N;     // size y of the grid
 
-constexpr int N = 65 * SCALE;
-constexpr int NX = 10 * N; // size x of the grid
-constexpr int NY = N;      // size y of the grid
-
-constexpr int N_OVERLAP_LAYER = 1;
+constexpr int N_OVERLAP_LAYER = 0;
 
 constexpr int GRID_RATIO = 2;
 constexpr dfloat U_MAX = 0.0256;
 
 constexpr size_t NX_COARSE = NX;
-constexpr size_t NY_COARSE = static_cast<int>(NY / 2) + 1;
+constexpr size_t NY_COARSE = NY;
 
-constexpr size_t NX_FINE = NX * GRID_RATIO - 1;
-constexpr size_t NY_FINE = NY;
+constexpr size_t NX_FINE = 2 * NX;
+constexpr size_t NY_FINE = 2 * NY;
 
-constexpr size_t NUMBER_OF_COARSE_NODES = (NX_COARSE + N_OVERLAP_LAYER) * NY_COARSE;
+constexpr size_t NUMBER_OF_COARSE_NODES = NX_COARSE * (NY_COARSE + N_OVERLAP_LAYER);
 constexpr size_t NUMBER_OF_FINE_NODES = NX_FINE * NY_FINE;
 
-constexpr dfloat VISC_FINE = U_MAX * (NY - 1) / RE;
-constexpr dfloat VISC_COARSE = U_MAX * ((NY_FINE * 2 - 1) - 1) / RE;
+constexpr dfloat VISC_FINE = U_MAX * (NY_FINE - 1) / RE;
+constexpr dfloat VISC_COARSE = U_MAX * (NY_COARSE - 1) / RE;
 constexpr dfloat TAU_FINE = 0.5 + 3.0 * VISC_FINE;     // relaxation time
 constexpr dfloat TAU_COARSE = 0.5 + 3.0 * VISC_COARSE; // relaxation time
 
@@ -49,7 +47,8 @@ constexpr dfloat MACH_NUMBER = U_MAX / 0.57735026918962;
 constexpr int INI_STEP = 0; // initial simulation step (0 default)
 
 // constexpr int T_STAR_FINAL = 1200;
-constexpr int N_STEPS = 5;
+constexpr int N_STEPS = 100000;
+constexpr int MACR_SAVE = 25000;
 
 #define BC_X_WALL
 #define BC_Y_WALL

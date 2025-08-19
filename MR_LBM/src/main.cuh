@@ -19,6 +19,8 @@
 #include "saveData.cuh"
 #include "lbm_solver.cuh"
 
+#include "grid_data.cuh"
+
 /*
  *   @brief Swaps the pointers of two dfloat variables.
  *   @param pt1: reference to the first dfloat pointer to be swapped
@@ -138,10 +140,20 @@ __host__ void interfaceMalloc(ghostInterfaceData &ghostInterface)
 	cudaMalloc((void **)&(ghostInterface.gGhost.Y_1), sizeof(dfloat) * NUMBER_GHOST_FACE_Y * QF);
 }
 
-__host__ void allocateHostMemory(latticeNode **coarse_nodes, latticeNode **fine_nodes)
+__host__ void allocateHostMemory(unsigned int **node_type_fine, dfloat **moments_fine, dfloat **pop_in_fine, dfloat **pop_out_fine,
+								 unsigned int **node_type_coarse, dfloat **moments_coarse, dfloat **pop_in_coarse, dfloat **pop_out_coarse)
 {
-	checkCudaErrors(cudaMallocHost((void **)coarse_nodes, NUMBER_OF_COARSE_NODES * sizeof(latticeNode)));
-	checkCudaErrors(cudaMallocHost((void **)fine_nodes, NUMBER_OF_FINE_NODES * sizeof(latticeNode)));
+	checkCudaErrors(cudaMallocHost((void **)node_type_fine, NUMBER_OF_FINE_NODES * sizeof(unsigned int)));
+	checkCudaErrors(cudaMallocHost((void **)node_type_coarse, NUMBER_OF_COARSE_NODES * sizeof(unsigned int)));
+
+	checkCudaErrors(cudaMallocHost((void **)moments_fine, NUMBER_OF_FINE_NODES * NUMBER_MOMENTS * sizeof(dfloat)));
+	checkCudaErrors(cudaMallocHost((void **)moments_coarse, NUMBER_OF_COARSE_NODES * NUMBER_MOMENTS * sizeof(dfloat)));
+
+	checkCudaErrors(cudaMallocHost((void **)pop_in_fine, NUMBER_OF_FINE_NODES * Q * sizeof(dfloat)));
+	checkCudaErrors(cudaMallocHost((void **)pop_in_coarse, NUMBER_OF_COARSE_NODES * Q * sizeof(dfloat)));
+
+	checkCudaErrors(cudaMallocHost((void **)pop_out_fine, NUMBER_OF_FINE_NODES * Q * sizeof(dfloat)));
+	checkCudaErrors(cudaMallocHost((void **)pop_out_coarse, NUMBER_OF_COARSE_NODES * Q * sizeof(dfloat)));
 }
 
 __host__ void allocateDeviceMemory(latticeNode **d_coarse_nodes, latticeNode **d_fine_nodes, GhostInterfaceData *ghostInterface)
@@ -151,62 +163,85 @@ __host__ void allocateDeviceMemory(latticeNode **d_coarse_nodes, latticeNode **d
 	interfaceMalloc(*ghostInterface);
 }
 
-__host__ inline void initialize_fine_grid(latticeNode *&lattice_nodes)
+__host__ inline void initialize_fine_grid(unsigned int *&node_type, dfloat *&moments, dfloat *&pop_in, dfloat *&pop_out)
 {
 	for (size_t y = 0; y < NY_FINE; ++y)
 	{
 		for (size_t x = 0; x < NX_FINE; ++x)
 		{
-			size_t idx = x + y * NX_FINE;
+			moments[fine_moment_idx(x, y, M_RHO_INDEX)] = RHO_0;
 
-			lattice_nodes[idx].rho = RHO_0;
+			dfloat inv_rho = static_cast<dfloat>(1) / RHO_0;
 
-			dfloat inv_rho = static_cast<dfloat>(1) / lattice_nodes[idx].rho;
+			moments[fine_moment_idx(x, y, M_UX_INDEX)] = 0.0;
+			moments[fine_moment_idx(x, y, M_UY_INDEX)] = 0.0;
 
-			lattice_nodes[idx].uy = 0.0;
-			lattice_nodes[idx].ux = 0.0;
+			node_type[fine_idx(x, y)] = BULK;
 
-			init_pop_eq(&lattice_nodes[idx]);
+			if (y == NY_FINE - 1)
+			{
+				node_type[fine_idx(x, y)] = NORTH;
+				moments[fine_moment_idx(x, y, M_UX_INDEX)] = U_MAX;
+			}
+			else if (y == 0)
+			{
+				node_type[fine_idx(x, y)] = SOUTH;
+			}
 
-			dfloat *pop = lattice_nodes[idx].pop_in;
+			dfloat pop[9];
 
-			lattice_nodes[idx].mxx = (pop[1] + pop[3] + pop[5] + pop[6] + pop[7] + pop[8]) * inv_rho - cs2;
-			lattice_nodes[idx].mxy = ((pop[5] + pop[7]) - (pop[6] + pop[8])) * inv_rho;
-			lattice_nodes[idx].myy = (pop[2] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8]) * inv_rho - cs2;
+			init_pop_eq(pop, moments[fine_moment_idx(x, y, M_RHO_INDEX)],
+						moments[fine_moment_idx(x, y, M_UX_INDEX)], moments[fine_moment_idx(x, y, M_UY_INDEX)]);
+
+			moments[fine_moment_idx(x, y, M_MXX_INDEX)] = (pop[1] + pop[3] + pop[5] + pop[6] + pop[7] + pop[8]) * inv_rho - cs2;
+			moments[fine_moment_idx(x, y, M_MXY_INDEX)] = ((pop[5] + pop[7]) - (pop[6] + pop[8])) * inv_rho;
+			moments[fine_moment_idx(x, y, M_MYY_INDEX)] = (pop[2] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8]) * inv_rho - cs2;
 		}
 	}
 }
 
-__host__ void initialize_coarse_grid(latticeNode *&lattice_nodes)
+__host__ void initialize_coarse_grid(unsigned int *&node_type, dfloat *&moments, dfloat *&pop_in, dfloat *&pop_out)
 {
-	for (size_t y = 0; y < NY_COARSE; y++)
+	for (size_t y = 0; y < NY_COARSE + N_OVERLAP_LAYER; y++)
 	{
-		for (size_t x = 0; x < NX_COARSE + N_OVERLAP_LAYER; x++)
+		for (size_t x = 0; x < NX_COARSE; x++)
 		{
-			size_t idx = coarse_idx(x, y);
+			moments[coarse_moment_idx(x, y, M_RHO_INDEX)] = RHO_0;
 
-			lattice_nodes[idx].rho = RHO_0;
+			dfloat inv_rho = static_cast<dfloat>(1) / RHO_0;
 
-			dfloat inv_rho = static_cast<dfloat>(1) / lattice_nodes[idx].rho;
+			moments[coarse_moment_idx(x, y, M_UX_INDEX)] = 0.0;
+			moments[coarse_moment_idx(x, y, M_UY_INDEX)] = 0.0;
 
-			lattice_nodes[idx].ux = 0.0;
-			lattice_nodes[idx].uy = 0.0;
+			node_type[coarse_idx(x, y)] = BULK;
 
-			init_pop_eq(&lattice_nodes[idx]);
+			if (y == NY_COARSE + N_OVERLAP_LAYER - 1)
+			{
+				node_type[coarse_idx(x, y)] = NORTH;
+				moments[coarse_moment_idx(x, y, M_UX_INDEX)] = U_MAX;
+			}
+			else if (y == 0)
+			{
+				node_type[coarse_idx(x, y)] = SOUTH;
+			}
 
-			dfloat *pop = lattice_nodes[idx].pop_in;
+			dfloat pop[9];
 
-			lattice_nodes[idx].mxx = (pop[1] + pop[3] + pop[5] + pop[6] + pop[7] + pop[8]) * inv_rho - cs2;
-			lattice_nodes[idx].mxy = ((pop[5] + pop[7]) - (pop[6] + pop[8])) * inv_rho;
-			lattice_nodes[idx].myy = (pop[2] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8]) * inv_rho - cs2;
+			init_pop_eq(pop, moments[coarse_moment_idx(x, y, M_RHO_INDEX)],
+						moments[coarse_moment_idx(x, y, M_UX_INDEX)], moments[coarse_moment_idx(x, y, M_UY_INDEX)]);
+
+			moments[coarse_moment_idx(x, y, M_MXX_INDEX)] = (pop[1] + pop[3] + pop[5] + pop[6] + pop[7] + pop[8]) * inv_rho - cs2;
+			moments[coarse_moment_idx(x, y, M_MXY_INDEX)] = ((pop[5] + pop[7]) - (pop[6] + pop[8])) * inv_rho;
+			moments[coarse_moment_idx(x, y, M_MYY_INDEX)] = (pop[2] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8]) * inv_rho - cs2;
 		}
 	}
 }
 
-__host__ void initializeDomain(latticeNode *&fine_nodes, latticeNode *&coarse_nodes)
+__host__ void initializeDomain(unsigned int *&node_type_fine, dfloat *&moments_fine, dfloat *&pop_in_fine, dfloat *&pop_out_fine,
+							   unsigned int *&node_type_coarse, dfloat *&moments_coarse, dfloat *&pop_in_coarse, dfloat *&pop_out_coarse)
 {
-	initialize_fine_grid(fine_nodes);
-	initialize_coarse_grid(coarse_nodes);
+	initialize_fine_grid(node_type_fine, moments_fine, pop_in_fine, pop_out_fine);
+	initialize_coarse_grid(node_type_coarse, moments_coarse, pop_in_coarse, pop_out_coarse);
 }
 
 #endif // MAIN_CUH
