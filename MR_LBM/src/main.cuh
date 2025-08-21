@@ -178,12 +178,7 @@ __host__ inline void initialize_fine_grid(unsigned int *&node_type, dfloat *&mom
 
 			node_type[fine_idx(x, y)] = BULK;
 
-			if (y == NY_FINE - 1)
-			{
-				node_type[fine_idx(x, y)] = NORTH;
-				moments[fine_moment_idx(x, y, M_UX_INDEX)] = U_MAX;
-			}
-			else if (y == 0)
+			if (y == 0)
 			{
 				node_type[fine_idx(x, y)] = SOUTH;
 			}
@@ -219,10 +214,6 @@ __host__ void initialize_coarse_grid(unsigned int *&node_type, dfloat *&moments,
 			{
 				node_type[coarse_idx(x, y)] = NORTH;
 				moments[coarse_moment_idx(x, y, M_UX_INDEX)] = U_MAX;
-			}
-			else if (y == 0)
-			{
-				node_type[coarse_idx(x, y)] = SOUTH;
 			}
 
 			dfloat pop[9];

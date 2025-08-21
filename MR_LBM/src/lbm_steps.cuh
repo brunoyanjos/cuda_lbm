@@ -101,7 +101,6 @@ boundary_condition(unsigned int node_type, const dfloat *pop,
         const dfloat rhoVar = 6.0f * rhoIn / 5.0f;
 
         *mxx = U_MAX * U_MAX;
-        *mxx = 0.0f;
         *mxy = 5.0f * mxyIn / 3.0f - U_MAX / 3.0f;
         *myy = 0.0f;
 
@@ -436,29 +435,43 @@ __host__ inline void collision(dfloat *mxx, dfloat *mxy, dfloat *myy, dfloat ux,
     *mxy = (t_omegaVar * (*mxy) + omegaVar * ux * uy);
 }
 
-__host__ inline void coarse_to_fine(latticeNode *coarse_nodes, latticeNode *fine_nodes)
+__host__ inline void coarse_to_fine(dfloat *moments_coarse, dfloat *moments_fine)
 {
     for (int x = 0; x < NX_COARSE; ++x)
     {
-        const size_t fine_id = fine_idx(x * 2, NY_FINE - 1);
-        const size_t coarse_id = coarse_idx(x, 0);
+        const size_t x_fine = x * 2;
+        const size_t y_fine = NY_FINE - 1;
+        const size_t x_coarse = x;
+        const size_t y_coarse = 1;
 
-        const unsigned temp_type = fine_nodes[fine_id].node_type;
+        moments_fine[fine_moment_idx(x_fine, y_fine, M_RHO_INDEX)] = moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_RHO_INDEX)];
 
-        fine_nodes[fine_id] = coarse_nodes[coarse_id];
+        moments_fine[fine_moment_idx(x_fine, y_fine, M_UX_INDEX)] = moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_UX_INDEX)];
+        moments_fine[fine_moment_idx(x_fine, y_fine, M_UY_INDEX)] = moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_UY_INDEX)];
 
-        fine_nodes[fine_id].node_type = temp_type;
+        moments_fine[fine_moment_idx(x_fine, y_fine, M_MXX_INDEX)] = moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_MXX_INDEX)];
+        moments_fine[fine_moment_idx(x_fine, y_fine, M_MXY_INDEX)] = moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_MXY_INDEX)];
+        moments_fine[fine_moment_idx(x_fine, y_fine, M_MYY_INDEX)] = moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_MYY_INDEX)];
     }
 }
 
-__host__ inline void fine_to_coarse(latticeNode *fine_nodes, latticeNode *coarse_nodes)
+__host__ inline void fine_to_coarse(dfloat *moments_fine, dfloat *moments_coarse)
 {
     for (int x = 0; x < NX_COARSE; ++x)
     {
-        const size_t fine_id = fine_idx(x * 2, (NY_FINE - 1) - 2);
-        const size_t coarse_id = coarse_idx(x, 0);
+        const size_t x_fine = x * 2;
+        const size_t y_fine = NY_FINE - 2;
+        const size_t x_coarse = x;
+        const size_t y_coarse = 0;
 
-        coarse_nodes[coarse_id] = fine_nodes[fine_id];
+        moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_RHO_INDEX)] = moments_fine[fine_moment_idx(x_fine, y_fine, M_RHO_INDEX)];
+
+        moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_UX_INDEX)] = moments_fine[fine_moment_idx(x_fine, y_fine, M_UX_INDEX)];
+        moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_UY_INDEX)] = moments_fine[fine_moment_idx(x_fine, y_fine, M_UY_INDEX)];
+
+        moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_MXX_INDEX)] = moments_fine[fine_moment_idx(x_fine, y_fine, M_MXX_INDEX)];
+        moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_MXY_INDEX)] = moments_fine[fine_moment_idx(x_fine, y_fine, M_MXY_INDEX)];
+        moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_MYY_INDEX)] = moments_fine[fine_moment_idx(x_fine, y_fine, M_MYY_INDEX)];
     }
 }
 

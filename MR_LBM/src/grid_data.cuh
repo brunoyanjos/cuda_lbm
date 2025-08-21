@@ -40,16 +40,31 @@ __host__ inline void coarse_velocity_profile(dfloat *moments)
     std::ofstream mxy_file(mxy_path.str(), std::ios::binary);
     std::ofstream myy_file(myy_path.str(), std::ios::binary);
 
-    const size_t x_coord = NX_COARSE / 2;
+    const size_t x_coord_0 = NX_COARSE / 2 - 1;
+    const size_t x_coord_1 = NX_COARSE / 2;
 
-    for (size_t y = 0; y < NY_COARSE; ++y)
+    for (size_t y = 0; y < NY_COARSE + N_OVERLAP_LAYER; ++y)
     {
-        const dfloat rho = moments[coarse_moment_idx(x_coord, y, M_RHO_INDEX)];
-        const dfloat ux = moments[coarse_moment_idx(x_coord, y, M_UX_INDEX)] / F_M_I_SCALE;
-        const dfloat uy = moments[coarse_moment_idx(x_coord, y, M_UY_INDEX)] / F_M_I_SCALE;
-        const dfloat mxx = moments[coarse_moment_idx(x_coord, y, M_MXX_INDEX)] / F_M_II_SCALE;
-        const dfloat mxy = moments[coarse_moment_idx(x_coord, y, M_MXY_INDEX)] / F_M_IJ_SCALE;
-        const dfloat myy = moments[coarse_moment_idx(x_coord, y, M_MYY_INDEX)] / F_M_II_SCALE;
+        const dfloat rho_0 = moments[coarse_moment_idx(x_coord_0, y, M_RHO_INDEX)];
+        const dfloat ux_0 = moments[coarse_moment_idx(x_coord_0, y, M_UX_INDEX)] / F_M_I_SCALE;
+        const dfloat uy_0 = moments[coarse_moment_idx(x_coord_0, y, M_UY_INDEX)] / F_M_I_SCALE;
+        const dfloat mxx_0 = moments[coarse_moment_idx(x_coord_0, y, M_MXX_INDEX)] / F_M_II_SCALE;
+        const dfloat mxy_0 = moments[coarse_moment_idx(x_coord_0, y, M_MXY_INDEX)] / F_M_IJ_SCALE;
+        const dfloat myy_0 = moments[coarse_moment_idx(x_coord_0, y, M_MYY_INDEX)] / F_M_II_SCALE;
+
+        const dfloat rho_1 = moments[coarse_moment_idx(x_coord_1, y, M_RHO_INDEX)];
+        const dfloat ux_1 = moments[coarse_moment_idx(x_coord_1, y, M_UX_INDEX)] / F_M_I_SCALE;
+        const dfloat uy_1 = moments[coarse_moment_idx(x_coord_1, y, M_UY_INDEX)] / F_M_I_SCALE;
+        const dfloat mxx_1 = moments[coarse_moment_idx(x_coord_1, y, M_MXX_INDEX)] / F_M_II_SCALE;
+        const dfloat mxy_1 = moments[coarse_moment_idx(x_coord_1, y, M_MXY_INDEX)] / F_M_IJ_SCALE;
+        const dfloat myy_1 = moments[coarse_moment_idx(x_coord_1, y, M_MYY_INDEX)] / F_M_II_SCALE;
+
+        const dfloat rho = (rho_0 + rho_1) * static_cast<dfloat>(0.5);
+        const dfloat ux = (ux_0 + ux_1) * static_cast<dfloat>(0.5);
+        const dfloat uy = (uy_0 + uy_1) * static_cast<dfloat>(0.5);
+        const dfloat mxx = (mxx_0 + mxx_1) * static_cast<dfloat>(0.5);
+        const dfloat mxy = (mxy_0 + mxy_1) * static_cast<dfloat>(0.5);
+        const dfloat myy = (myy_0 + myy_1) * static_cast<dfloat>(0.5);
 
         rho_file.write(reinterpret_cast<const char *>(&rho), sizeof(dfloat));
         ux_file.write(reinterpret_cast<const char *>(&ux), sizeof(dfloat));
@@ -90,16 +105,31 @@ __host__ inline void fine_velocity_profile(dfloat *moments)
     std::ofstream mxy_file(mxy_path.str(), std::ios::binary);
     std::ofstream myy_file(myy_path.str(), std::ios::binary);
 
-    const size_t x_coord = NX_FINE / 2;
+    const size_t x_coord_0 = NX_FINE / 2 - 1;
+    const size_t x_coord_1 = NX_FINE / 2;
 
     for (size_t y = 0; y < NY_FINE; ++y)
     {
-        const dfloat rho = moments[fine_moment_idx(x_coord, y, M_RHO_INDEX)];
-        const dfloat ux = moments[fine_moment_idx(x_coord, y, M_UX_INDEX)] / F_M_I_SCALE;
-        const dfloat uy = moments[fine_moment_idx(x_coord, y, M_UY_INDEX)] / F_M_I_SCALE;
-        const dfloat mxx = moments[fine_moment_idx(x_coord, y, M_MXX_INDEX)] / F_M_II_SCALE;
-        const dfloat mxy = moments[fine_moment_idx(x_coord, y, M_MXY_INDEX)] / F_M_IJ_SCALE;
-        const dfloat myy = moments[fine_moment_idx(x_coord, y, M_MYY_INDEX)] / F_M_II_SCALE;
+        const dfloat rho_0 = moments[fine_moment_idx(x_coord_0, y, M_RHO_INDEX)];
+        const dfloat ux_0 = moments[fine_moment_idx(x_coord_0, y, M_UX_INDEX)] / F_M_I_SCALE;
+        const dfloat uy_0 = moments[fine_moment_idx(x_coord_0, y, M_UY_INDEX)] / F_M_I_SCALE;
+        const dfloat mxx_0 = moments[fine_moment_idx(x_coord_0, y, M_MXX_INDEX)] / F_M_II_SCALE;
+        const dfloat mxy_0 = moments[fine_moment_idx(x_coord_0, y, M_MXY_INDEX)] / F_M_IJ_SCALE;
+        const dfloat myy_0 = moments[fine_moment_idx(x_coord_0, y, M_MYY_INDEX)] / F_M_II_SCALE;
+
+        const dfloat rho_1 = moments[fine_moment_idx(x_coord_1, y, M_RHO_INDEX)];
+        const dfloat ux_1 = moments[fine_moment_idx(x_coord_1, y, M_UX_INDEX)] / F_M_I_SCALE;
+        const dfloat uy_1 = moments[fine_moment_idx(x_coord_1, y, M_UY_INDEX)] / F_M_I_SCALE;
+        const dfloat mxx_1 = moments[fine_moment_idx(x_coord_1, y, M_MXX_INDEX)] / F_M_II_SCALE;
+        const dfloat mxy_1 = moments[fine_moment_idx(x_coord_1, y, M_MXY_INDEX)] / F_M_IJ_SCALE;
+        const dfloat myy_1 = moments[fine_moment_idx(x_coord_1, y, M_MYY_INDEX)] / F_M_II_SCALE;
+
+        const dfloat rho = (rho_0 + rho_1) * static_cast<dfloat>(0.5);
+        const dfloat ux = (ux_0 + ux_1) * static_cast<dfloat>(0.5);
+        const dfloat uy = (uy_0 + uy_1) * static_cast<dfloat>(0.5);
+        const dfloat mxx = (mxx_0 + mxx_1) * static_cast<dfloat>(0.5);
+        const dfloat mxy = (mxy_0 + mxy_1) * static_cast<dfloat>(0.5);
+        const dfloat myy = (myy_0 + myy_1) * static_cast<dfloat>(0.5);
 
         rho_file.write(reinterpret_cast<const char *>(&rho), sizeof(dfloat));
         ux_file.write(reinterpret_cast<const char *>(&ux), sizeof(dfloat));

@@ -44,8 +44,8 @@ int main()
 			fine_grid_solution(node_type_fine, moments_fine, pop_in_fine, pop_out_fine);
 		}
 
-		// coarse_to_fine(coarse_nodes, fine_nodes);
-		// fine_to_coarse(fine_nodes, coarse_nodes);
+		coarse_to_fine(moments_coarse, moments_fine);
+		fine_to_coarse(moments_fine, moments_coarse);
 
 		if (step % MACR_SAVE == 0)
 		{

@@ -19,7 +19,7 @@ TAU_COARSE = 0.5 + 3.0 * VISC_COARSE
 OMEGA_FINE = 1.0 / TAU_FINE
 OMEGA_COARSE = 1.0 / TAU_COARSE
 
-ALPHA = OMEGA_COARSE / OMEGA_FINE * GRID_RATIO
+ALPHA = OMEGA_FINE * GRID_RATIO / OMEGA_COARSE
 
 coarse_rho_path = "GRID/001/coarse_rho.bin"
 fine_rho_path = "GRID/001/fine_rho.bin"
@@ -57,20 +57,38 @@ with open(coarse_uy_path, 'rb') as f:
 with open(fine_uy_path, 'rb') as f:
     fine_uy = np.frombuffer(f.read(), dtype=np.float32)
     
+with open(coarse_mxx_path, 'rb') as f:
+    coarse_mxx = np.frombuffer(f.read(), dtype=np.float32)
+    
+with open(fine_mxx_path, 'rb') as f:
+    fine_mxx = np.frombuffer(f.read(), dtype=np.float32)    
+
 with open(coarse_mxy_path, 'rb') as f:
     coarse_mxy = np.frombuffer(f.read(), dtype=np.float32)
     
 with open(fine_mxy_path, 'rb') as f:
     fine_mxy = np.frombuffer(f.read(), dtype=np.float32)
     
-calc_mxy_fine = (1 / ALPHA) * (coarse_mxy - coarse_ux * coarse_uy) + fine_ux[::2] * fine_uy[::2]
-calc_mxy_coarse = ALPHA * (fine_mxy[::2] - fine_ux[::2] * fine_uy[::2]) + coarse_ux * coarse_uy
-            
-y_coarse = np.linspace(0, 1, NY_COARSE)
-y_fine = np.linspace(0, 1, NY_FINE)
+with open(coarse_myy_path, 'rb') as f:
+    coarse_myy = np.frombuffer(f.read(), dtype=np.float32)
+    
+with open(fine_myy_path, 'rb') as f:
+    fine_myy = np.frombuffer(f.read(), dtype=np.float32)
 
-plt.plot(coarse_uy , y_coarse, label = "coarse")
-plt.plot(fine_uy, y_fine, label = "fine")
+# calc_mxx_fine = (1 / ALPHA) * (coarse_mxx - coarse_ux * coarse_ux) + fine_ux[::2] * fine_ux[::2]
+# calc_mxx_coarse_norm = ALPHA * (fine_mxx[::2] - fine_ux[::2] * fine_ux[::2]) + coarse_ux * coarse_ux
+
+# calc_mxy_fine = (1 / ALPHA) * (coarse_mxy - coarse_ux * coarse_uy) + fine_ux[::2] * fine_uy[::2]
+# calc_mxy_coarse_norm = ALPHA * (fine_mxy[::2] - fine_ux[::2] * fine_uy[::2]) + coarse_ux * coarse_uy
+  
+y_coarse = np.linspace(0, 1, len(coarse_ux))
+y_fine = np.linspace(0, 1, len(fine_ux))
+
+plt.plot(coarse_mxx , y_coarse, label = "coarse", marker='x')
+plt.plot(fine_mxx, y_fine, label = "fine")
+
+# plt.plot(calc_mxx_coarse_norm , y_coarse, label = "calc_coarse")
+# plt.plot(calc_mxx_fine, y_coarse, label = "calc_fine")
 
 plt.legend(title="grid kind", loc='lower right')
 
