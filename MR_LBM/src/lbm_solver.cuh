@@ -33,6 +33,8 @@ __host__ inline void fine_grid_solution(unsigned int *node_type, dfloat *moments
         {
             unsigned int nodeType = node_type[fine_idx(x, y)];
 
+            // printf("%02d ", nodeType);
+
             dfloat rho, ux, uy, mxx, mxy, myy;
 
             const dfloat *pop = pop_in + fine_idx(x, y) * Q;
@@ -68,6 +70,8 @@ __host__ inline void fine_grid_solution(unsigned int *node_type, dfloat *moments
             moments[fine_moment_idx(x, y, M_MXY_INDEX)] = mxy;
             moments[fine_moment_idx(x, y, M_MYY_INDEX)] = myy;
         }
+
+        // std::cout << std::endl;
     }
 }
 
@@ -96,6 +100,8 @@ __host__ inline void coarse_grid_solution(unsigned int *node_type, dfloat *momen
         for (size_t x = 0; x < NX_COARSE; x++)
         {
             unsigned int nodeType = node_type[coarse_idx(x, y)];
+
+            // printf("%02d ", nodeType);
 
             dfloat rho, ux, uy, mxx, mxy, myy;
 
@@ -132,6 +138,8 @@ __host__ inline void coarse_grid_solution(unsigned int *node_type, dfloat *momen
             moments[coarse_moment_idx(x, y, M_MXY_INDEX)] = mxy;
             moments[coarse_moment_idx(x, y, M_MYY_INDEX)] = myy;
         }
+
+        // std::cout << std::endl;
     }
 }
 

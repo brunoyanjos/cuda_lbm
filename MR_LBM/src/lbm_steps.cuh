@@ -435,7 +435,7 @@ __host__ inline void collision(dfloat *mxx, dfloat *mxy, dfloat *myy, dfloat ux,
     *mxy = (t_omegaVar * (*mxy) + omegaVar * ux * uy);
 }
 
-__host__ inline void coarse_to_fine(dfloat *moments_coarse, dfloat *moments_fine)
+__host__ inline void coarse_to_fine(dfloat *moments_coarse, dfloat *moments_fine, unsigned int *node_type_coarse, unsigned int *node_type_fine)
 {
     for (int x = 0; x < NX_COARSE; ++x)
     {
@@ -443,6 +443,20 @@ __host__ inline void coarse_to_fine(dfloat *moments_coarse, dfloat *moments_fine
         const size_t y_fine = NY_FINE - 1;
         const size_t x_coarse = x;
         const size_t y_coarse = 1;
+
+        // std::cout
+        //     << " - rho fine: " << moments_fine[fine_moment_idx(x_fine, y_fine, M_RHO_INDEX)] << std::endl;
+        // std::cout
+        //     << " - ux fine: " << moments_fine[fine_moment_idx(x_fine, y_fine, M_UX_INDEX)] << std::endl;
+        // std::cout
+        //     << " - uy fine: " << moments_fine[fine_moment_idx(x_fine, y_fine, M_UY_INDEX)] << std::endl;
+        // std::cout
+        //     << " - mxx fine: " << moments_fine[fine_moment_idx(x_fine, y_fine, M_MXX_INDEX)] << std::endl;
+        // std::cout
+        //     << " - mxy fine: " << moments_fine[fine_moment_idx(x_fine, y_fine, M_MXY_INDEX)] << std::endl;
+        // std::cout
+        //     << " - myy fine: " << moments_fine[fine_moment_idx(x_fine, y_fine, M_MYY_INDEX)] << std::endl;
+        // std::cout << std::endl;
 
         moments_fine[fine_moment_idx(x_fine, y_fine, M_RHO_INDEX)] = moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_RHO_INDEX)];
 
@@ -452,10 +466,24 @@ __host__ inline void coarse_to_fine(dfloat *moments_coarse, dfloat *moments_fine
         moments_fine[fine_moment_idx(x_fine, y_fine, M_MXX_INDEX)] = moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_MXX_INDEX)];
         moments_fine[fine_moment_idx(x_fine, y_fine, M_MXY_INDEX)] = moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_MXY_INDEX)];
         moments_fine[fine_moment_idx(x_fine, y_fine, M_MYY_INDEX)] = moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_MYY_INDEX)];
+
+        // std::cout << "rho coarse: " << moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_RHO_INDEX)]
+        //           << " - rho fine: " << moments_fine[fine_moment_idx(x_fine, y_fine, M_RHO_INDEX)] << std::endl;
+        // std::cout << "ux coarse: " << moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_UX_INDEX)]
+        //           << " - ux fine: " << moments_fine[fine_moment_idx(x_fine, y_fine, M_UX_INDEX)] << std::endl;
+        // std::cout << "uy coarse: " << moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_UY_INDEX)]
+        //           << " - uy fine: " << moments_fine[fine_moment_idx(x_fine, y_fine, M_UY_INDEX)] << std::endl;
+        // std::cout << "mxx coarse: " << moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_MXX_INDEX)]
+        //           << " - mxx fine: " << moments_fine[fine_moment_idx(x_fine, y_fine, M_MXX_INDEX)] << std::endl;
+        // std::cout << "mxy coarse: " << moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_MXY_INDEX)]
+        //           << " - mxy fine: " << moments_fine[fine_moment_idx(x_fine, y_fine, M_MXY_INDEX)] << std::endl;
+        // std::cout << "myy coarse: " << moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_MYY_INDEX)]
+        //           << " - myy fine: " << moments_fine[fine_moment_idx(x_fine, y_fine, M_MYY_INDEX)] << std::endl;
+        // std::cout << std::endl;
     }
 }
 
-__host__ inline void fine_to_coarse(dfloat *moments_fine, dfloat *moments_coarse)
+__host__ inline void fine_to_coarse(dfloat *moments_fine, dfloat *moments_coarse, unsigned int *node_type_fine, unsigned int *node_type_coarse)
 {
     for (int x = 0; x < NX_COARSE; ++x)
     {
@@ -472,6 +500,20 @@ __host__ inline void fine_to_coarse(dfloat *moments_fine, dfloat *moments_coarse
         moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_MXX_INDEX)] = moments_fine[fine_moment_idx(x_fine, y_fine, M_MXX_INDEX)];
         moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_MXY_INDEX)] = moments_fine[fine_moment_idx(x_fine, y_fine, M_MXY_INDEX)];
         moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_MYY_INDEX)] = moments_fine[fine_moment_idx(x_fine, y_fine, M_MYY_INDEX)];
+
+        // std::cout << "rho coarse: " << moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_RHO_INDEX)]
+        //           << " - rho fine: " << moments_fine[fine_moment_idx(x_fine, y_fine, M_RHO_INDEX)] << std::endl;
+        // std::cout << "ux coarse: " << moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_UX_INDEX)]
+        //           << " - ux fine: " << moments_fine[fine_moment_idx(x_fine, y_fine, M_UX_INDEX)] << std::endl;
+        // std::cout << "uy coarse: " << moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_UY_INDEX)]
+        //           << " - uy fine: " << moments_fine[fine_moment_idx(x_fine, y_fine, M_UY_INDEX)] << std::endl;
+        // std::cout << "mxx coarse: " << moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_MXX_INDEX)]
+        //           << " - mxx fine: " << moments_fine[fine_moment_idx(x_fine, y_fine, M_MXX_INDEX)] << std::endl;
+        // std::cout << "mxy coarse: " << moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_MXY_INDEX)]
+        //           << " - mxy fine: " << moments_fine[fine_moment_idx(x_fine, y_fine, M_MXY_INDEX)] << std::endl;
+        // std::cout << "myy coarse: " << moments_coarse[coarse_moment_idx(x_coarse, y_coarse, M_MYY_INDEX)]
+        //           << " - myy fine: " << moments_fine[fine_moment_idx(x_fine, y_fine, M_MYY_INDEX)] << std::endl;
+        // std::cout << std::endl;
     }
 }
 
