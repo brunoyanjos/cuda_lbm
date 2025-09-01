@@ -178,10 +178,39 @@ __host__ inline void initialize_fine_grid(unsigned int *&node_type, dfloat *&mom
 
 			node_type[fine_idx(x, y)] = BULK;
 
-			// if (y == 0)
-			// {
-			// 	node_type[fine_idx(x, y)] = SOUTH;
-			// }
+			if (x == 0 && y == 0)
+			{
+				node_type[fine_idx(x, y)] = SOUTH_WEST;
+			}
+			else if (x == 0 && y == (NY_FINE - 1))
+			{
+				node_type[fine_idx(x, y)] = NORTH_WEST;
+			}
+			else if (x == (NX_FINE - 1) && y == 0)
+			{
+				node_type[fine_idx(x, y)] = SOUTH_EAST;
+			}
+			else if (x == (NX_FINE - 1) && y == (NY_FINE - 1))
+			{
+				node_type[fine_idx(x, y)] = NORTH_EAST;
+			}
+			else if (y == 0)
+			{
+				node_type[fine_idx(x, y)] = SOUTH;
+			}
+			else if (y == (NY_FINE - 1))
+			{
+				node_type[fine_idx(x, y)] = NORTH;
+				moments[fine_moment_idx(x, y, M_UX_INDEX)] = U_MAX;
+			}
+			else if (x == 0)
+			{
+				node_type[fine_idx(x, y)] = WEST;
+			}
+			else if (x == (NX_FINE - 1))
+			{
+				node_type[fine_idx(x, y)] = EAST;
+			}
 
 			dfloat pop[9];
 
@@ -197,7 +226,7 @@ __host__ inline void initialize_fine_grid(unsigned int *&node_type, dfloat *&mom
 
 __host__ void initialize_coarse_grid(unsigned int *&node_type, dfloat *&moments, dfloat *&pop_in, dfloat *&pop_out)
 {
-	for (size_t y = 0; y < NY_COARSE + N_OVERLAP_LAYER; y++)
+	for (size_t y = 0; y < NY_COARSE; y++)
 	{
 		for (size_t x = 0; x < NX_COARSE; x++)
 		{
@@ -210,11 +239,39 @@ __host__ void initialize_coarse_grid(unsigned int *&node_type, dfloat *&moments,
 
 			node_type[coarse_idx(x, y)] = BULK;
 
-			// if (y == NY_COARSE + N_OVERLAP_LAYER - 1)
-			// {
-			// 	node_type[coarse_idx(x, y)] = NORTH;
-			// 	moments[coarse_moment_idx(x, y, M_UX_INDEX)] = U_MAX;
-			// }
+			if (x == 0 && y == 0)
+			{
+				node_type[coarse_idx(x, y)] = SOUTH_WEST;
+			}
+			else if (x == 0 && y == (NY_COARSE - 1))
+			{
+				node_type[coarse_idx(x, y)] = NORTH_WEST;
+			}
+			else if (x == (NX_COARSE - 1) && y == 0)
+			{
+				node_type[coarse_idx(x, y)] = SOUTH_EAST;
+			}
+			else if (x == (NX_COARSE - 1) && y == (NY_COARSE - 1))
+			{
+				node_type[coarse_idx(x, y)] = NORTH_EAST;
+			}
+			else if (y == 0)
+			{
+				node_type[coarse_idx(x, y)] = SOUTH;
+			}
+			else if (y == (NY_COARSE - 1))
+			{
+				node_type[coarse_idx(x, y)] = NORTH;
+				moments[coarse_moment_idx(x, y, M_UX_INDEX)] = U_MAX;
+			}
+			else if (x == 0)
+			{
+				node_type[coarse_idx(x, y)] = WEST;
+			}
+			else if (x == (NX_COARSE - 1))
+			{
+				node_type[coarse_idx(x, y)] = EAST;
+			}
 
 			dfloat pop[9];
 

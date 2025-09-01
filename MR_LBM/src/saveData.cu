@@ -91,7 +91,7 @@ __host__ void saveMacr_coarse(
 			for (int j = 0; j < totalNy; ++j)
 				for (int i = 0; i < NX_COARSE; ++i)
 				{
-					float val = double(j) + (NY_COARSE - 1);
+					float val = double(j);
 					gridfile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 				}
 		}
@@ -242,7 +242,7 @@ __host__ void saveMacr_fine(
 			for (int j = 0; j < NY_FINE; ++j)
 				for (int i = 0; i < NX_FINE; ++i)
 				{
-					float val = double(i) * 0.5; // already float
+					float val = double(i) * 0.5 + NX_COARSE; // already float
 					gridfile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 				}
 

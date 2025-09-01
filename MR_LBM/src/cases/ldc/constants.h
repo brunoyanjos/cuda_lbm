@@ -7,23 +7,23 @@ constexpr dfloat RE = 1000;
 
 constexpr int SCALE = 1;
 
-constexpr int N = 5 * SCALE;
+constexpr int N = 33 * SCALE;
 constexpr int NX = 4 * N; // size x of the grid
 constexpr int NY = N;     // size y of the grid
 
-constexpr int N_OVERLAP_LAYER = 1;
+constexpr int N_OVERLAP_LAYER = 0;
 
 constexpr int GRID_RATIO = 2;
-constexpr dfloat U_MAX = 0.0;
+constexpr dfloat U_MAX = 0.0256;
 
 constexpr size_t NX_COARSE = NX;
-constexpr size_t NY_COARSE = static_cast<size_t>(NY / 2) + 1;
+constexpr size_t NY_COARSE = NY;
 
-constexpr size_t NX_FINE = NX * GRID_RATIO - 1;
-constexpr size_t NY_FINE = NY;
+constexpr size_t NX_FINE = 2 * NX;
+constexpr size_t NY_FINE = 2 * NY;
 
-constexpr size_t COARSE_HEIGHT = NY;
-constexpr size_t FINE_HEIGHT = NY_FINE * GRID_RATIO - 1;
+constexpr size_t COARSE_HEIGHT = NX_COARSE;
+constexpr size_t FINE_HEIGHT = NX_FINE;
 
 constexpr size_t NUMBER_OF_COARSE_NODES = NX_COARSE * (NY_COARSE + N_OVERLAP_LAYER);
 constexpr size_t NUMBER_OF_FINE_NODES = NX_FINE * NY_FINE;

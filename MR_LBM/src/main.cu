@@ -39,19 +39,15 @@ int main()
 	{
 		coarse_grid_solution(node_type_coarse, moments_coarse, pop_in_coarse, pop_out_coarse);
 
-		// std::cout << std::endl;
-
 		for (size_t fine_step = 0; fine_step < GRID_RATIO; ++fine_step)
 		{
 			fine_grid_solution(node_type_fine, moments_fine, pop_in_fine, pop_out_fine);
-
-			// std::cout << std::endl;
 		}
 
 		// coarse_to_fine(moments_coarse, moments_fine, node_type_coarse, node_type_fine);
 		// std::cout << "-------------------------------------------------------------------" << std::endl
 		// 		  << std::endl;
-		fine_to_coarse(moments_fine, moments_coarse, node_type_fine, node_type_coarse);
+		// fine_to_coarse(moments_fine, moments_coarse, node_type_fine, node_type_coarse);
 		// std::cout << "-------------------------------------------------------------------" << std::endl
 		// 		  << std::endl;
 
