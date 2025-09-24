@@ -319,19 +319,19 @@ __host__ void hostInitialization_innerNodes(
 				{
 					if (bit_1)
 					{
-						hNodeType[idxScalarBlock(xm1 % BLOCK_NX, ym1 % BLOCK_NY, xm1 / BLOCK_NX, ym1 / BLOCK_NY)] = 115;
+						hNodeType[idxScalarBlock(xm1 % BLOCK_NX, ym1 % BLOCK_NY, xm1 / BLOCK_NX, ym1 / BLOCK_NY)] = 203;
 					}
 					else if (bit_2)
 					{
-						hNodeType[idxScalarBlock(xp1 % BLOCK_NX, ym1 % BLOCK_NY, xp1 / BLOCK_NX, ym1 / BLOCK_NY)] = 115;
+						hNodeType[idxScalarBlock(xp1 % BLOCK_NX, ym1 % BLOCK_NY, xp1 / BLOCK_NX, ym1 / BLOCK_NY)] = 204;
 					}
 					else if (bit_4)
 					{
-						hNodeType[idxScalarBlock(xm1 % BLOCK_NX, yp1 % BLOCK_NY, xm1 / BLOCK_NX, yp1 / BLOCK_NY)] = 115;
+						hNodeType[idxScalarBlock(xm1 % BLOCK_NX, yp1 % BLOCK_NY, xm1 / BLOCK_NX, yp1 / BLOCK_NY)] = 201;
 					}
 					else if (bit_8)
 					{
-						hNodeType[idxScalarBlock(xp1 % BLOCK_NX, yp1 % BLOCK_NY, xp1 / BLOCK_NX, yp1 / BLOCK_NY)] = 115;
+						hNodeType[idxScalarBlock(xp1 % BLOCK_NX, yp1 % BLOCK_NY, xp1 / BLOCK_NX, yp1 / BLOCK_NY)] = 202;
 					}
 				}
 			}
