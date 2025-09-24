@@ -26,7 +26,7 @@ __global__ void gpuInitialization_mom(
 	dfloat pop[Q];
 	for (int i = 0; i < Q; i++)
 	{
-		pop[i] = w[i] * RHO_0 * (1.0 + 3.0 * (ux * d_cx[i] + uy * d_cy[i]) + 4.5 * (ux * ux * (d_cx[i] * d_cx[i] - cs2) + uy * uy * (d_cx[i] * d_cx[i] - cs2)) + 9 * ux * uy * d_cx[i] * d_cy[i]);
+		pop[i] = w[i] * RHO_0 * (1.0 + 3.0 * (ux * cx[i] + uy * cy[i]) + 4.5 * (ux * ux * (cx[i] * cx[i] - cs2) + uy * uy * (cx[i] * cx[i] - cs2)) + 9 * ux * uy * cx[i] * cy[i]);
 	}
 
 	dfloat invRho = 1.0 / rho;

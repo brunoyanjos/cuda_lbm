@@ -34,11 +34,8 @@ constexpr dfloat as2 = 3.0;
 constexpr dfloat cs2 = 1.0 / as2;
 
 // populations velocities      0  1  2  3  4  5  6  7  8
-__device__ constexpr dfloat d_cx[Q] = {0, 1, 0, -1, 0, 1, -1, -1, 1};
-__device__ constexpr dfloat d_cy[Q] = {0, 0, 1, 0, -1, 1, 1, -1, -1};
-
-constexpr dfloat cx[Q] = {0, 1, 0, -1, 0, 1, -1, -1, 1};
-constexpr dfloat cy[Q] = {0, 0, 1, 0, -1, 1, 1, -1, -1};
+__device__ constexpr dfloat cx[Q] = {0, 1, 0, -1, 0, 1, -1, -1, 1};
+__device__ constexpr dfloat cy[Q] = {0, 0, 1, 0, -1, 1, 1, -1, -1};
 
 constexpr dfloat F_M_0_SCALE = 1.0;
 constexpr dfloat F_M_I_SCALE = as2;
