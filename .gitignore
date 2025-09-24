@@ -27,6 +27,8 @@ src/CUDA/x64
 *.test
 *.pdf
 *.dat
+GRID/*
+LDC/*
 MR_LBM/*.dat
 MR_LBM/OUTPUT/*
 MR_LBM/CYLINDER/*
