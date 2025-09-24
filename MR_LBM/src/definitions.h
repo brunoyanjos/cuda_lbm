@@ -12,30 +12,33 @@ constexpr dfloat ONESIXTH = 1.0 / 6.0;
 constexpr dfloat ONETHIRD = 1.0 / 3.0;
 
 /* --------------------------- AUXILIARY DEFINES --------------------------- */
-#define IN_HOST 1    // variable accessible only for host
+#define IN_HOST 1	 // variable accessible only for host
 #define IN_VIRTUAL 2 // variable accessible for device and host
 
 constexpr size_t BYTES_PER_GB = (1 << 30);
 constexpr size_t BYTES_PER_MB = (1 << 20);
 
 /* ------------------------------ VELOCITY SET ------------------------------ */
-constexpr unsigned char Q = 9;  // number of velocities
+constexpr unsigned char Q = 9;	// number of velocities
 constexpr unsigned char QF = 3; // number of velocities on each face
-constexpr dfloat W0 = 4.0 / 9;  // population 0 weight (0, 0, 0)
-constexpr dfloat W1 = 1.0 / 9;  // adjacent populations (1, 0, 0)
+constexpr dfloat W0 = 4.0 / 9;	// population 0 weight (0, 0, 0)
+constexpr dfloat W1 = 1.0 / 9;	// adjacent populations (1, 0, 0)
 constexpr dfloat W2 = 1.0 / 36; // diagonal populations (1, 1, 0)
 
 // velocities weight vector
-__device__ const dfloat w[Q] = { W0,
+__device__ const dfloat w[Q] = {W0,
 								W1, W1, W1, W1,
-								W2, W2, W2, W2 };
+								W2, W2, W2, W2};
 
 constexpr dfloat as2 = 3.0;
 constexpr dfloat cs2 = 1.0 / as2;
 
 // populations velocities      0  1  2  3  4  5  6  7  8
-__device__ constexpr dfloat cx[Q] = { 0, 1, 0, -1, 0, 1, -1, -1, 1 };
-__device__ constexpr dfloat cy[Q] = { 0, 0, 1, 0, -1, 1, 1, -1, -1 };
+__device__ constexpr dfloat d_cx[Q] = {0, 1, 0, -1, 0, 1, -1, -1, 1};
+__device__ constexpr dfloat d_cy[Q] = {0, 0, 1, 0, -1, 1, 1, -1, -1};
+
+constexpr dfloat cx[Q] = {0, 1, 0, -1, 0, 1, -1, -1, 1};
+constexpr dfloat cy[Q] = {0, 0, 1, 0, -1, 1, 1, -1, -1};
 
 constexpr dfloat F_M_0_SCALE = 1.0;
 constexpr dfloat F_M_I_SCALE = as2;
@@ -46,7 +49,7 @@ constexpr dfloat F_M_IJ_SCALE = as2 * as2;
 #include "arrayIndex.h"
 
 constexpr int SHARED_MEMORY_ELEMENT_SIZE = sizeof(dfloat) * (Q - 1);
- constexpr int MAX_ELEMENTS_IN_BLOCK = 48128 / SHARED_MEMORY_ELEMENT_SIZE;
+constexpr int MAX_ELEMENTS_IN_BLOCK = 48128 / SHARED_MEMORY_ELEMENT_SIZE;
 
 constexpr BlockDim optimalBlockDimArray = findOptimalBlockDimensions(MAX_ELEMENTS_IN_BLOCK);
 
@@ -67,7 +70,6 @@ const size_t Y_CORRECTION = NY % BLOCK_NY > 0.0 ? 1 : 0;
 
 const size_t NUM_BLOCK_X = NX / BLOCK_NX + X_CORRECTION;
 const size_t NUM_BLOCK_Y = NY / BLOCK_NY + Y_CORRECTION;
-
 
 const size_t NUM_BLOCK = NUM_BLOCK_X * NUM_BLOCK_Y;
 

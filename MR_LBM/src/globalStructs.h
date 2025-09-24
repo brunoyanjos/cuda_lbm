@@ -21,6 +21,8 @@ typedef struct ghostInterfaceData
 
 typedef struct cylinderProperties
 {
+    bool isBulk;
+
     // x coordinates
     dfloat xb;
     dfloat xw;

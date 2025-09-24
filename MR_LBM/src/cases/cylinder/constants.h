@@ -7,10 +7,10 @@ constexpr dfloat RE = 100;
 
 constexpr int SCALE = 1;
 
-constexpr int D = 32;       //Diameter of the cylinder
+constexpr int D = 32; // Diameter of the cylinder
 
-constexpr int HD = 10 * D;    //Height of the Domain !!!!should be a odd number!!!!
-constexpr int LD = 60 * D;    //Length of the Domain
+constexpr int HD = 10 * D; // Height of the Domain !!!!should be a odd number!!!!
+constexpr int LD = 60 * D; // Length of the Domain
 constexpr int L_front = 15 * D;
 
 constexpr int L_bot = (HD - D) / 2;
@@ -21,7 +21,7 @@ constexpr int L_back = LD - L_front - D;
 constexpr int N = 1 * SCALE;
 
 constexpr int NX = LD; // size x of the grid
-constexpr int NY = HD;      // size y of the grid
+constexpr int NY = HD; // size y of the grid
 
 constexpr dfloat xc = (dfloat)(L_front + D * 0.5);
 constexpr dfloat yc = (dfloat)(L_bot + D * 0.5);
@@ -30,8 +30,8 @@ constexpr dfloat U_MAX = 0.1;
 constexpr dfloat L = N;
 
 constexpr int MACR_SAVE = 10 * D / U_MAX;
-constexpr int tstar = 2000;         //non-dimensional time to start the statistics
-constexpr int stat_period = 100;    //period of statistics * tstar 
+constexpr int tstar = 2000;      // non-dimensional time to start the statistics
+constexpr int stat_period = 100; // period of statistics * tstar
 
 constexpr int N_STEPS = (tstar + stat_period) * D / U_MAX;
 

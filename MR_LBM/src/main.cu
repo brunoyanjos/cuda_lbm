@@ -86,7 +86,6 @@ int main()
 	int avg_blockSize = 256; // Otimizado para ocupação
 	int avg_gridSize = (L_back + avg_blockSize - 1) / avg_blockSize;
 
-
 	/* ------------------------------ TIMER EVENTS  ------------------------------ */
 	checkCudaErrors(cudaSetDevice(GPU_INDEX));
 	cudaEvent_t start, stop, start_step, stop_step;

@@ -67,7 +67,7 @@ __global__ void streamingAndMom(
 
 	if (nodeType != BULK)
 	{
-		if (nodeType > 100 && nodeType < 115)
+		if (nodeType == 100)
 		{
 			cylinderProperties *bc_property = findCylindeProperty(cylinder_properties, cylinder_counter, x, y);
 
@@ -77,6 +77,52 @@ __global__ void streamingAndMom(
 			{
 				incoming_forces(bc_property, pop);
 			}
+		}
+		else if (nodeType == 115)
+		{
+			// we have to do something here
+			// calculate incomings
+			dfloat rho_I = 0;
+
+			dfloat ux_I = 0;
+			dfloat uy_I = 0;
+
+			dfloat m_xx_I = 0;
+			dfloat m_yy_I = 0;
+			dfloat m_xy_I = 0;
+
+			cylinderProperties *bc_property = findCylindeProperty(cylinder_properties, cylinder_counter, x, y);
+
+			for (std::size_t i = 0; i < 9; i++)
+			{
+				if ((*bc_property).is[i] == 1)
+				{
+
+					const dfloat Hxx = (cx[i] * cx[i]) - cs2;
+					const dfloat Hyy = (cy[i] * cy[i]) - cs2;
+					const dfloat Hxy = cx[i] * cy[i];
+
+					rho_I += (pop[i] + w[i]);
+
+					ux_I += (pop[i] + w[i]) * cx[i];
+					uy_I += (pop[i] + w[i]) * cy[i];
+
+					m_xx_I += (pop[i] + w[i]) * Hxx;
+					m_yy_I += (pop[i] + w[i]) * Hyy;
+					m_xy_I += (pop[i] + w[i]) * Hxy;
+				}
+			}
+
+			const dfloat inv_rho_I = 1.0 / rho_I;
+
+			rhoVar = rho_I;
+
+			ux_t30 = ux_I;
+			uy_t30 = uy_I;
+
+			m_xx_t45 = m_xx_I * inv_rho_I;
+			m_yy_t45 = m_yy_I * inv_rho_I;
+			m_xy_t90 = m_xy_I * inv_rho_I;
 		}
 		else
 		{
@@ -133,79 +179,88 @@ __global__ void updateInnerBoundaries(dfloat *fMom, cylinderProperties *cylinder
 
 	dfloat rhoVar = RHO_0 + fMom[idxMom(tx, ty, M_RHO_INDEX, bx, by)];
 
+	dfloat ux_t30 = fMom[idxMom(tx, ty, M_UX_INDEX, bx, by)];
+	dfloat uy_t30 = fMom[idxMom(tx, ty, M_UY_INDEX, bx, by)];
+
 	dfloat m_xx_t45 = fMom[idxMom(tx, ty, M_MXX_INDEX, bx, by)];
 	dfloat m_xy_t90 = fMom[idxMom(tx, ty, M_MXY_INDEX, bx, by)];
 	dfloat m_yy_t45 = fMom[idxMom(tx, ty, M_MYY_INDEX, bx, by)];
 
-	// for first point
-
-	dfloat ux1;
-	dfloat uy1;
-
-	bilinear_velocity_interpolation(property.x1, property.y1, int(property.x1), int(property.y1),
-									int(property.x1) + 1, int(property.y1) + 1, fMom, M_UX_INDEX, &ux1);
-	bilinear_velocity_interpolation(property.x1, property.y1, int(property.x1), int(property.y1),
-									int(property.x1) + 1, int(property.y1) + 1, fMom, M_UY_INDEX, &uy1);
-
-	// for second point
-
-	dfloat ux2;
-	dfloat uy2;
-
-	bilinear_velocity_interpolation(property.x2, property.y2, int(property.x2), int(property.y2),
-									int(property.x2) + 1, int(property.y2) + 1, fMom, M_UX_INDEX, &ux2);
-	bilinear_velocity_interpolation(property.x2, property.y2, int(property.x2), int(property.y2),
-									int(property.x2) + 1, int(property.y2) + 1, fMom, M_UY_INDEX, &uy2);
-
-	// moment interpolation to first point
-	dfloat mxx1 = 0.0;
-	dfloat myy1 = 0.0;
-	dfloat mxx2 = 0.0;
-	dfloat myy2 = 0.0;
-
-	if (ROTATIONAL_COORDINATES)
+	if (property.isBulk)
 	{
-		bilinear_moment_interpolation(property.x1, property.y1, int(property.x1), int(property.y1),
-									  int(property.x1) + 1, int(property.y1) + 1, fMom, &mxx1, &myy1);
-		bilinear_moment_interpolation(property.x2, property.y2, int(property.x2), int(property.y2),
-									  int(property.x2) + 1, int(property.y2) + 1, fMom, &mxx2, &myy2);
-	}
-
-	if (CALCULATE_PRESSURE && step >= STAT_BEGIN_TIME && step <= STAT_END_TIME)
-	{
-		dfloat rho1;
-		dfloat rho2;
-		dfloat rho3;
-
-		bilinear_density_interpolation(property.x1, property.y1, int(property.x1), int(property.y1), int(property.x1) + 1, int(property.y1) + 1, fMom, M_RHO_INDEX, &rho1);
-		bilinear_density_interpolation(property.x2, property.y2, int(property.x2), int(property.y2), int(property.x2) + 1, int(property.y2) + 1, fMom, M_RHO_INDEX, &rho2);
-		bilinear_density_interpolation(property.x3, property.y3, int(property.x3), int(property.y3), int(property.x3) + 1, int(property.y3) + 1, fMom, M_RHO_INDEX, &rho3);
-
-		pressure_extrapolation(property.xw, property.yw, property.x1, property.y1, property.x2, property.y2, property.x3, property.y3, rho1, rho2, rho3, &(cylinder_properties[threadIdx.x].ps));
-	}
-
-	const dfloat delta = property.dr;
-
-	const dfloat ux_t30 = extrapolation(delta, ux1, ux2);
-	const dfloat uy_t30 = extrapolation(delta, uy1, uy2);
-
-	const dfloat m_xx_int = extrapolation(delta, mxx1, mxx2);
-	const dfloat m_yy_int = extrapolation(delta, myy1, myy2);
-
-	if (ROTATIONAL_COORDINATES)
-	{
-		if (RHO_STRONG)
-		{
-			numericalSolution_rotation(&rhoVar, ux_t30, uy_t30, &m_xx_t45, &m_xy_t90, &m_yy_t45, m_xx_int, m_yy_int, property.is, property.os, OMEGA, xb, yb);
-		}
-		if (RHO_EQ)
-		{
-			numericalSolution_rotation_rhoeq(&rhoVar, ux_t30, uy_t30, &m_xx_t45, &m_xy_t90, &m_yy_t45, m_xx_int, m_yy_int, property.is, property.os, OMEGA, xb, yb);
-		}
 	}
 	else
 	{
-		numericalSolution(&rhoVar, ux_t30, uy_t30, &m_xx_t45, &m_xy_t90, &m_yy_t45, property.is, property.os, OMEGA);
+		// for first point
+
+		dfloat ux1;
+		dfloat uy1;
+
+		bilinear_velocity_interpolation(property.x1, property.y1, int(property.x1), int(property.y1),
+										int(property.x1) + 1, int(property.y1) + 1, fMom, M_UX_INDEX, &ux1);
+		bilinear_velocity_interpolation(property.x1, property.y1, int(property.x1), int(property.y1),
+										int(property.x1) + 1, int(property.y1) + 1, fMom, M_UY_INDEX, &uy1);
+
+		// for second point
+
+		dfloat ux2;
+		dfloat uy2;
+
+		bilinear_velocity_interpolation(property.x2, property.y2, int(property.x2), int(property.y2),
+										int(property.x2) + 1, int(property.y2) + 1, fMom, M_UX_INDEX, &ux2);
+		bilinear_velocity_interpolation(property.x2, property.y2, int(property.x2), int(property.y2),
+										int(property.x2) + 1, int(property.y2) + 1, fMom, M_UY_INDEX, &uy2);
+
+		// moment interpolation to first point
+		dfloat mxx1 = 0.0;
+		dfloat myy1 = 0.0;
+		dfloat mxx2 = 0.0;
+		dfloat myy2 = 0.0;
+
+		if (ROTATIONAL_COORDINATES)
+		{
+			bilinear_moment_interpolation(property.x1, property.y1, int(property.x1), int(property.y1),
+										  int(property.x1) + 1, int(property.y1) + 1, fMom, &mxx1, &myy1);
+			bilinear_moment_interpolation(property.x2, property.y2, int(property.x2), int(property.y2),
+										  int(property.x2) + 1, int(property.y2) + 1, fMom, &mxx2, &myy2);
+		}
+
+		if (CALCULATE_PRESSURE && step >= STAT_BEGIN_TIME && step <= STAT_END_TIME)
+		{
+			dfloat rho1;
+			dfloat rho2;
+			dfloat rho3;
+
+			bilinear_density_interpolation(property.x1, property.y1, int(property.x1), int(property.y1), int(property.x1) + 1, int(property.y1) + 1, fMom, M_RHO_INDEX, &rho1);
+			bilinear_density_interpolation(property.x2, property.y2, int(property.x2), int(property.y2), int(property.x2) + 1, int(property.y2) + 1, fMom, M_RHO_INDEX, &rho2);
+			bilinear_density_interpolation(property.x3, property.y3, int(property.x3), int(property.y3), int(property.x3) + 1, int(property.y3) + 1, fMom, M_RHO_INDEX, &rho3);
+
+			pressure_extrapolation(property.xw, property.yw, property.x1, property.y1, property.x2, property.y2, property.x3, property.y3, rho1, rho2, rho3, &(cylinder_properties[threadIdx.x].ps));
+		}
+
+		const dfloat delta = property.dr;
+
+		ux_t30 = extrapolation(delta, ux1, ux2);
+		uy_t30 = extrapolation(delta, uy1, uy2);
+
+		const dfloat m_xx_int = extrapolation(delta, mxx1, mxx2);
+		const dfloat m_yy_int = extrapolation(delta, myy1, myy2);
+
+		if (ROTATIONAL_COORDINATES)
+		{
+			if (RHO_STRONG)
+			{
+				numericalSolution_rotation(&rhoVar, ux_t30, uy_t30, &m_xx_t45, &m_xy_t90, &m_yy_t45, m_xx_int, m_yy_int, property.is, property.os, OMEGA, xb, yb);
+			}
+			if (RHO_EQ)
+			{
+				numericalSolution_rotation_rhoeq(&rhoVar, ux_t30, uy_t30, &m_xx_t45, &m_xy_t90, &m_yy_t45, m_xx_int, m_yy_int, property.is, property.os, OMEGA, xb, yb);
+			}
+		}
+		else
+		{
+			numericalSolution(&rhoVar, ux_t30, uy_t30, &m_xx_t45, &m_xy_t90, &m_yy_t45, property.is, property.os, OMEGA);
+		}
 	}
 
 	fMom[idxMom(tx, ty, M_RHO_INDEX, bx, by)] = rhoVar - RHO_0;

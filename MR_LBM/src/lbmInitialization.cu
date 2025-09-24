@@ -26,7 +26,7 @@ __global__ void gpuInitialization_mom(
 	dfloat pop[Q];
 	for (int i = 0; i < Q; i++)
 	{
-		pop[i] = w[i] * RHO_0 * (1.0 + 3.0 * (ux * cx[i] + uy * cy[i]) + 4.5 * (ux * ux * (cx[i] * cx[i] - cs2) + uy * uy * (cx[i] * cx[i] - cs2)) + 9 * ux * uy * cx[i] * cy[i]);
+		pop[i] = w[i] * RHO_0 * (1.0 + 3.0 * (ux * d_cx[i] + uy * d_cy[i]) + 4.5 * (ux * ux * (d_cx[i] * d_cx[i] - cs2) + uy * uy * (d_cx[i] * d_cx[i] - cs2)) + 9 * ux * uy * d_cx[i] * d_cy[i]);
 	}
 
 	dfloat invRho = 1.0 / rho;
@@ -150,7 +150,6 @@ __host__ void hostInitialization_innerNodes(
 	size_t *contour_counter)
 {
 	int x, y;
-	unsigned nodeType;
 
 	float r = (float)(D * 0.5);
 
@@ -178,9 +177,9 @@ __host__ void hostInitialization_innerNodes(
 
 	cudaMallocHost((void **)cylinder_properties, sizeof(cylinderProperties) * max_count);
 
-	for (int y = L_bot - 2; y < L_bot + D + 2; y++)
+	for (int y = L_bot - 1; y < L_bot + D + 2; y++)
 	{
-		for (int x = L_front - 2; x < L_front + D + 2; x++)
+		for (int x = L_front - 1; x < L_front + D + 2; x++)
 		{
 
 			const unsigned short int xp1 = x + 1;
@@ -237,17 +236,175 @@ __host__ void hostInitialization_innerNodes(
 					max_radius = lattice_radius;
 				}
 
-				count++;
-
 				int bit_1 = node_3 != BULK && node_4 != BULK && node_7 != BULK ? 0 : 1;
 				int bit_2 = node_1 != BULK && node_4 != BULK && node_8 != BULK ? 0 : 1;
 				int bit_4 = node_2 != BULK && node_3 != BULK && node_6 != BULK ? 0 : 1;
 				int bit_8 = node_1 != BULK && node_2 != BULK && node_5 != BULK ? 0 : 1;
 
-				int bc_number = bit_1 * 1 + bit_2 * 2 + bit_4 * 4 + bit_8 * 8;
+				if (bit_1 + bit_2 + bit_4 + bit_8 > 1)
+				{
+					(*cylinder_properties)[count].isBulk = false;
 
-				hNodeType[idxScalarBlock(x % BLOCK_NX, y % BLOCK_NY, x / BLOCK_NX, y / BLOCK_NY)] = bc_number + 100;
+					hNodeType[idxScalarBlock(x % BLOCK_NX, y % BLOCK_NY, x / BLOCK_NX, y / BLOCK_NY)] = 100;
+				}
+				else
+				{
+					(*cylinder_properties)[count].isBulk = true;
+
+					if (bit_1)
+					{
+						(*cylinder_properties)[count].xb = xm1;
+						(*cylinder_properties)[count].yb = ym1;
+					}
+					else if (bit_2)
+					{
+						(*cylinder_properties)[count].xb = xp1;
+						(*cylinder_properties)[count].yb = ym1;
+					}
+					else if (bit_4)
+					{
+						(*cylinder_properties)[count].xb = xm1;
+						(*cylinder_properties)[count].yb = yp1;
+					}
+					else if (bit_8)
+					{
+						(*cylinder_properties)[count].xb = xp1;
+						(*cylinder_properties)[count].yb = yp1;
+					}
+				}
+
+				count++;
 			}
+		}
+	}
+
+	for (int y = L_bot - 1; y < L_bot + D + 2; y++)
+	{
+		for (int x = L_front - 1; x < L_front + D + 2; x++)
+		{
+			const unsigned short int xp1 = x + 1;
+			const unsigned short int xm1 = x - 1;
+
+			const unsigned short int yp1 = y + 1;
+			const unsigned short int ym1 = y - 1;
+
+			int node_0 = hNodeType[idxScalarBlock(x % BLOCK_NX, y % BLOCK_NY, x / BLOCK_NX, y / BLOCK_NY)];
+			int node_1 = hNodeType[idxScalarBlock(xp1 % BLOCK_NX, y % BLOCK_NY, xp1 / BLOCK_NX, y / BLOCK_NY)];
+			int node_2 = hNodeType[idxScalarBlock(x % BLOCK_NX, yp1 % BLOCK_NY, x / BLOCK_NX, yp1 / BLOCK_NY)];
+			int node_3 = hNodeType[idxScalarBlock(xm1 % BLOCK_NX, y % BLOCK_NY, xm1 / BLOCK_NX, y / BLOCK_NY)];
+			int node_4 = hNodeType[idxScalarBlock(x % BLOCK_NX, ym1 % BLOCK_NY, x / BLOCK_NX, ym1 / BLOCK_NY)];
+			int node_5 = hNodeType[idxScalarBlock(xp1 % BLOCK_NX, yp1 % BLOCK_NY, xp1 / BLOCK_NX, yp1 / BLOCK_NY)];
+			int node_6 = hNodeType[idxScalarBlock(xm1 % BLOCK_NX, yp1 % BLOCK_NY, xm1 / BLOCK_NX, yp1 / BLOCK_NY)];
+			int node_7 = hNodeType[idxScalarBlock(xm1 % BLOCK_NX, ym1 % BLOCK_NY, xm1 / BLOCK_NX, ym1 / BLOCK_NY)];
+			int node_8 = hNodeType[idxScalarBlock(xp1 % BLOCK_NX, ym1 % BLOCK_NY, xp1 / BLOCK_NX, ym1 / BLOCK_NY)];
+
+			bool anyBulk =
+				node_1 == BULK ||
+				node_2 == BULK ||
+				node_3 == BULK ||
+				node_4 == BULK ||
+				node_5 == BULK ||
+				node_6 == BULK ||
+				node_7 == BULK ||
+				node_8 == BULK;
+
+			if (node_0 == SOLID_NODE && anyBulk)
+			{
+				int bit_1 = node_3 != BULK && node_4 != BULK && node_7 != BULK ? 0 : 1;
+				int bit_2 = node_1 != BULK && node_4 != BULK && node_8 != BULK ? 0 : 1;
+				int bit_4 = node_2 != BULK && node_3 != BULK && node_6 != BULK ? 0 : 1;
+				int bit_8 = node_1 != BULK && node_2 != BULK && node_5 != BULK ? 0 : 1;
+
+				if (bit_1 + bit_2 + bit_4 + bit_8 == 1)
+				{
+					if (bit_1)
+					{
+						hNodeType[idxScalarBlock(xm1 % BLOCK_NX, ym1 % BLOCK_NY, xm1 / BLOCK_NX, ym1 / BLOCK_NY)] = 115;
+					}
+					else if (bit_2)
+					{
+						hNodeType[idxScalarBlock(xp1 % BLOCK_NX, ym1 % BLOCK_NY, xp1 / BLOCK_NX, ym1 / BLOCK_NY)] = 115;
+					}
+					else if (bit_4)
+					{
+						hNodeType[idxScalarBlock(xm1 % BLOCK_NX, yp1 % BLOCK_NY, xm1 / BLOCK_NX, yp1 / BLOCK_NY)] = 115;
+					}
+					else if (bit_8)
+					{
+						hNodeType[idxScalarBlock(xp1 % BLOCK_NX, yp1 % BLOCK_NY, xp1 / BLOCK_NX, yp1 / BLOCK_NY)] = 115;
+					}
+				}
+			}
+		}
+	}
+
+	for (int i = 0; i < count; i++)
+	{
+		if (!((*cylinder_properties)[i].isBulk))
+		{
+			int xb = (*cylinder_properties)[i].xb;
+			int yb = (*cylinder_properties)[i].yb;
+
+			// Calculate radius
+			dfloat xb_diff = xb - xc;
+			dfloat yb_diff = yb - yc;
+
+			dfloat r2 = xb_diff * xb_diff + yb_diff * yb_diff;
+
+			dfloat lattice_radius = sqrt(r2);
+
+			dfloat inv_radius = 1.0 / lattice_radius;
+			// ----------------------------
+
+			// location at wall
+			dfloat unit_nx = xb_diff * inv_radius;
+			dfloat unit_ny = yb_diff * inv_radius;
+
+			dfloat xw = xc + max_radius * unit_nx;
+			dfloat yw = yc + max_radius * unit_ny;
+
+			(*cylinder_properties)[i].xw = xw;
+			(*cylinder_properties)[i].yw = yw;
+
+			dfloat xwb_diff = xw - xb;
+			dfloat ywb_diff = yw - yb;
+
+			dfloat dr2 = xwb_diff * xwb_diff + ywb_diff * ywb_diff;
+			(*cylinder_properties)[i].dr = sqrt(dr2);
+			// ---------------------------
+
+			// fluid point 1
+			dfloat delx = sqrt(2.0);
+			dfloat x1 = xw + delx * unit_nx;
+			dfloat y1 = yw + delx * unit_ny;
+
+			(*cylinder_properties)[i].x1 = x1;
+			(*cylinder_properties)[i].y1 = y1;
+			// ---------------------------
+
+			// fluid point 2
+			dfloat x2 = xw + 2.0 * delx * unit_nx;
+			dfloat y2 = yw + 2.0 * delx * unit_ny;
+
+			(*cylinder_properties)[i].x2 = x2;
+			(*cylinder_properties)[i].y2 = y2;
+			// ---------------------------
+
+			// fluid point 3
+			dfloat x3 = xw + 3.0 * delx * unit_nx;
+			dfloat y3 = yw + 3.0 * delx * unit_ny;
+
+			(*cylinder_properties)[i].x3 = x3;
+			(*cylinder_properties)[i].y3 = y3;
+			// ---------------------------
+
+			dfloat theta = atan2f(yb_diff, xb_diff);
+			if (theta < 0)
+			{
+				theta += 2.0 * M_PI;
+			}
+
+			(*cylinder_properties)[i].theta = theta;
 		}
 	}
 
@@ -256,140 +413,39 @@ __host__ void hostInitialization_innerNodes(
 		int xb = (*cylinder_properties)[i].xb;
 		int yb = (*cylinder_properties)[i].yb;
 
-		// Calculate radius
-		dfloat xb_diff = xb - xc;
-		dfloat yb_diff = yb - yc;
+		const unsigned short int xp1 = x + 1;
+		const unsigned short int xm1 = x - 1;
 
-		dfloat r2 = xb_diff * xb_diff + yb_diff * yb_diff;
+		const unsigned short int yp1 = y + 1;
+		const unsigned short int ym1 = y - 1;
 
-		dfloat lattice_radius = sqrt(r2);
+		int nodes[9];
 
-		dfloat inv_radius = 1.0 / lattice_radius;
-		// ----------------------------
+		nodes[0] = hNodeType[idxScalarBlock(x % BLOCK_NX, y % BLOCK_NY, x / BLOCK_NX, y / BLOCK_NY)];
+		nodes[1] = hNodeType[idxScalarBlock(xp1 % BLOCK_NX, y % BLOCK_NY, xp1 / BLOCK_NX, y / BLOCK_NY)];
+		nodes[2] = hNodeType[idxScalarBlock(x % BLOCK_NX, yp1 % BLOCK_NY, x / BLOCK_NX, yp1 / BLOCK_NY)];
+		nodes[3] = hNodeType[idxScalarBlock(xm1 % BLOCK_NX, y % BLOCK_NY, xm1 / BLOCK_NX, y / BLOCK_NY)];
+		nodes[4] = hNodeType[idxScalarBlock(x % BLOCK_NX, ym1 % BLOCK_NY, x / BLOCK_NX, ym1 / BLOCK_NY)];
+		nodes[5] = hNodeType[idxScalarBlock(xp1 % BLOCK_NX, yp1 % BLOCK_NY, xp1 / BLOCK_NX, yp1 / BLOCK_NY)];
+		nodes[6] = hNodeType[idxScalarBlock(xm1 % BLOCK_NX, yp1 % BLOCK_NY, xm1 / BLOCK_NX, yp1 / BLOCK_NY)];
+		nodes[7] = hNodeType[idxScalarBlock(xm1 % BLOCK_NX, ym1 % BLOCK_NY, xm1 / BLOCK_NX, ym1 / BLOCK_NY)];
+		nodes[8] = hNodeType[idxScalarBlock(xp1 % BLOCK_NX, ym1 % BLOCK_NY, xp1 / BLOCK_NX, ym1 / BLOCK_NY)];
 
-		// location at wall
-		dfloat unit_nx = xb_diff * inv_radius;
-		dfloat unit_ny = yb_diff * inv_radius;
+		int pop_op[9] = {0, 3, 4, 1, 2, 7, 8, 5, 6};
 
-		dfloat xw = xc + max_radius * unit_nx;
-		dfloat yw = yc + max_radius * unit_ny;
-
-		(*cylinder_properties)[i].xw = xw;
-		(*cylinder_properties)[i].yw = yw;
-
-		dfloat xwb_diff = xw - xb;
-		dfloat ywb_diff = yw - yb;
-
-		dfloat dr2 = xwb_diff * xwb_diff + ywb_diff * ywb_diff;
-		(*cylinder_properties)[i].dr = sqrt(dr2);
-		// ---------------------------
-
-		// fluid point 1
-		dfloat delx = sqrt(2.0);
-		dfloat x1 = xw + delx * unit_nx;
-		dfloat y1 = yw + delx * unit_ny;
-
-		(*cylinder_properties)[i].x1 = x1;
-		(*cylinder_properties)[i].y1 = y1;
-		// ---------------------------
-
-		// fluid point 2
-		dfloat x2 = xw + 2.0 * delx * unit_nx;
-		dfloat y2 = yw + 2.0 * delx * unit_ny;
-
-		(*cylinder_properties)[i].x2 = x2;
-		(*cylinder_properties)[i].y2 = y2;
-		// ---------------------------
-
-		// fluid point 3
-		dfloat x3 = xw + 3.0 * delx * unit_nx;
-		dfloat y3 = yw + 3.0 * delx * unit_ny;
-
-		(*cylinder_properties)[i].x3 = x3;
-		(*cylinder_properties)[i].y3 = y3;
-		// ---------------------------
-
-		dfloat theta = atan2f(yb_diff, xb_diff);
-		if (theta < 0)
+		for (int j = 0; j < Q; ++j)
 		{
-			theta += 2.0 * M_PI;
+			(*cylinder_properties)[i].os[j] = 0;
+			(*cylinder_properties)[i].is[j] = 0;
 		}
 
-		(*cylinder_properties)[i].theta = theta;
-
-		nodeType = hNodeType[idxScalarBlock(xb % BLOCK_NX, yb % BLOCK_NY, xb / BLOCK_NX, yb / BLOCK_NY)];
-		nodeType -= 100;
-
-		(*cylinder_properties)[i].is[0] = 0;
-		(*cylinder_properties)[i].is[1] = 0;
-		(*cylinder_properties)[i].is[2] = 0;
-		(*cylinder_properties)[i].is[3] = 0;
-		(*cylinder_properties)[i].is[4] = 0;
-		(*cylinder_properties)[i].is[5] = 0;
-		(*cylinder_properties)[i].is[6] = 0;
-		(*cylinder_properties)[i].is[7] = 0;
-		(*cylinder_properties)[i].is[8] = 0;
-
-		(*cylinder_properties)[i].os[0] = 0;
-		(*cylinder_properties)[i].os[1] = 0;
-		(*cylinder_properties)[i].os[2] = 0;
-		(*cylinder_properties)[i].os[3] = 0;
-		(*cylinder_properties)[i].os[4] = 0;
-		(*cylinder_properties)[i].os[5] = 0;
-		(*cylinder_properties)[i].os[6] = 0;
-		(*cylinder_properties)[i].os[7] = 0;
-		(*cylinder_properties)[i].os[8] = 0;
-
-		if (nodeType & 1)
+		for (int j = 0; j < Q; ++j)
 		{
-			(*cylinder_properties)[i].is[0] = 1;
-			(*cylinder_properties)[i].is[1] = 1;
-			(*cylinder_properties)[i].is[2] = 1;
-			(*cylinder_properties)[i].is[5] = 1;
-
-			(*cylinder_properties)[i].os[0] = 1;
-			(*cylinder_properties)[i].os[3] = 1;
-			(*cylinder_properties)[i].os[4] = 1;
-			(*cylinder_properties)[i].os[7] = 1;
-		}
-
-		if (nodeType & 2)
-		{
-			(*cylinder_properties)[i].is[0] = 1;
-			(*cylinder_properties)[i].is[2] = 1;
-			(*cylinder_properties)[i].is[3] = 1;
-			(*cylinder_properties)[i].is[6] = 1;
-
-			(*cylinder_properties)[i].os[0] = 1;
-			(*cylinder_properties)[i].os[1] = 1;
-			(*cylinder_properties)[i].os[4] = 1;
-			(*cylinder_properties)[i].os[8] = 1;
-		}
-
-		if (nodeType & 4)
-		{
-			(*cylinder_properties)[i].is[0] = 1;
-			(*cylinder_properties)[i].is[1] = 1;
-			(*cylinder_properties)[i].is[4] = 1;
-			(*cylinder_properties)[i].is[8] = 1;
-
-			(*cylinder_properties)[i].os[0] = 1;
-			(*cylinder_properties)[i].os[2] = 1;
-			(*cylinder_properties)[i].os[3] = 1;
-			(*cylinder_properties)[i].os[6] = 1;
-		}
-
-		if (nodeType & 8)
-		{
-			(*cylinder_properties)[i].is[0] = 1;
-			(*cylinder_properties)[i].is[3] = 1;
-			(*cylinder_properties)[i].is[4] = 1;
-			(*cylinder_properties)[i].is[7] = 1;
-
-			(*cylinder_properties)[i].os[0] = 1;
-			(*cylinder_properties)[i].os[1] = 1;
-			(*cylinder_properties)[i].os[2] = 1;
-			(*cylinder_properties)[i].os[5] = 1;
+			if (nodes[j] != SOLID_NODE)
+			{
+				(*cylinder_properties)[i].os[j] = 1;
+				(*cylinder_properties)[i].is[pop_op[j]] = 1;
+			}
 		}
 	}
 
