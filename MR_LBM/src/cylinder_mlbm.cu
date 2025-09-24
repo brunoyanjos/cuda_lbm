@@ -115,14 +115,197 @@ __global__ void streamingAndMom(
 
 			const dfloat inv_rho_I = 1.0 / rho_I;
 
-			rhoVar = rho_I;
+			// rhoVar = rho_I;
 
-			ux_t30 = ux_I;
-			uy_t30 = uy_I;
+			// ux_t30 = ux_I;
+			// uy_t30 = uy_I;
 
-			m_xx_t45 = m_xx_I * inv_rho_I;
-			m_yy_t45 = m_yy_I * inv_rho_I;
-			m_xy_t90 = m_xy_I * inv_rho_I;
+			// m_xx_t45 = m_xx_I * inv_rho_I;
+			// m_yy_t45 = m_yy_I * inv_rho_I;
+			// m_xy_t90 = m_xy_I * inv_rho_I;
+
+			// BCFLUID-TYPE1
+			double linear_part = (5202.0 + 612.0 * m_xx_I - 1836.0 * m_xy_I + 612.0 * m_yy_I -
+								  720.0 * m_xx_I * OMEGA + 2160.0 * m_xy_I * OMEGA - 720.0 * m_yy_I * OMEGA +
+								  255.0 * ux_I + 159.0 * OMEGA * ux_I - 255.0 * uy_I - 159.0 * OMEGA * uy_I) *
+								 rho_I;
+
+			double inner_expr = (1734.0 + 204.0 * m_yy_I + m_xx_I * (204.0 - 240.0 * OMEGA) -
+								 240.0 * m_yy_I * OMEGA + 36.0 * m_xy_I * (-17.0 + 20.0 * OMEGA) +
+								 85.0 * ux_I + 53.0 * OMEGA * ux_I - 85.0 * uy_I - 53.0 * OMEGA * uy_I);
+
+			double squared_term = 3.0 * inner_expr * inner_expr;
+
+			double quadratic_terms = (45.0 * m_xx_I * m_xx_I + 405.0 * m_xy_I * m_xy_I + 45.0 * m_yy_I * m_yy_I -
+									  345.0 * m_yy_I * ux_I + 589.0 * ux_I * ux_I -
+									  15.0 * m_xx_I * (18.0 * m_xy_I - 6.0 * m_yy_I + 23.0 * ux_I - 23.0 * uy_I) +
+									  345.0 * m_yy_I * uy_I - 1467.0 * ux_I * uy_I + 589.0 * uy_I * uy_I -
+									  45.0 * m_xy_I * (6.0 * m_yy_I - 23.0 * ux_I + 23.0 * uy_I));
+
+			double OMEGA_factor = 2.0 * OMEGA * (4998.0 + 103.0 * OMEGA);
+
+			double sqrt_expr = std::sqrt(3.0 * rho_I * rho_I * (squared_term + OMEGA_factor * quadratic_terms));
+
+			rhoVar = (linear_part + sqrt_expr) / (9996.0 + 206.0 * OMEGA);
+
+			ux_t30 = -(3.0 * m_xx_I * rho_I - 9.0 * m_xy_I * rho_I + 3.0 * m_yy_I * rho_I -
+					   20.0 * rho_I * ux_I + 3.0 * rho_I * uy_I + rhoVar) /
+					 (17.0 * rhoVar);
+
+			uy_t30 = -(-3.0 * m_xx_I * rho_I + 9.0 * m_xy_I * rho_I - 3.0 * m_yy_I * rho_I +
+					   3.0 * rho_I * ux_I - 20.0 * rho_I * uy_I - rhoVar) /
+					 (17.0 * rhoVar);
+
+			m_xx_t45 = -(-57.0 * m_xx_I * rho_I + 18.0 * m_xy_I * rho_I - 6.0 * m_yy_I * rho_I +
+						 6.0 * rho_I * ux_I - 6.0 * rho_I * uy_I - 2.0 * rhoVar) /
+					   (51.0 * rhoVar);
+
+			m_yy_t45 = (6.0 * m_xx_I * rho_I - 18.0 * m_xy_I * rho_I + 57.0 * m_yy_I * rho_I -
+						6.0 * rho_I * ux_I + 6.0 * rho_I * uy_I + 2.0 * rhoVar) /
+					   (51.0 * rhoVar);
+
+			m_xy_t90 = -(3.0 * m_xx_I * rho_I - 26.0 * m_xy_I * rho_I + 3.0 * m_yy_I * rho_I -
+						 3.0 * rho_I * ux_I + 3.0 * rho_I * uy_I + rhoVar) /
+					   (17.0 * rhoVar);
+
+			// BCFLUID-TYPE2
+			double linear_part = (5202.0 * rho_I + 612.0 * m_xx_I * rho_I + 1836.0 * m_xy_I * rho_I +
+								  612.0 * m_yy_I * rho_I - 720.0 * m_xx_I * OMEGA * rho_I -
+								  2160.0 * m_xy_I * OMEGA * rho_I - 720.0 * m_yy_I * OMEGA * rho_I -
+								  255.0 * rho_I * ux_I - 159.0 * OMEGA * rho_I * ux_I -
+								  255.0 * rho_I * uy_I - 159.0 * OMEGA * rho_I * uy_I);
+
+			double inner_expr = (-1734.0 - 204.0 * m_yy_I + 240.0 * m_yy_I * OMEGA +
+								 12.0 * m_xx_I * (-17.0 + 20.0 * OMEGA) +
+								 36.0 * m_xy_I * (-17.0 + 20.0 * OMEGA) +
+								 85.0 * ux_I + 53.0 * OMEGA * ux_I +
+								 85.0 * uy_I + 53.0 * OMEGA * uy_I);
+
+			double squared_term = 3.0 * inner_expr * inner_expr;
+
+			double quadratic_terms = (45.0 * m_xx_I * m_xx_I + 405.0 * m_xy_I * m_xy_I + 45.0 * m_yy_I * m_yy_I +
+									  345.0 * m_yy_I * ux_I + 589.0 * ux_I * ux_I +
+									  345.0 * m_yy_I * uy_I + 1467.0 * ux_I * uy_I +
+									  589.0 * uy_I * uy_I +
+									  45.0 * m_xy_I * (6.0 * m_yy_I + 23.0 * (ux_I + uy_I)) +
+									  15.0 * m_xx_I * (18.0 * m_xy_I + 6.0 * m_yy_I + 23.0 * (ux_I + uy_I)));
+
+			double OMEGA_factor = 2.0 * OMEGA * (4998.0 + 103.0 * OMEGA);
+
+			double sqrt_expr = std::sqrt(3.0 * rho_I * rho_I * (squared_term + OMEGA_factor * quadratic_terms));
+
+			rhoVar = (linear_part + sqrt_expr) / (9996.0 + 206.0 * OMEGA);
+
+			ux_t30 = -(-3.0 * m_xx_I * rho_I - 9.0 * m_xy_I * rho_I - 3.0 * m_yy_I * rho_I -
+					   20.0 * rho_I * ux_I - 3.0 * rho_I * uy_I - rhoVar) /
+					 (17.0 * rhoVar);
+
+			uy_t30 = -(-3.0 * m_xx_I * rho_I - 9.0 * m_xy_I * rho_I - 3.0 * m_yy_I * rho_I -
+					   3.0 * rho_I * ux_I - 20.0 * rho_I * uy_I - rhoVar) /
+					 (17.0 * rhoVar);
+
+			m_xx_t45 = -(-57.0 * m_xx_I * rho_I - 18.0 * m_xy_I * rho_I - 6.0 * m_yy_I * rho_I -
+						 6.0 * rho_I * ux_I - 6.0 * rho_I * uy_I - 2.0 * rhoVar) /
+					   (51.0 * rhoVar);
+
+			m_yy_t45 = (6.0 * m_xx_I * rho_I + 18.0 * m_xy_I * rho_I + 57.0 * m_yy_I * rho_I +
+						6.0 * rho_I * ux_I + 6.0 * rho_I * uy_I + 2.0 * rhoVar) /
+					   (51.0 * rhoVar);
+
+			m_xy_t90 = (3.0 * m_xx_I * rho_I + 26.0 * m_xy_I * rho_I + 3.0 * m_yy_I * rho_I +
+						3.0 * rho_I * ux_I + 3.0 * rho_I * uy_I + rhoVar) /
+					   (17.0 * rhoVar);
+
+			// BCFLUID-TYPE3
+			double linear_part = (5202.0 * rho_I + 612.0 * m_xx_I * rho_I + 1836.0 * m_xy_I * rho_I +
+								  612.0 * m_yy_I * rho_I - 720.0 * m_xx_I * OMEGA * rho_I -
+								  2160.0 * m_xy_I * OMEGA * rho_I - 720.0 * m_yy_I * OMEGA * rho_I +
+								  255.0 * rho_I * ux_I + 159.0 * OMEGA * rho_I * ux_I +
+								  255.0 * rho_I * uy_I + 159.0 * OMEGA * rho_I * uy_I);
+
+			double inner_expr = (1734.0 + 204.0 * m_xx_I + 612.0 * m_xy_I + 204.0 * m_yy_I -
+								 240.0 * m_xx_I * OMEGA - 720.0 * m_xy_I * OMEGA - 240.0 * m_yy_I * OMEGA +
+								 85.0 * ux_I + 53.0 * OMEGA * ux_I + 85.0 * uy_I + 53.0 * OMEGA * uy_I);
+
+			double squared_term = 3.0 * inner_expr * inner_expr;
+
+			double quadratic_terms = (45.0 * m_xx_I * m_xx_I + 405.0 * m_xy_I * m_xy_I + 45.0 * m_yy_I * m_yy_I -
+									  345.0 * m_yy_I * ux_I + 589.0 * ux_I * ux_I -
+									  345.0 * m_yy_I * uy_I + 1467.0 * ux_I * uy_I +
+									  589.0 * uy_I * uy_I +
+									  45.0 * m_xy_I * (6.0 * m_yy_I - 23.0 * (ux_I + uy_I)) +
+									  15.0 * m_xx_I * (18.0 * m_xy_I + 6.0 * m_yy_I - 23.0 * (ux_I + uy_I)));
+
+			double OMEGA_factor = 2.0 * OMEGA * (4998.0 + 103.0 * OMEGA);
+
+			double sqrt_expr = std::sqrt(3.0 * rho_I * rho_I * (squared_term + OMEGA_factor * quadratic_terms));
+
+			rhoVar = (linear_part + sqrt_expr) / (9996.0 + 206.0 * OMEGA);
+
+			ux_t30 = -(3.0 * m_xx_I * rho_I + 9.0 * m_xy_I * rho_I + 3.0 * m_yy_I * rho_I -
+					   20.0 * rho_I * ux_I - 3.0 * rho_I * uy_I + rhoVar) /
+					 (17.0 * rhoVar);
+
+			uy_t30 = -(3.0 * m_xx_I * rho_I + 9.0 * m_xy_I * rho_I + 3.0 * m_yy_I * rho_I -
+					   3.0 * rho_I * ux_I - 20.0 * rho_I * uy_I + rhoVar) /
+					 (17.0 * rhoVar);
+
+			m_xx_t45 = -(-57.0 * m_xx_I * rho_I - 18.0 * m_xy_I * rho_I - 6.0 * m_yy_I * rho_I +
+						 6.0 * rho_I * ux_I + 6.0 * rho_I * uy_I - 2.0 * rhoVar) /
+					   (51.0 * rhoVar);
+
+			m_yy_t45 = (6.0 * m_xx_I * rho_I + 18.0 * m_xy_I * rho_I + 57.0 * m_yy_I * rho_I -
+						6.0 * rho_I * ux_I - 6.0 * rho_I * uy_I + 2.0 * rhoVar) /
+					   (51.0 * rhoVar);
+
+			m_xy_t90 = (3.0 * m_xx_I * rho_I + 26.0 * m_xy_I * rho_I + 3.0 * m_yy_I * rho_I -
+						3.0 * rho_I * ux_I - 3.0 * rho_I * uy_I + rhoVar) /
+					   (17.0 * rhoVar);
+
+			// BCFLUID-TYPE4
+			double linear_part = (5202.0 * rho_I + 612.0 * m_xx_I * rho_I - 1836.0 * m_xy_I * rho_I +
+								  612.0 * m_yy_I * rho_I - 720.0 * m_xx_I * OMEGA * rho_I +
+								  2160.0 * m_xy_I * OMEGA * rho_I - 720.0 * m_yy_I * OMEGA * rho_I -
+								  255.0 * rho_I * ux_I - 159.0 * OMEGA * rho_I * ux_I +
+								  255.0 * rho_I * uy_I + 159.0 * OMEGA * rho_I * uy_I);
+
+			double inner_expr = (1734.0 + 204.0 * m_yy_I + m_xx_I * (204.0 - 240.0 * OMEGA) -
+								 240.0 * m_yy_I * OMEGA + 36.0 * m_xy_I * (-17.0 + 20.0 * OMEGA) -
+								 85.0 * ux_I - 53.0 * OMEGA * ux_I + 85.0 * uy_I + 53.0 * OMEGA * uy_I);
+
+			double squared_term = 3.0 * inner_expr * inner_expr;
+
+			double quadratic_terms = (45.0 * m_xx_I * m_xx_I + 405.0 * m_xy_I * m_xy_I + 45.0 * m_yy_I * m_yy_I +
+									  345.0 * m_yy_I * ux_I + 589.0 * ux_I * ux_I -
+									  45.0 * m_xy_I * (6.0 * m_yy_I + 23.0 * ux_I - 23.0 * uy_I) -
+									  345.0 * m_yy_I * uy_I - 1467.0 * ux_I * uy_I + 589.0 * uy_I * uy_I -
+									  15.0 * m_xx_I * (18.0 * m_xy_I - 6.0 * m_yy_I - 23.0 * ux_I + 23.0 * uy_I));
+
+			double OMEGA_factor = 2.0 * OMEGA * (4998.0 + 103.0 * OMEGA);
+
+			double sqrt_expr = std::sqrt(3.0 * rho_I * rho_I * (squared_term + OMEGA_factor * quadratic_terms));
+
+			rhoVar = (linear_part + sqrt_expr) / (9996.0 + 206.0 * OMEGA);
+
+			ux_t30 = -(-3.0 * m_xx_I * rho_I + 9.0 * m_xy_I * rho_I - 3.0 * m_yy_I * rho_I -
+					   20.0 * rho_I * ux_I + 3.0 * rho_I * uy_I - rhoVar) /
+					 (17.0 * rhoVar);
+
+			uy_t30 = -(3.0 * m_xx_I * rho_I - 9.0 * m_xy_I * rho_I + 3.0 * m_yy_I * rho_I +
+					   3.0 * rho_I * ux_I - 20.0 * rho_I * uy_I + rhoVar) /
+					 (17.0 * rhoVar);
+
+			m_xx_t45 = -(-57.0 * m_xx_I * rho_I + 18.0 * m_xy_I * rho_I - 6.0 * m_yy_I * rho_I -
+						 6.0 * rho_I * ux_I + 6.0 * rho_I * uy_I - 2.0 * rhoVar) /
+					   (51.0 * rhoVar);
+
+			m_yy_t45 = (6.0 * m_xx_I * rho_I - 18.0 * m_xy_I * rho_I + 57.0 * m_yy_I * rho_I +
+						6.0 * rho_I * ux_I - 6.0 * rho_I * uy_I + 2.0 * rhoVar) /
+					   (51.0 * rhoVar);
+
+			m_xy_t90 = -(3.0 * m_xx_I * rho_I - 26.0 * m_xy_I * rho_I + 3.0 * m_yy_I * rho_I +
+						 3.0 * rho_I * ux_I - 3.0 * rho_I * uy_I + rhoVar) /
+					   (17.0 * rhoVar);
 		}
 		else
 		{
