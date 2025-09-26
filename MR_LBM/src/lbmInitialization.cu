@@ -413,19 +413,19 @@ __host__ void hostInitialization_innerNodes(
 		int xb = (*cylinder_properties)[i].xb;
 		int yb = (*cylinder_properties)[i].yb;
 
-		const unsigned short int xp1 = x + 1;
-		const unsigned short int xm1 = x - 1;
+		const unsigned short int xp1 = xb + 1;
+		const unsigned short int xm1 = xb - 1;
 
-		const unsigned short int yp1 = y + 1;
-		const unsigned short int ym1 = y - 1;
+		const unsigned short int yp1 = yb + 1;
+		const unsigned short int ym1 = yb - 1;
 
 		int nodes[9];
 
-		nodes[0] = hNodeType[idxScalarBlock(x % BLOCK_NX, y % BLOCK_NY, x / BLOCK_NX, y / BLOCK_NY)];
-		nodes[1] = hNodeType[idxScalarBlock(xp1 % BLOCK_NX, y % BLOCK_NY, xp1 / BLOCK_NX, y / BLOCK_NY)];
-		nodes[2] = hNodeType[idxScalarBlock(x % BLOCK_NX, yp1 % BLOCK_NY, x / BLOCK_NX, yp1 / BLOCK_NY)];
-		nodes[3] = hNodeType[idxScalarBlock(xm1 % BLOCK_NX, y % BLOCK_NY, xm1 / BLOCK_NX, y / BLOCK_NY)];
-		nodes[4] = hNodeType[idxScalarBlock(x % BLOCK_NX, ym1 % BLOCK_NY, x / BLOCK_NX, ym1 / BLOCK_NY)];
+		nodes[0] = hNodeType[idxScalarBlock(xb % BLOCK_NX, yb % BLOCK_NY, xb / BLOCK_NX, yb / BLOCK_NY)];
+		nodes[1] = hNodeType[idxScalarBlock(xp1 % BLOCK_NX, yb % BLOCK_NY, xp1 / BLOCK_NX, yb / BLOCK_NY)];
+		nodes[2] = hNodeType[idxScalarBlock(xb % BLOCK_NX, yp1 % BLOCK_NY, xb / BLOCK_NX, yp1 / BLOCK_NY)];
+		nodes[3] = hNodeType[idxScalarBlock(xm1 % BLOCK_NX, yb % BLOCK_NY, xm1 / BLOCK_NX, yb / BLOCK_NY)];
+		nodes[4] = hNodeType[idxScalarBlock(xb % BLOCK_NX, ym1 % BLOCK_NY, xb / BLOCK_NX, ym1 / BLOCK_NY)];
 		nodes[5] = hNodeType[idxScalarBlock(xp1 % BLOCK_NX, yp1 % BLOCK_NY, xp1 / BLOCK_NX, yp1 / BLOCK_NY)];
 		nodes[6] = hNodeType[idxScalarBlock(xm1 % BLOCK_NX, yp1 % BLOCK_NY, xm1 / BLOCK_NX, yp1 / BLOCK_NY)];
 		nodes[7] = hNodeType[idxScalarBlock(xm1 % BLOCK_NX, ym1 % BLOCK_NY, xm1 / BLOCK_NX, ym1 / BLOCK_NY)];
