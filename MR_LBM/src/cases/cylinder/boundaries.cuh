@@ -81,7 +81,7 @@ __host__ __device__ inline void boundary_definition(unsigned int *nodeType, unsi
 __device__ inline void boundary_calculation(unsigned int nodeType, dfloat *rhoVar, dfloat *ux, dfloat *uy, dfloat *mxx, dfloat *myy, dfloat *mxy, dfloat *pop, dfloat *fMom, int x, int y, dfloat OMEGA)
 {
 	const dfloat pop_0 = pop[0] + W0;
-	
+
 	const dfloat pop_1 = pop[1] + W1;
 	const dfloat pop_2 = pop[2] + W1;
 	const dfloat pop_3 = pop[3] + W1;
@@ -146,7 +146,7 @@ __device__ inline void boundary_calculation(unsigned int nodeType, dfloat *rhoVa
 		*uy = 0.0;
 		*ux = U_MAX;
 
-		const dfloat rho = (4.0 * rhoIn + 3.0 * rhoIn * mxxIn) / (3.0 - 3.0 * (*ux));	// weak conservation
+		const dfloat rho = (4.0 * rhoIn + 3.0 * rhoIn * mxxIn) / (3.0 - 3.0 * (*ux)); // weak conservation
 		// const dfloat rho = (-6.0 * rhoIn) / (-5.0 + 3.0 * (*ux) + 3.0 * (*ux) * (*ux));	//rhoeq conservation
 		*mxx = (rho + 9.0 * rhoIn * mxxIn + 3.0 * rho * (*ux)) / (6.0 * rho);
 		*mxy = 2.0 * rhoIn * mxyIn / rho;
@@ -165,7 +165,7 @@ __device__ inline void boundary_calculation(unsigned int nodeType, dfloat *rhoVa
 		const dfloat mxyIn = (pop_5 - pop_8) * inv_rhoIn;
 		const dfloat myyIn = (pop_2 + pop_4 + pop_5 + pop_8) * inv_rhoIn - cs2;
 
-		const dfloat rho = RHO_0;// + fMom[idxMom(threadIdx.x - 1, threadIdx.y, M_RHO_INDEX, blockIdx.x, blockIdx.y)];
+		const dfloat rho = RHO_0 + fMom[idxMom(threadIdx.x - 1, threadIdx.y, M_RHO_INDEX, blockIdx.x, blockIdx.y)];
 		*ux = fMom[idxMom(threadIdx.x - 1, threadIdx.y, M_UX_INDEX, blockIdx.x, blockIdx.y)] / F_M_I_SCALE;
 		*uy = fMom[idxMom(threadIdx.x - 1, threadIdx.y, M_UY_INDEX, blockIdx.x, blockIdx.y)] / F_M_I_SCALE;
 
