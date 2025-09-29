@@ -177,7 +177,6 @@ __device__ inline void boundary_calculation(unsigned int nodeType, dfloat *rhoVa
 
 		break;
 	}
-
 	case SOUTH_WEST:
 	{
 		const dfloat rhoIn = pop_0 + pop_3 + pop_4 + pop_7;

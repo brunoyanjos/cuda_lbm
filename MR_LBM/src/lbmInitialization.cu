@@ -171,6 +171,7 @@ __host__ void hostInitialization_innerNodes(
 	}
 
 	int count = 0;
+	int cylinder_count = 0;
 	int max_count = 1; // estimativa inicial
 
 	float max_radius = 0.0;
@@ -246,6 +247,7 @@ __host__ void hostInitialization_innerNodes(
 					(*cylinder_properties)[count].isBulk = false;
 
 					hNodeType[idxScalarBlock(x % BLOCK_NX, y % BLOCK_NY, x / BLOCK_NX, y / BLOCK_NY)] = 100;
+					cylinder_count++;
 				}
 				else
 				{
@@ -450,5 +452,5 @@ __host__ void hostInitialization_innerNodes(
 	}
 
 	*D_MAX = (float)2 * max_radius;
-	*contour_counter = count;
+	*contour_counter = cylinder_count;
 }

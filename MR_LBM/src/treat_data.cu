@@ -11,11 +11,15 @@ __host__ void calculate_pressure(cylinderProperties *h_cylinder_properties, unsi
 		std::ofstream data_file(filename.c_str(), std::ios::app);
 
 		data_file << count;
+
 		for (int i = 0; i < count; i++)
 		{
 			cylinderProperties property = h_cylinder_properties[i];
 
-			data_file << std::setprecision(10) << " " << property.theta;
+			if (!property.isBulk)
+			{
+				data_file << std::setprecision(10) << " " << property.theta;
+			}
 		}
 
 		data_file << std::endl;
@@ -34,8 +38,12 @@ __host__ void calculate_pressure(cylinderProperties *h_cylinder_properties, unsi
 	{
 		cylinderProperties property = h_cylinder_properties[i];
 
-		data_file << std::setprecision(10) << " " << property.ps;
+		if (!property.isBulk)
+		{
+			data_file << std::setprecision(10) << " " << property.ps;
+		}
 	}
+
 	data_file << std::endl;
 
 	data_file.close();
@@ -63,7 +71,7 @@ __host__ void calculate_forces(cylinderProperties *h_cylinder_properties, unsign
 	data_file.close();
 }
 
-__host__ void calculate_inlet_density(dfloat *h_fMom, unsigned int step, dfloat* rho_infty)
+__host__ void calculate_inlet_density(dfloat *h_fMom, unsigned int step, dfloat *rho_infty)
 {
 	dfloat rho_inlet = 0;
 
@@ -109,7 +117,8 @@ __global__ void velocity_on_centerline_average(dfloat *fMom, dfloat *ux_center, 
 	const size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 	const size_t x = idx + offset;
 
-	if(idx >= L_back) return;
+	if (idx >= L_back)
+		return;
 
 	const size_t top_y_coord = NY / 2;
 	const size_t bot_y_coord = top_y_coord - 1;
