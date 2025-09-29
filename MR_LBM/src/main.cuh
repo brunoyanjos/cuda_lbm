@@ -166,7 +166,7 @@ __host__ void initializeDomain(
 #ifdef CYLINDER
 	dfloat *D_max, cylinderProperties **h_cylinder_properties,
 	cylinderProperties *&d_cylinder_properties,
-	size_t *contour_count
+	size_t *cylinder_count, size_t *boundary_count
 #endif
 )
 {
@@ -181,9 +181,9 @@ __host__ void initializeDomain(
 	hostInitialization_nodeType(hNodeType);
 
 #ifdef CYLINDER
-	hostInitialization_innerNodes(hNodeType, D_max, h_cylinder_properties, contour_count);
-	checkCudaErrors(cudaMalloc((void **)&d_cylinder_properties, sizeof(cylinderProperties) * (*contour_count)));
-	checkCudaErrors(cudaMemcpy(d_cylinder_properties, *h_cylinder_properties, sizeof(cylinderProperties) * (*contour_count), cudaMemcpyHostToDevice));
+	hostInitialization_innerNodes(hNodeType, D_max, h_cylinder_properties, cylinder_count, boundary_count);
+	checkCudaErrors(cudaMalloc((void **)&d_cylinder_properties, sizeof(cylinderProperties) * (*cylinder_count)));
+	checkCudaErrors(cudaMemcpy(d_cylinder_properties, *h_cylinder_properties, sizeof(cylinderProperties) * (*cylinder_count), cudaMemcpyHostToDevice));
 #endif
 
 	checkCudaErrors(cudaMemcpy(dNodeType, hNodeType, sizeof(unsigned int) * NUMBER_LBM_NODES, cudaMemcpyHostToDevice));

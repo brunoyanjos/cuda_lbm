@@ -19,7 +19,7 @@
 #include "globalStructs.h"
 #include "globalFunctions.h"
 
-__host__ void calculate_pressure(cylinderProperties *h_cylinder_properties, unsigned int count, unsigned int step);
+__host__ void calculate_pressure(cylinderProperties *h_cylinder_properties, unsigned int count, unsigned int count_b, unsigned int step);
 
 __host__ void calculate_forces(cylinderProperties *h_cylinder_properties, unsigned int count, unsigned int step);
 

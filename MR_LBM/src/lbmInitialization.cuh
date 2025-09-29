@@ -27,7 +27,7 @@
  *   @param fMom: moments to be inialized to be initialized
  */
 __global__ void gpuInitialization_mom(
-	dfloat* fMom);
+	dfloat *fMom);
 
 /*
  *   @brief Initializes populations in the intefaces based on the moments
@@ -36,39 +36,38 @@ __global__ void gpuInitialization_mom(
  *   @param ghostInterface interface block transfer information
  */
 __global__ void gpuInitialization_pop(
-	dfloat* fMom, ghostInterfaceData ghostInterface);
+	dfloat *fMom, ghostInterfaceData ghostInterface);
 
 /*
  *   @brief Initialize the boundary condition node type
  *   @param nodeType: node type ID
  */
 __global__ void gpuInitialization_nodeType(
-	unsigned int* dNodeType);
+	unsigned int *dNodeType);
 
 /*
  *   @brief Initialize the boundary condition node type
  *   @param nodeType: node type ID
  */
 __host__ void hostInitialization_nodeType_bulk(
-	unsigned int* hNodeType);
+	unsigned int *hNodeType);
 
 /*
  *   @brief Initialize the boundary condition node type
  *   @param nodeType: node type ID
  */
 __host__ void hostInitialization_nodeType(
-	unsigned int* hNodeType);
+	unsigned int *hNodeType);
 
-
-	/*
+/*
  *   @brief Initialize the boundary condition node type
  *   @param nodeType: node type ID
  */
 __host__ void hostInitialization_innerNodes(
-	unsigned int* hNodeType,
-	dfloat* D_MAX,
-	cylinderProperties** cylinder_properties,
-	size_t* contour_counter
-);
+	unsigned int *hNodeType,
+	dfloat *D_MAX,
+	cylinderProperties **cylinder_properties,
+	size_t *cylinder_counter,
+	size_t *boundary_counter);
 
 #endif // !__LBM_INITIALIZATION_CUH

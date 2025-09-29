@@ -147,7 +147,7 @@ __host__ void hostInitialization_innerNodes(
 	unsigned int *hNodeType,
 	dfloat *D_MAX,
 	cylinderProperties **cylinder_properties,
-	size_t *contour_counter)
+	size_t *cylinder_counter, size_t *boundary_counter)
 {
 	int x, y;
 
@@ -452,5 +452,6 @@ __host__ void hostInitialization_innerNodes(
 	}
 
 	*D_MAX = (float)2 * max_radius;
-	*contour_counter = cylinder_count;
+	*cylinder_counter = count;
+	*boundary_counter = cylinder_count;
 }

@@ -33,7 +33,8 @@ int main()
 	unsigned int *hNodeType;
 
 	dfloat D_Max;
-	size_t countor_count;
+	size_t cylinder_count;
+	size_t boundary_count;
 
 	dfloat *h_fMom;
 
@@ -72,12 +73,12 @@ int main()
 					 &step, gridBlock, threadBlock,
 #ifdef CYLINDER
 					 &D_Max, &h_cylinder_properties,
-					 d_cylinder_properties, &countor_count
+					 d_cylinder_properties, &cylinder_count, &boundary_count
 #endif
 	);
 
 	printf("final_time: %d, begin_stat: %d\n", N_STEPS, STAT_BEGIN_TIME);
-	printf("count: %zu, d_max:%f\n", countor_count, D_Max);
+	printf("count: %zu, d_max:%f\n", boundary_count, D_Max);
 
 	const dfloat VISC = U_MAX * D_Max / RE;
 	const dfloat TAU = 0.5 + 3.0 * VISC; // relaxation time
@@ -91,7 +92,7 @@ int main()
 	cudaEvent_t start, stop, start_step, stop_step;
 	initializeCudaEvents(start, stop, start_step, stop_step);
 	/* ------------------------------ LBM LOOP ------------------------------ */
-	saveSimInfo(step, 0.0, D, D_Max, countor_count, rho_infty);
+	saveSimInfo(step, 0.0, D, D_Max, boundary_count, rho_infty);
 
 	/* --------------------------------------------------------------------- */
 	/* ---------------------------- BEGIN LOOP ------------------------------ */
@@ -99,12 +100,12 @@ int main()
 	for (step = INI_STEP; step < N_STEPS; step++)
 	{
 #ifdef CYLINDER
-		streamingAndMom<<<gridBlock, threadBlock>>>(d_fMom, OMEGA, countor_count, dNodeType, ghostInterface, d_cylinder_properties, step);
+		streamingAndMom<<<gridBlock, threadBlock>>>(d_fMom, OMEGA, cylinder_count, dNodeType, ghostInterface, d_cylinder_properties, step);
 		checkCudaErrors(cudaDeviceSynchronize());
-		updateInnerBoundaries<<<1, countor_count>>>(d_fMom, d_cylinder_properties, OMEGA, step);
+		updateInnerBoundaries<<<1, cylinder_count>>>(d_fMom, d_cylinder_properties, OMEGA, step);
 
 		checkCudaErrors(cudaDeviceSynchronize());
-		boundaryAndCollision<<<gridBlock, threadBlock>>>(d_fMom, countor_count, OMEGA, dNodeType, ghostInterface, d_cylinder_properties, step);
+		boundaryAndCollision<<<gridBlock, threadBlock>>>(d_fMom, cylinder_count, OMEGA, dNodeType, ghostInterface, d_cylinder_properties, step);
 #else
 		gpuMomCollisionStream<<<gridBlock, threadBlock>>>(d_fMom, dNodeType, ghostInterface, step);
 #endif
@@ -117,13 +118,13 @@ int main()
 		if (step >= STAT_BEGIN_TIME && step <= STAT_END_TIME)
 		{
 			checkCudaErrors(cudaDeviceSynchronize());
-			checkCudaErrors(cudaMemcpy(h_cylinder_properties, d_cylinder_properties, sizeof(cylinderProperties) * countor_count, cudaMemcpyDeviceToHost));
+			checkCudaErrors(cudaMemcpy(h_cylinder_properties, d_cylinder_properties, sizeof(cylinderProperties) * cylinder_count, cudaMemcpyDeviceToHost));
 			checkCudaErrors(cudaMemcpy(h_fMom, d_fMom, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyDeviceToHost));
 
 			velocity_on_centerline_average<<<avg_gridSize, avg_blockSize>>>(d_fMom, d_ux_center, d_uy_center, step);
 
-			calculate_forces(h_cylinder_properties, countor_count, step);
-			calculate_pressure(h_cylinder_properties, countor_count, step);
+			calculate_forces(h_cylinder_properties, cylinder_count, step);
+			calculate_pressure(h_cylinder_properties, cylinder_count, boundary_count, step);
 			calculate_inlet_density(h_fMom, step, &rho_infty);
 		}
 #endif // CYLINDER
@@ -159,7 +160,7 @@ int main()
 	/* ------------------------------ POST ------------------------------ */
 	checkCudaErrors(cudaMemcpy(h_fMom, d_fMom, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyDeviceToHost));
 	// save info file
-	saveSimInfo(step, MLUPS, D, D_Max, countor_count, rho_infty);
+	saveSimInfo(step, MLUPS, D, D_Max, boundary_count, rho_infty);
 
 	/* ------------------------------ FREE ------------------------------ */
 	cudaFree(d_fMom);

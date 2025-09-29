@@ -1,6 +1,6 @@
 #include "treat_data.cuh"
 
-__host__ void calculate_pressure(cylinderProperties *h_cylinder_properties, unsigned int count, unsigned int step)
+__host__ void calculate_pressure(cylinderProperties *h_cylinder_properties, unsigned int count, unsigned int count_b, unsigned int step)
 {
 	if (step == STAT_BEGIN_TIME)
 	{
@@ -10,7 +10,7 @@ __host__ void calculate_pressure(cylinderProperties *h_cylinder_properties, unsi
 
 		std::ofstream data_file(filename.c_str(), std::ios::app);
 
-		data_file << count;
+		data_file << count_b;
 
 		for (int i = 0; i < count; i++)
 		{
@@ -56,8 +56,11 @@ __host__ void calculate_forces(cylinderProperties *h_cylinder_properties, unsign
 
 	for (int i = 0; i < count; i++)
 	{
-		f_x_net += h_cylinder_properties[i].Fx;
-		f_y_net += h_cylinder_properties[i].Fy;
+		if (!h_cylinder_properties[i].isBulk)
+		{
+			f_x_net += h_cylinder_properties[i].Fx;
+			f_y_net += h_cylinder_properties[i].Fy;
+		}
 	}
 
 	// write to a file
