@@ -6,27 +6,35 @@
 constexpr dfloat RE = 100;
 
 constexpr int SCALE = 1;
-constexpr int N_STEPS = 100000;
 
-constexpr int MACR_SAVE = 1000;
+constexpr int MACR_SAVE = 1;
 
-constexpr int N = 64 * SCALE;
-constexpr int NX = 10 * N;               // size x of the grid
-constexpr int NY = N;               // size y of the grid
+constexpr int N = 31 * SCALE;
+constexpr int NX = 4 * N;
+constexpr int NY = N;
 
-constexpr dfloat U_MAX = 0.1;
-constexpr dfloat L = N;
+constexpr int N_OVERLAP_LAYER = 1;
 
-constexpr dfloat VISC = U_MAX * (NY-1) / RE;
-constexpr dfloat TAU = 0.5 + 3.0 * VISC; // relaxation time
+constexpr int GRID_RATIO = 2;
+constexpr dfloat U_MAX = 0.01;
 
-constexpr dfloat OMEGA = 1.0 / TAU;            // (tau)^-1
-constexpr dfloat OMEGAd2 = OMEGA / 2.0;        // OMEGA/2
-constexpr dfloat OMEGAd9 = OMEGA / 9.0;        // OMEGA/9
-constexpr dfloat T_OMEGA = 1.0 - OMEGA;        // 1-OMEGA
-constexpr dfloat TT_OMEGA = 1.0 - 0.5 * OMEGA; // 1.0 - OMEGA/2
-constexpr dfloat OMEGA_P1 = 1.0 + OMEGA;       // 1+ OMEGA
-constexpr dfloat TT_OMEGA_T3 = TT_OMEGA * 3.0; // 3*(1-0.5*OMEGA)
+constexpr size_t NX_COARSE = static_cast<size_t>(NX / 2) + 1 + N_OVERLAP_LAYER;
+constexpr size_t NY_COARSE = NY;
+
+constexpr size_t NX_FINE = NX;
+constexpr size_t NY_FINE = NY * GRID_RATIO - 1;
+
+constexpr size_t NUMBER_OF_COARSE_NODES = NX_COARSE * NY_COARSE;
+constexpr size_t NUMBER_OF_FINE_NODES = NX_FINE * NY_FINE;
+
+constexpr dfloat VISC_FINE = U_MAX * (NY_FINE - 1) / RE;
+constexpr dfloat VISC_COARSE = U_MAX * (NY_COARSE - 1) / RE;
+
+constexpr dfloat TAU_FINE = 0.5 + 3.0 * VISC_FINE;
+constexpr dfloat TAU_COARSE = 0.5 + 3.0 * VISC_COARSE;
+
+constexpr dfloat OMEGA_FINE = 1.0 / TAU_FINE;
+constexpr dfloat OMEGA_COARSE = 1.0 / TAU_COARSE;
 
 // value for the velocity initial condition in the domain
 constexpr dfloat U_0_X = 0.0;
@@ -39,10 +47,12 @@ constexpr dfloat MACH_NUMBER = U_MAX / 0.57735026918962;
 /* --------------------- INITIALIZATION LOADING DEFINES -------------------- */
 constexpr int INI_STEP = 0; // initial simulation step (0 default)
 
+// constexpr int T_STAR_FINAL = 1200;
+constexpr int N_STEPS = 1;
+
 #define BC_X_WALL
 #define BC_Y_WALL
-// #define BC_Y_PERIODIC
 
-constexpr bool IRBC = false;
+constexpr bool IRBC = true;
 
 #endif // !CONSTANTS_H

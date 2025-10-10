@@ -51,7 +51,6 @@ __host__ void saveMacr_coarse(
 	// writing grid.x file
 	// -------------------------------------------------------------------------------------------------------
 	int nprocs = 1;
-	const size_t totalNy = NY_COARSE;
 
 	if (nSteps == 0)
 	{
@@ -74,21 +73,21 @@ __host__ void saveMacr_coarse(
 		for (int m = 1; m <= nprocs; ++m)
 		{
 			gridfile.write(reinterpret_cast<const char *>(&NX_COARSE), sizeof(int));
-			gridfile.write(reinterpret_cast<const char *>(&totalNy), sizeof(int));
+			gridfile.write(reinterpret_cast<const char *>(&NY_COARSE), sizeof(int));
 		}
 
 		// Write x and y arrays for each processor (m = 0 to nprocs - 1)
 		for (int m = 0; m < nprocs; ++m)
 		{
 			// Fortran is column-major: loop j outer, i inner
-			for (int j = 0; j < totalNy; ++j)
+			for (int j = 0; j < NY_COARSE; ++j)
 				for (int i = 0; i < NX_COARSE; ++i)
 				{
 					float val = double(i); // already float
 					gridfile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 				}
 
-			for (int j = 0; j < totalNy; ++j)
+			for (int j = 0; j < NY_COARSE; ++j)
 				for (int i = 0; i < NX_COARSE; ++i)
 				{
 					float val = double(j);
@@ -121,7 +120,7 @@ __host__ void saveMacr_coarse(
 	for (int l = 0; l < nprocs; ++l)
 	{
 		datafile.write(reinterpret_cast<const char *>(&NX_COARSE), sizeof(int));
-		datafile.write(reinterpret_cast<const char *>(&totalNy), sizeof(int));
+		datafile.write(reinterpret_cast<const char *>(&NY_COARSE), sizeof(int));
 		int nf = 3; // 3 fields: rho, ux, uy
 		datafile.write(reinterpret_cast<const char *>(&nf), sizeof(int));
 	}
@@ -130,24 +129,24 @@ __host__ void saveMacr_coarse(
 	for (int m = 0; m < nprocs; ++m)
 	{
 		// Fortran is column-major: loop j outer, i inner
-		for (int j = 0; j < totalNy; ++j)
+		for (int j = 0; j < NY_COARSE; ++j)
 			for (int i = 0; i < NX_COARSE; ++i)
 			{
-				float val = moments[coarse_moment_idx(i, j, M_RHO_INDEX)]; // already float
+				float val = moments[idx_mom(i, j, M_RHO_INDEX, NX_COARSE)]; // already float
 				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 			}
 
-		for (int j = 0; j < totalNy; ++j)
+		for (int j = 0; j < NY_COARSE; ++j)
 			for (int i = 0; i < NX_COARSE; ++i)
 			{
-				float val = moments[coarse_moment_idx(i, j, M_UX_INDEX)] / F_M_I_SCALE; // already float
+				float val = moments[idx_mom(i, j, M_UX_INDEX, NX_COARSE)] / F_M_I_SCALE; // already float
 				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 			}
 
-		for (int j = 0; j < totalNy; ++j)
+		for (int j = 0; j < NY_COARSE; ++j)
 			for (int i = 0; i < NX_COARSE; ++i)
 			{
-				float val = moments[coarse_moment_idx(i, j, M_UY_INDEX)] / F_M_I_SCALE; // already float
+				float val = moments[idx_mom(i, j, M_UY_INDEX, NX_COARSE)] / F_M_I_SCALE; // already float
 				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 			}
 	}
@@ -291,21 +290,21 @@ __host__ void saveMacr_fine(
 		for (int j = 0; j < NY_FINE; ++j)
 			for (int i = 0; i < NX_FINE; ++i)
 			{
-				float val = moments[fine_moment_idx(i, j, M_RHO_INDEX)]; // already float
+				float val = moments[idx_mom(i, j, M_RHO_INDEX, NX_FINE)]; // already float
 				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 			}
 
 		for (int j = 0; j < NY_FINE; ++j)
 			for (int i = 0; i < NX_FINE; ++i)
 			{
-				float val = moments[fine_moment_idx(i, j, M_UX_INDEX)] / F_M_I_SCALE; // already float
+				float val = moments[idx_mom(i, j, M_UX_INDEX, NX_FINE)] / F_M_I_SCALE; // already float
 				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 			}
 
 		for (int j = 0; j < NY_FINE; ++j)
 			for (int i = 0; i < NX_FINE; ++i)
 			{
-				float val = moments[fine_moment_idx(i, j, M_UY_INDEX)] / F_M_I_SCALE; // already float
+				float val = moments[idx_mom(i, j, M_UY_INDEX, NX_FINE)] / F_M_I_SCALE; // already float
 				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 			}
 	}
@@ -391,8 +390,6 @@ std::string getSimInfoString(int step, dfloat MLUPS)
 	strSimInfo << "             Nsteps: " << step << "\n";
 	strSimInfo << "              MLUPS: " << MLUPS << "\n";
 	strSimInfo << std::scientific << std::setprecision(0);
-	strSimInfo << "                 BX: " << BLOCK_NX << "\n";
-	strSimInfo << "                 BY: " << BLOCK_NY << "\n";
 	strSimInfo << "--------------------------------------------------------------------------------\n";
 
 	return strSimInfo.str();

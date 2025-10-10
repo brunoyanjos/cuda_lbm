@@ -24,7 +24,7 @@ int main()
 	initializeDomain(node_type_fine, moments_fine, pop_in_fine, pop_out_fine,
 					 node_type_coarse, moments_coarse, pop_in_coarse, pop_out_coarse);
 
-	/* ------------------------------ TIMER EVENTS  ------------------------------ */
+	/* ---------------------------- TIMER EVENTS  --------------------------- */
 	checkCudaErrors(cudaSetDevice(GPU_INDEX));
 	cudaEvent_t start, stop, start_step, stop_step;
 	initializeCudaEvents(start, stop, start_step, stop_step);

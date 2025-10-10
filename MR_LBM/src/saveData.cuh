@@ -16,7 +16,6 @@
 
 #include "globalFunctions.h"
 #include "errorDef.h"
-#include "globalStructs.h"
 
 /*
  *   Get string with simulation information
@@ -42,10 +41,6 @@ void saveVarBin(
     std::string strFile,
     dfloat *var,
     size_t memSize);
-
-__host__ void velocity_profiles(latticeNode *nodes, unsigned int step);
-
-__host__ void kinetic_energy(latticeNode *nodes, unsigned int step);
 
 void folderSetup();
 

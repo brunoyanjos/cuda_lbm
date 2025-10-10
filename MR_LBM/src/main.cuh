@@ -12,26 +12,11 @@
 
 // FILE INCLUDES
 #include "var.h"
-#include "globalStructs.h"
 #include "errorDef.h"
-#include "lbmInitialization.cuh"
-#include "mlbm.cuh"
 #include "saveData.cuh"
+#include "lbm_steps.cuh"
 #include "lbm_solver.cuh"
-
 #include "grid_data.cuh"
-
-/*
- *   @brief Swaps the pointers of two dfloat variables.
- *   @param pt1: reference to the first dfloat pointer to be swapped
- *   @param pt2: reference to the second dfloat pointer to be swapped
- */
-__host__ __device__ void interfaceSwap(dfloat *&pt1, dfloat *&pt2)
-{
-	dfloat *temp = pt1;
-	pt1 = pt2;
-	pt2 = temp;
-}
 
 void initializeCudaEvents(cudaEvent_t &start, cudaEvent_t &stop, cudaEvent_t &start_step, cudaEvent_t &stop_step)
 {
@@ -59,87 +44,6 @@ dfloat recordElapsedTime(cudaEvent_t &start_step, cudaEvent_t &stop_step, int st
 	return MLUPS;
 }
 
-/*
- *   @brief Frees the memory allocated for the ghost interface data.
- *   @param ghostInterface: reference to the ghost interface data structure
- */
-__host__ void interfaceFree(ghostInterfaceData &ghostInterface)
-{
-	cudaFree(ghostInterface.fGhost.X_0);
-	cudaFree(ghostInterface.fGhost.X_1);
-	cudaFree(ghostInterface.fGhost.Y_0);
-	cudaFree(ghostInterface.fGhost.Y_1);
-
-	cudaFree(ghostInterface.gGhost.X_0);
-	cudaFree(ghostInterface.gGhost.X_1);
-	cudaFree(ghostInterface.gGhost.Y_0);
-	cudaFree(ghostInterface.gGhost.Y_1);
-}
-
-/*
- *   @brief Performs a CUDA memory copy for ghost interface data between source and destination.
- *   @param ghostInterface: reference to the ghost interface data structure
- *   @param dst: destination ghost data structure
- *   @param src: source ghost data structure
- *   @param kind: type of memory copy (e.g., cudaMemcpyHostToDevice)
- *   @param Q: number of quantities in the ghost data that are transfered
- */
-__host__ void interfaceCudaMemcpy(GhostInterfaceData &ghostInterface, ghostData &dst, const ghostData &src, cudaMemcpyKind kind, int Q)
-{
-	struct MemcpyPair
-	{
-		dfloat *dst;
-		const dfloat *src;
-		size_t size;
-	};
-
-	MemcpyPair memcpyPairs[] = {
-		{dst.X_0, src.X_0, sizeof(dfloat) * NUMBER_GHOST_FACE_X * Q},
-		{dst.X_1, src.X_1, sizeof(dfloat) * NUMBER_GHOST_FACE_X * Q},
-		{dst.Y_0, src.Y_0, sizeof(dfloat) * NUMBER_GHOST_FACE_Y * Q},
-		{dst.Y_1, src.Y_1, sizeof(dfloat) * NUMBER_GHOST_FACE_Y * Q},
-	};
-
-	checkCudaErrors(cudaDeviceSynchronize());
-	for (const auto &pair : memcpyPairs)
-	{
-		checkCudaErrors(cudaMemcpy(pair.dst, pair.src, pair.size, kind));
-	}
-}
-
-/*
- *   @brief Swaps the ghost interfaces.
- *   @param ghostInterface: reference to the ghost interface data structure
- */
-__host__ void swapGhostInterfaces(GhostInterfaceData &ghostInterface)
-{
-	// Synchronize device before performing swaps
-	checkCudaErrors(cudaDeviceSynchronize());
-
-	// Swap interface pointers for fGhost and gGhost
-	interfaceSwap(ghostInterface.fGhost.X_0, ghostInterface.gGhost.X_0);
-	interfaceSwap(ghostInterface.fGhost.X_1, ghostInterface.gGhost.X_1);
-	interfaceSwap(ghostInterface.fGhost.Y_0, ghostInterface.gGhost.Y_0);
-	interfaceSwap(ghostInterface.fGhost.Y_1, ghostInterface.gGhost.Y_1);
-}
-
-/*
- *   @brief Allocates memory for the ghost interface data.
- *   @param ghostInterface: reference to the ghost interface data structure
- */
-__host__ void interfaceMalloc(ghostInterfaceData &ghostInterface)
-{
-	cudaMalloc((void **)&(ghostInterface.fGhost.X_0), sizeof(dfloat) * NUMBER_GHOST_FACE_X * QF);
-	cudaMalloc((void **)&(ghostInterface.fGhost.X_1), sizeof(dfloat) * NUMBER_GHOST_FACE_X * QF);
-	cudaMalloc((void **)&(ghostInterface.fGhost.Y_0), sizeof(dfloat) * NUMBER_GHOST_FACE_Y * QF);
-	cudaMalloc((void **)&(ghostInterface.fGhost.Y_1), sizeof(dfloat) * NUMBER_GHOST_FACE_Y * QF);
-
-	cudaMalloc((void **)&(ghostInterface.gGhost.X_0), sizeof(dfloat) * NUMBER_GHOST_FACE_X * QF);
-	cudaMalloc((void **)&(ghostInterface.gGhost.X_1), sizeof(dfloat) * NUMBER_GHOST_FACE_X * QF);
-	cudaMalloc((void **)&(ghostInterface.gGhost.Y_0), sizeof(dfloat) * NUMBER_GHOST_FACE_Y * QF);
-	cudaMalloc((void **)&(ghostInterface.gGhost.Y_1), sizeof(dfloat) * NUMBER_GHOST_FACE_Y * QF);
-}
-
 __host__ void allocateHostMemory(unsigned int **node_type_fine, dfloat **moments_fine, dfloat **pop_in_fine, dfloat **pop_out_fine,
 								 unsigned int **node_type_coarse, dfloat **moments_coarse, dfloat **pop_in_coarse, dfloat **pop_out_coarse)
 {
@@ -156,70 +60,29 @@ __host__ void allocateHostMemory(unsigned int **node_type_fine, dfloat **moments
 	checkCudaErrors(cudaMallocHost((void **)pop_out_coarse, NUMBER_OF_COARSE_NODES * Q * sizeof(dfloat)));
 }
 
-__host__ void allocateDeviceMemory(latticeNode **d_coarse_nodes, latticeNode **d_fine_nodes, GhostInterfaceData *ghostInterface)
-{
-	cudaMalloc((void **)d_coarse_nodes, MEM_SIZE_NODES);
-	cudaMalloc((void **)d_fine_nodes, MEM_SIZE_NODES);
-	interfaceMalloc(*ghostInterface);
-}
-
 __host__ inline void initialize_fine_grid(unsigned int *&node_type, dfloat *&moments, dfloat *&pop_in, dfloat *&pop_out)
 {
 	for (size_t y = 0; y < NY_FINE; ++y)
 	{
 		for (size_t x = 0; x < NX_FINE; ++x)
 		{
-			moments[fine_moment_idx(x, y, M_RHO_INDEX)] = RHO_0;
+			moments[idx_mom(x, y, M_RHO_INDEX, NX_FINE)] = RHO_0;
 
 			dfloat inv_rho = static_cast<dfloat>(1) / RHO_0;
 
-			moments[fine_moment_idx(x, y, M_UX_INDEX)] = 0.0;
-			moments[fine_moment_idx(x, y, M_UY_INDEX)] = 0.0;
+			moments[idx_mom(x, y, M_UX_INDEX, NX_FINE)] = 0.0;
+			moments[idx_mom(x, y, M_UY_INDEX, NX_FINE)] = 0.0;
 
-			node_type[fine_idx(x, y)] = BULK;
-
-			if (x == 0 && y == 0)
-			{
-				node_type[fine_idx(x, y)] = SOUTH_WEST;
-			}
-			else if (x == 0 && y == (NY_FINE - 1))
-			{
-				node_type[fine_idx(x, y)] = NORTH_WEST;
-			}
-			else if (x == (NX_FINE - 1) && y == 0)
-			{
-				node_type[fine_idx(x, y)] = SOUTH_EAST;
-			}
-			else if (x == (NX_FINE - 1) && y == (NY_FINE - 1))
-			{
-				node_type[fine_idx(x, y)] = NORTH_EAST;
-			}
-			else if (y == 0)
-			{
-				node_type[fine_idx(x, y)] = SOUTH;
-			}
-			else if (y == (NY_FINE - 1))
-			{
-				node_type[fine_idx(x, y)] = NORTH;
-				moments[fine_moment_idx(x, y, M_UX_INDEX)] = U_MAX;
-			}
-			else if (x == 0)
-			{
-				node_type[fine_idx(x, y)] = WEST;
-			}
-			else if (x == (NX_FINE - 1))
-			{
-				node_type[fine_idx(x, y)] = EAST;
-			}
+			node_type[idx_grid(x, y, NX_FINE)] = BULK;
 
 			dfloat pop[9];
 
-			init_pop_eq(pop, moments[fine_moment_idx(x, y, M_RHO_INDEX)],
-						moments[fine_moment_idx(x, y, M_UX_INDEX)], moments[fine_moment_idx(x, y, M_UY_INDEX)]);
+			init_pop_eq(pop, moments[idx_mom(x, y, M_RHO_INDEX, NX_FINE)],
+						moments[idx_mom(x, y, M_UX_INDEX, NX_FINE)], moments[idx_mom(x, y, M_UY_INDEX, NX_FINE)]);
 
-			moments[fine_moment_idx(x, y, M_MXX_INDEX)] = (pop[1] + pop[3] + pop[5] + pop[6] + pop[7] + pop[8]) * inv_rho - cs2;
-			moments[fine_moment_idx(x, y, M_MXY_INDEX)] = ((pop[5] + pop[7]) - (pop[6] + pop[8])) * inv_rho;
-			moments[fine_moment_idx(x, y, M_MYY_INDEX)] = (pop[2] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8]) * inv_rho - cs2;
+			moments[idx_mom(x, y, M_MXX_INDEX, NX_FINE)] = (pop[1] + pop[3] + pop[5] + pop[6] + pop[7] + pop[8]) * inv_rho - cs2;
+			moments[idx_mom(x, y, M_MXY_INDEX, NX_FINE)] = ((pop[5] + pop[7]) - (pop[6] + pop[8])) * inv_rho;
+			moments[idx_mom(x, y, M_MYY_INDEX, NX_FINE)] = (pop[2] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8]) * inv_rho - cs2;
 		}
 	}
 }
@@ -230,57 +93,23 @@ __host__ void initialize_coarse_grid(unsigned int *&node_type, dfloat *&moments,
 	{
 		for (size_t x = 0; x < NX_COARSE; x++)
 		{
-			moments[coarse_moment_idx(x, y, M_RHO_INDEX)] = RHO_0;
+			moments[idx_mom(x, y, M_RHO_INDEX, NX_COARSE)] = RHO_0;
 
 			dfloat inv_rho = static_cast<dfloat>(1) / RHO_0;
 
-			moments[coarse_moment_idx(x, y, M_UX_INDEX)] = 0.0;
-			moments[coarse_moment_idx(x, y, M_UY_INDEX)] = 0.0;
+			moments[idx_mom(x, y, M_UX_INDEX, NX_COARSE)] = 0.0;
+			moments[idx_mom(x, y, M_UY_INDEX, NX_COARSE)] = 0.0;
 
-			node_type[coarse_idx(x, y)] = BULK;
-
-			if (x == 0 && y == 0)
-			{
-				node_type[coarse_idx(x, y)] = SOUTH_WEST;
-			}
-			else if (x == 0 && y == (NY_COARSE - 1))
-			{
-				node_type[coarse_idx(x, y)] = NORTH_WEST;
-			}
-			else if (x == (NX_COARSE - 1) && y == 0)
-			{
-				node_type[coarse_idx(x, y)] = SOUTH_EAST;
-			}
-			else if (x == (NX_COARSE - 1) && y == (NY_COARSE - 1))
-			{
-				node_type[coarse_idx(x, y)] = NORTH_EAST;
-			}
-			else if (y == 0)
-			{
-				node_type[coarse_idx(x, y)] = SOUTH;
-			}
-			else if (y == (NY_COARSE - 1))
-			{
-				node_type[coarse_idx(x, y)] = NORTH;
-				moments[coarse_moment_idx(x, y, M_UX_INDEX)] = U_MAX;
-			}
-			else if (x == 0)
-			{
-				node_type[coarse_idx(x, y)] = WEST;
-			}
-			else if (x == (NX_COARSE - 1))
-			{
-				node_type[coarse_idx(x, y)] = EAST;
-			}
+			node_type[idx_grid(x, y, NX_COARSE)] = BULK;
 
 			dfloat pop[9];
 
-			init_pop_eq(pop, moments[coarse_moment_idx(x, y, M_RHO_INDEX)],
-						moments[coarse_moment_idx(x, y, M_UX_INDEX)], moments[coarse_moment_idx(x, y, M_UY_INDEX)]);
+			init_pop_eq(pop, moments[idx_mom(x, y, M_RHO_INDEX, NX_COARSE)],
+						moments[idx_mom(x, y, M_UX_INDEX, NX_COARSE)], moments[idx_mom(x, y, M_UY_INDEX, NX_COARSE)]);
 
-			moments[coarse_moment_idx(x, y, M_MXX_INDEX)] = (pop[1] + pop[3] + pop[5] + pop[6] + pop[7] + pop[8]) * inv_rho - cs2;
-			moments[coarse_moment_idx(x, y, M_MXY_INDEX)] = ((pop[5] + pop[7]) - (pop[6] + pop[8])) * inv_rho;
-			moments[coarse_moment_idx(x, y, M_MYY_INDEX)] = (pop[2] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8]) * inv_rho - cs2;
+			moments[idx_mom(x, y, M_MXX_INDEX, NX_COARSE)] = (pop[1] + pop[3] + pop[5] + pop[6] + pop[7] + pop[8]) * inv_rho - cs2;
+			moments[idx_mom(x, y, M_MXY_INDEX, NX_COARSE)] = ((pop[5] + pop[7]) - (pop[6] + pop[8])) * inv_rho;
+			moments[idx_mom(x, y, M_MYY_INDEX, NX_COARSE)] = (pop[2] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8]) * inv_rho - cs2;
 		}
 	}
 }

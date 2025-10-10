@@ -4,112 +4,26 @@
 
 #include <builtin_types.h> // for device variables
 #include "var.h"
-#include "globalStructs.h"
 
-__host__ __device__
+__host__
     size_t __forceinline__
-    idxMom(
-        const int tx,
-        const int ty,
-        const int mom,
-        const int bx,
-        const int by)
+    idx_grid(size_t x, size_t y, size_t nx)
 {
-    return tx + BLOCK_NX * (ty + BLOCK_NY * (mom + NUMBER_MOMENTS * (bx + NUM_BLOCK_X * by)));
-}
-
-__device__ int __forceinline__
-idxPopX(
-    const int ty,
-    const int pop,
-    const int bx,
-    const int by)
-{
-    return ty + BLOCK_NY * (pop + QF * (bx + NUM_BLOCK_X * by));
-}
-
-__device__ int __forceinline__
-idxPopY(
-    const int tx,
-    const int pop,
-    const int bx,
-    const int by)
-{
-    return tx + BLOCK_NX * (pop + QF * (bx + NUM_BLOCK_X * by));
-}
-
-__host__ __device__
-    size_t __forceinline__
-    idxScalarBlock(
-        const int tx,
-        const int ty,
-        const int bx,
-        const int by)
-{
-    return tx + BLOCK_NX * (ty + BLOCK_NY * (bx + NUM_BLOCK_X * by));
-}
-
-__host__ __device__
-    size_t __forceinline__
-    idxPopBlock(const unsigned int tx, const unsigned int ty, const unsigned int pop)
-{
-    return tx + BLOCK_NX * (ty + BLOCK_NY * (pop));
-}
-
-__host__ __device__
-    size_t __forceinline__
-    idxScalarGlobal(unsigned int x, unsigned int y)
-{
-    return x + NX * y;
-}
-
-__host__ __device__
-    size_t __forceinline__
-    idxCylinder(unsigned int x, unsigned int y)
-{
-    return x + NX * y;
+    return x + nx * y;
 }
 
 __host__
     size_t __forceinline__
-    fine_idx(size_t x, size_t y)
+    idx_mom(size_t x, size_t y, size_t mom_idx, size_t nx)
 {
-    return x + y * NX_FINE;
+    return (x + y * nx) * NUMBER_MOMENTS + mom_idx;
 }
 
 __host__
     size_t __forceinline__
-    fine_moment_idx(size_t x, size_t y, size_t mom_idx)
+    idx_pop(size_t x, size_t y, size_t pop_idx, size_t nx)
 {
-    return (x + y * NX_FINE) * NUMBER_MOMENTS + mom_idx;
-}
-
-__host__
-    size_t __forceinline__
-    fine_pop_idx(size_t x, size_t y, size_t pop_idx)
-{
-    return (x + y * NX_FINE) * Q + pop_idx;
-}
-
-__host__
-    size_t __forceinline__
-    coarse_idx(size_t x, size_t y)
-{
-    return x + y * NX_COARSE;
-}
-
-__host__
-    size_t __forceinline__
-    coarse_moment_idx(size_t x, size_t y, size_t mom_idx)
-{
-    return (x + y * NX_COARSE) * NUMBER_MOMENTS + mom_idx;
-}
-
-__host__
-    size_t __forceinline__
-    coarse_pop_idx(size_t x, size_t y, size_t pop_idx)
-{
-    return (x + y * NX_COARSE) * Q + pop_idx;
+    return (x + y * nx) * Q + pop_idx;
 }
 
 #endif // !__GLOBAL_FUNCTIONS_H

@@ -45,19 +45,19 @@ __host__ inline void coarse_velocity_profile(dfloat *moments)
 
     for (size_t y = 0; y < NY_COARSE + N_OVERLAP_LAYER; ++y)
     {
-        const dfloat rho_0 = moments[coarse_moment_idx(x_coord_0, y, M_RHO_INDEX)];
-        const dfloat ux_0 = moments[coarse_moment_idx(x_coord_0, y, M_UX_INDEX)] / F_M_I_SCALE;
-        const dfloat uy_0 = moments[coarse_moment_idx(x_coord_0, y, M_UY_INDEX)] / F_M_I_SCALE;
-        const dfloat mxx_0 = moments[coarse_moment_idx(x_coord_0, y, M_MXX_INDEX)] / F_M_II_SCALE;
-        const dfloat mxy_0 = moments[coarse_moment_idx(x_coord_0, y, M_MXY_INDEX)] / F_M_IJ_SCALE;
-        const dfloat myy_0 = moments[coarse_moment_idx(x_coord_0, y, M_MYY_INDEX)] / F_M_II_SCALE;
+        const dfloat rho_0 = moments[idx_mom(x_coord_0, y, M_RHO_INDEX, NX_COARSE)];
+        const dfloat ux_0 = moments[idx_mom(x_coord_0, y, M_UX_INDEX, NX_COARSE)] / F_M_I_SCALE;
+        const dfloat uy_0 = moments[idx_mom(x_coord_0, y, M_UY_INDEX, NX_COARSE)] / F_M_I_SCALE;
+        const dfloat mxx_0 = moments[idx_mom(x_coord_0, y, M_MXX_INDEX, NX_COARSE)] / F_M_II_SCALE;
+        const dfloat mxy_0 = moments[idx_mom(x_coord_0, y, M_MXY_INDEX, NX_COARSE)] / F_M_IJ_SCALE;
+        const dfloat myy_0 = moments[idx_mom(x_coord_0, y, M_MYY_INDEX, NX_COARSE)] / F_M_II_SCALE;
 
-        const dfloat rho_1 = moments[coarse_moment_idx(x_coord_1, y, M_RHO_INDEX)];
-        const dfloat ux_1 = moments[coarse_moment_idx(x_coord_1, y, M_UX_INDEX)] / F_M_I_SCALE;
-        const dfloat uy_1 = moments[coarse_moment_idx(x_coord_1, y, M_UY_INDEX)] / F_M_I_SCALE;
-        const dfloat mxx_1 = moments[coarse_moment_idx(x_coord_1, y, M_MXX_INDEX)] / F_M_II_SCALE;
-        const dfloat mxy_1 = moments[coarse_moment_idx(x_coord_1, y, M_MXY_INDEX)] / F_M_IJ_SCALE;
-        const dfloat myy_1 = moments[coarse_moment_idx(x_coord_1, y, M_MYY_INDEX)] / F_M_II_SCALE;
+        const dfloat rho_1 = moments[idx_mom(x_coord_1, y, M_RHO_INDEX, NX_COARSE)];
+        const dfloat ux_1 = moments[idx_mom(x_coord_1, y, M_UX_INDEX, NX_COARSE)] / F_M_I_SCALE;
+        const dfloat uy_1 = moments[idx_mom(x_coord_1, y, M_UY_INDEX, NX_COARSE)] / F_M_I_SCALE;
+        const dfloat mxx_1 = moments[idx_mom(x_coord_1, y, M_MXX_INDEX, NX_COARSE)] / F_M_II_SCALE;
+        const dfloat mxy_1 = moments[idx_mom(x_coord_1, y, M_MXY_INDEX, NX_COARSE)] / F_M_IJ_SCALE;
+        const dfloat myy_1 = moments[idx_mom(x_coord_1, y, M_MYY_INDEX, NX_COARSE)] / F_M_II_SCALE;
 
         const dfloat rho = (rho_0 + rho_1) * static_cast<dfloat>(0.5);
         const dfloat ux = (ux_0 + ux_1) * static_cast<dfloat>(0.5);
@@ -110,19 +110,19 @@ __host__ inline void fine_velocity_profile(dfloat *moments)
 
     for (size_t y = 0; y < NY_FINE; ++y)
     {
-        const dfloat rho_0 = moments[fine_moment_idx(x_coord_0, y, M_RHO_INDEX)];
-        const dfloat ux_0 = moments[fine_moment_idx(x_coord_0, y, M_UX_INDEX)] / F_M_I_SCALE;
-        const dfloat uy_0 = moments[fine_moment_idx(x_coord_0, y, M_UY_INDEX)] / F_M_I_SCALE;
-        const dfloat mxx_0 = moments[fine_moment_idx(x_coord_0, y, M_MXX_INDEX)] / F_M_II_SCALE;
-        const dfloat mxy_0 = moments[fine_moment_idx(x_coord_0, y, M_MXY_INDEX)] / F_M_IJ_SCALE;
-        const dfloat myy_0 = moments[fine_moment_idx(x_coord_0, y, M_MYY_INDEX)] / F_M_II_SCALE;
+        const dfloat rho_0 = moments[idx_mom(x_coord_0, y, M_RHO_INDEX, NX_COARSE)];
+        const dfloat ux_0 = moments[idx_mom(x_coord_0, y, M_UX_INDEX, NX_COARSE)] / F_M_I_SCALE;
+        const dfloat uy_0 = moments[idx_mom(x_coord_0, y, M_UY_INDEX, NX_COARSE)] / F_M_I_SCALE;
+        const dfloat mxx_0 = moments[idx_mom(x_coord_0, y, M_MXX_INDEX, NX_COARSE)] / F_M_II_SCALE;
+        const dfloat mxy_0 = moments[idx_mom(x_coord_0, y, M_MXY_INDEX, NX_COARSE)] / F_M_IJ_SCALE;
+        const dfloat myy_0 = moments[idx_mom(x_coord_0, y, M_MYY_INDEX, NX_COARSE)] / F_M_II_SCALE;
 
-        const dfloat rho_1 = moments[fine_moment_idx(x_coord_1, y, M_RHO_INDEX)];
-        const dfloat ux_1 = moments[fine_moment_idx(x_coord_1, y, M_UX_INDEX)] / F_M_I_SCALE;
-        const dfloat uy_1 = moments[fine_moment_idx(x_coord_1, y, M_UY_INDEX)] / F_M_I_SCALE;
-        const dfloat mxx_1 = moments[fine_moment_idx(x_coord_1, y, M_MXX_INDEX)] / F_M_II_SCALE;
-        const dfloat mxy_1 = moments[fine_moment_idx(x_coord_1, y, M_MXY_INDEX)] / F_M_IJ_SCALE;
-        const dfloat myy_1 = moments[fine_moment_idx(x_coord_1, y, M_MYY_INDEX)] / F_M_II_SCALE;
+        const dfloat rho_1 = moments[idx_mom(x_coord_1, y, M_RHO_INDEX, NX_COARSE)];
+        const dfloat ux_1 = moments[idx_mom(x_coord_1, y, M_UX_INDEX, NX_COARSE)] / F_M_I_SCALE;
+        const dfloat uy_1 = moments[idx_mom(x_coord_1, y, M_UY_INDEX, NX_COARSE)] / F_M_I_SCALE;
+        const dfloat mxx_1 = moments[idx_mom(x_coord_1, y, M_MXX_INDEX, NX_COARSE)] / F_M_II_SCALE;
+        const dfloat mxy_1 = moments[idx_mom(x_coord_1, y, M_MXY_INDEX, NX_COARSE)] / F_M_IJ_SCALE;
+        const dfloat myy_1 = moments[idx_mom(x_coord_1, y, M_MYY_INDEX, NX_COARSE)] / F_M_II_SCALE;
 
         const dfloat rho = (rho_0 + rho_1) * static_cast<dfloat>(0.5);
         const dfloat ux = (ux_0 + ux_1) * static_cast<dfloat>(0.5);
