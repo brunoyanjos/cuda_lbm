@@ -31,12 +31,10 @@ EXEC_NAME="sim_${LT}_sm${CompCap}"
 rm -f "$EXEC_NAME"
 
 rm -rf "GRID/001"
-rm -rf "GRID/002"
-rm -rf "GRID/003"
 
 mkdir -p "GRID/001"
-mkdir -p "GRID/002"
-mkdir -p "GRID/003"
+mkdir -p "GRID/001/COARSE"
+mkdir -p "GRID/001/FINE"
 
 # Compile from source directory
 cd MR_LBM/src || {

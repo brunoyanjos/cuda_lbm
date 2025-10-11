@@ -55,8 +55,8 @@ int main()
 		{
 			printf("\n--------------------------- Last Time Step %06zu ---------------------------\n", step);
 
-			saveMacr_coarse(moments_coarse, step, "002");
-			saveMacr_fine(moments_fine, step, "003");
+			saveMacr_coarse(moments_coarse, step);
+			saveMacr_fine(moments_fine, step);
 		}
 	}
 

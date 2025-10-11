@@ -1,14 +1,16 @@
 #include "saveData.cuh"
 
 __host__ void saveMacr_coarse(
-	dfloat *moments, unsigned int nSteps, std::string id)
+	dfloat *moments, unsigned int nSteps)
 {
 	// Sakthi-modifications
 	// Creating master.p3d file
 	// ======================================================================================================================
 	std::string strInf = PATH_FILES;
 	strInf += "/";
-	strInf += id;
+	strInf += ID_SIM;
+	strInf += "/";
+	strInf += "COARSE";
 	strInf += "/";
 	strInf += "master.p3d"; // generate file name (with path)
 	std::string prefix = "data";
@@ -56,8 +58,8 @@ __host__ void saveMacr_coarse(
 	{
 		std::string strInf2 = PATH_FILES;
 		strInf2 += "/";
-		strInf2 += id;
-		strInf2 += "/";
+		strInf2 += ID_SIM;
+		strInf2 += "/COARSE/";
 		strInf2 += "grid.x"; // generate file name (with path)
 
 		std::ofstream gridfile(strInf2, std::ios::binary);
@@ -102,8 +104,8 @@ __host__ void saveMacr_coarse(
 
 	std::string strInf3 = PATH_FILES;
 	strInf3 += "/";
-	strInf3 += id;
-	strInf3 += "/";
+	strInf3 += ID_SIM;
+	strInf3 += "/COARSE/";
 	filename_temp << strInf3 << prefix << (10000000 + nSteps) << suffix;
 	std::string filename = filename_temp.str();
 
@@ -161,15 +163,15 @@ __host__ void saveMacr_coarse(
 }
 
 __host__ void saveMacr_fine(
-	dfloat *moments, unsigned int nSteps, std::string id)
+	dfloat *moments, unsigned int nSteps)
 {
 	// Sakthi-modifications
 	// Creating master.p3d file
 	// ======================================================================================================================
 	std::string strInf = PATH_FILES;
 	strInf += "/";
-	strInf += id;
-	strInf += "/";
+	strInf += ID_SIM;
+	strInf += "/FINE/";
 	strInf += "master.p3d"; // generate file name (with path)
 	std::string prefix = "data";
 	std::string suffix = ".f";
@@ -214,8 +216,8 @@ __host__ void saveMacr_fine(
 	{
 		std::string strInf2 = PATH_FILES;
 		strInf2 += "/";
-		strInf2 += id;
-		strInf2 += "/";
+		strInf2 += ID_SIM;
+		strInf2 += "/FINE/";
 		strInf2 += "grid.x"; // generate file name (with path)
 
 		std::ofstream gridfile(strInf2, std::ios::binary);
@@ -241,7 +243,7 @@ __host__ void saveMacr_fine(
 			for (int j = 0; j < NY_FINE; ++j)
 				for (int i = 0; i < NX_FINE; ++i)
 				{
-					float val = double(i) * 0.5 + NX_COARSE; // already float
+					float val = double(i) * 0.5 + NX_COARSE - 2; // already float
 					gridfile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 				}
 
@@ -260,8 +262,8 @@ __host__ void saveMacr_fine(
 
 	std::string strInf3 = PATH_FILES;
 	strInf3 += "/";
-	strInf3 += id;
-	strInf3 += "/";
+	strInf3 += ID_SIM;
+	strInf3 += "/FINE/";
 	filename_temp << strInf3 << prefix << (10000000 + nSteps) << suffix;
 	std::string filename = filename_temp.str();
 

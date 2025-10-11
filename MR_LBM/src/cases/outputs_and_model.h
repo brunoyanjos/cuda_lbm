@@ -16,6 +16,7 @@
 #define COLREC STR(colrec/REG_ORDER/collision_and_reconstruction.cuh)
 #define CASE_CONSTANTS STR(BC_PROBLEM/constants.h)
 #define CASE_BC STR(CASE_DIRECTORY/BC_PROBLEM/boundaries.cuh)
+#define EVAL_BC STR(CASE_DIRECTORY/BC_PROBLEM/eval_boundaries.cuh)
 
 // clang-format on
 

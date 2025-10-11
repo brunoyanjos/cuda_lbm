@@ -6,6 +6,7 @@
 #include "globalFunctions.h"
 #include "nodeTypeMap.h"
 #include CASE_BC
+#include EVAL_BC
 
 __host__ inline void fine_grid_solution(unsigned int *node_type, dfloat *moments, dfloat *pop_in, dfloat *pop_out)
 {

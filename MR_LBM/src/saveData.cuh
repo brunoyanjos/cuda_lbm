@@ -35,7 +35,6 @@ void saveSimInfo(int step, dfloat MLUPS);
  *   @param strFile: filename to save
  *   @param var: float variable to save
  *   @param memSize: sizeof var
-
  */
 void saveVarBin(
     std::string strFile,
@@ -44,8 +43,11 @@ void saveVarBin(
 
 void folderSetup();
 
-__host__ void saveMacr_coarse(dfloat *moments, unsigned int nSteps, std::string id);
-__host__ void saveMacr_fine(dfloat *moments, unsigned int nSteps, std::string id);
+__host__ void saveMacr_coarse(
+    dfloat *moments, unsigned int nSteps);
+
+__host__ void saveMacr_fine(
+    dfloat *moments, unsigned int nSteps);
 
 std::string getVarFilename(const std::string varName, unsigned int step, const std::string ext);
 
