@@ -1,373 +1,193 @@
 #include "saveData.cuh"
 
-__host__ void saveMacr_coarse(
-	dfloat *moments, unsigned int nSteps)
+__host__ void saveMacr_coarse(dfloat *moments, unsigned int nSteps)
 {
-	// Sakthi-modifications
-	// Creating master.p3d file
-	// ======================================================================================================================
-	std::string strInf = PATH_FILES;
-	strInf += "/";
-	strInf += ID_SIM;
-	strInf += "/";
-	strInf += "COARSE";
-	strInf += "/";
-	strInf += "master.p3d"; // generate file name (with path)
-	std::string prefix = "data";
-	std::string suffix = ".f";
-	std::ostringstream master_file;
-	master_file << strInf;
-	std::ofstream out(master_file.str());
-	out << "{" << std::endl;
-	out << std::endl;
-	out << " \"auto-detect-format\": true," << std::endl;
-	out << std::endl;
-	out << " \"filenames\": [" << std::endl;
-	out << std::endl;
+	const std::string basePath = std::string(PATH_FILES) + "/" + ID_SIM + "/COARSE/";
+	const int nprocs = 1;
 
-	for (int iter = 1; iter < N_STEPS; iter++)
+	auto writeInts = [](std::ofstream &f, const std::initializer_list<int> &vals)
 	{
-		if (iter % MACR_SAVE == 0)
-		{
-			std::ostringstream filename_temp;
-			filename_temp << prefix << (10000000 + iter) << suffix;
-			std::string filename = filename_temp.str();
+		for (auto v : vals)
+			f.write(reinterpret_cast<const char *>(&v), sizeof(int));
+	};
 
-			if (out.is_open())
+	auto writeField = [&](std::ofstream &f, int fieldIdx, float scale = 1.0f)
+	{
+		for (int j = 0; j < NY_COARSE; ++j)
+			for (int i = 0; i < NX_COARSE; ++i)
 			{
-				out << "{ \"time\" :  " << iter / MACR_SAVE << ", \"xyz\" : \"grid.x\", \"function\" : \"" << filename << "\" }," << std::endl;
+				float val = static_cast<float>(moments[idx_mom(i, j, fieldIdx, NX_COARSE)]) / scale;
+				f.write(reinterpret_cast<const char *>(&val), sizeof(float));
 			}
-			else
-			{
-				std::cerr << "Failed to open file: master.p3d" << std::endl;
-			}
+	};
+
+	// =======================================================================
+	// MASTER FILE (.p3d)
+	// =======================================================================
+	{
+		std::ofstream out(basePath + "master.p3d");
+		if (!out)
+		{
+			std::cerr << "Failed to open master.p3d\n";
+			return;
 		}
+
+		out << "{\n\n \"auto-detect-format\": true,\n\n \"filenames\": [\n\n";
+		for (int iter = 1; iter < N_STEPS; ++iter)
+			if (iter % MACR_SAVE == 0)
+				out << "{ \"time\": " << iter / MACR_SAVE
+					<< ", \"xyz\": \"grid.x\", \"function\": \"data" << (10000000 + iter)
+					<< ".f\" },\n";
+		out << "\n]\n}\n";
 	}
 
-	out << std::endl;
-	out << "]" << std::endl;
-	out << "}" << std::endl;
-	out.close();
-	// ======================================================================================================================
-
-	// writing grid.x file
-	// -------------------------------------------------------------------------------------------------------
-	int nprocs = 1;
-
+	// =======================================================================
+	// GRID FILE (grid.x)
+	// =======================================================================
 	if (nSteps == 0)
 	{
-		std::string strInf2 = PATH_FILES;
-		strInf2 += "/";
-		strInf2 += ID_SIM;
-		strInf2 += "/COARSE/";
-		strInf2 += "grid.x"; // generate file name (with path)
-
-		std::ofstream gridfile(strInf2, std::ios::binary);
-		if (!gridfile)
+		std::ofstream grid(basePath + "grid.x", std::ios::binary);
+		if (!grid)
 		{
-			std::cerr << "Error opening grid file" << std::endl;
+			std::cerr << "Error opening grid file\n";
+			return;
 		}
 
-		// Write nprocs
-		gridfile.write(reinterpret_cast<const char *>(&nprocs), sizeof(int));
+		writeInts(grid, {nprocs});
+		for (int m = 0; m < nprocs; ++m)
+			writeInts(grid, {NX_COARSE, NY_COARSE});
 
-		// Write (nx, ny) for each processor (Fortran loop: m = 1 to nprocs)
-		for (int m = 1; m <= nprocs; ++m)
-		{
-			gridfile.write(reinterpret_cast<const char *>(&NX_COARSE), sizeof(int));
-			gridfile.write(reinterpret_cast<const char *>(&NY_COARSE), sizeof(int));
-		}
-
-		// Write x and y arrays for each processor (m = 0 to nprocs - 1)
+		// write x, y coordinates
 		for (int m = 0; m < nprocs; ++m)
 		{
-			// Fortran is column-major: loop j outer, i inner
 			for (int j = 0; j < NY_COARSE; ++j)
 				for (int i = 0; i < NX_COARSE; ++i)
 				{
-					float val = double(i); // already float
-					gridfile.write(reinterpret_cast<const char *>(&val), sizeof(float));
+					float val = static_cast<float>(i);
+					grid.write(reinterpret_cast<const char *>(&val), sizeof(float));
 				}
-
 			for (int j = 0; j < NY_COARSE; ++j)
 				for (int i = 0; i < NX_COARSE; ++i)
 				{
-					float val = double(j);
-					gridfile.write(reinterpret_cast<const char *>(&val), sizeof(float));
+					float val = static_cast<float>(j);
+					grid.write(reinterpret_cast<const char *>(&val), sizeof(float));
 				}
 		}
 	}
 
-	// datafile
-
-	std::ostringstream filename_temp;
-
-	std::string strInf3 = PATH_FILES;
-	strInf3 += "/";
-	strInf3 += ID_SIM;
-	strInf3 += "/COARSE/";
-	filename_temp << strInf3 << prefix << (10000000 + nSteps) << suffix;
-	std::string filename = filename_temp.str();
-
-	std::ofstream datafile(filename, std::ios::binary);
-	if (!datafile)
+	// =======================================================================
+	// DATA FILE (dataXXXXXXX.f)
+	// =======================================================================
+	const std::string dataFileName = basePath + "data" + std::to_string(10000000 + nSteps) + ".f";
+	std::ofstream data(dataFileName, std::ios::binary);
+	if (!data)
 	{
-		std::cerr << "Error opening grid file" << std::endl;
+		std::cerr << "Error opening data file\n";
+		return;
 	}
 
-	// Write nprocs
-	datafile.write(reinterpret_cast<const char *>(&nprocs), sizeof(int));
-
-	// Write (nx, ny) for each processor (Fortran loop: m = 1 to nprocs)
+	writeInts(data, {nprocs});
 	for (int l = 0; l < nprocs; ++l)
-	{
-		datafile.write(reinterpret_cast<const char *>(&NX_COARSE), sizeof(int));
-		datafile.write(reinterpret_cast<const char *>(&NY_COARSE), sizeof(int));
-		int nf = 3; // 3 fields: rho, ux, uy
-		datafile.write(reinterpret_cast<const char *>(&nf), sizeof(int));
-	}
+		writeInts(data, {NX_COARSE, NY_COARSE, 3}); // 3 fields: rho, ux, uy
 
-	// Write x and y arrays for each processor (m = 0 to nprocs - 1)
-	for (int m = 0; m < nprocs; ++m)
-	{
-		// Fortran is column-major: loop j outer, i inner
-		for (int j = 0; j < NY_COARSE; ++j)
-			for (int i = 0; i < NX_COARSE; ++i)
-			{
-				float val = moments[idx_mom(i, j, M_RHO_INDEX, NX_COARSE)]; // already float
-				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
-			}
-
-		for (int j = 0; j < NY_COARSE; ++j)
-			for (int i = 0; i < NX_COARSE; ++i)
-			{
-				float val = moments[idx_mom(i, j, M_UX_INDEX, NX_COARSE)] / F_M_I_SCALE; // already float
-				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
-			}
-
-		for (int j = 0; j < NY_COARSE; ++j)
-			for (int i = 0; i < NX_COARSE; ++i)
-			{
-				float val = moments[idx_mom(i, j, M_UY_INDEX, NX_COARSE)] / F_M_I_SCALE; // already float
-				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
-			}
-	}
-
-	datafile.close();
-
-	std::string strFileRho, strFileUx, strFileUy;
-
-	strFileRho = getVarFilename("rho", nSteps, ".bin");
-	strFileUx = getVarFilename("ux", nSteps, ".bin");
-	strFileUy = getVarFilename("uy", nSteps, ".bin");
+	writeField(data, M_RHO_INDEX);
+	writeField(data, M_UX_INDEX, F_M_I_SCALE);
+	writeField(data, M_UY_INDEX, F_M_I_SCALE);
 }
 
-__host__ void saveMacr_fine(
-	dfloat *moments, unsigned int nSteps)
+__host__ void saveMacr_fine(dfloat *moments, unsigned int nSteps)
 {
-	// Sakthi-modifications
-	// Creating master.p3d file
-	// ======================================================================================================================
-	std::string strInf = PATH_FILES;
-	strInf += "/";
-	strInf += ID_SIM;
-	strInf += "/FINE/";
-	strInf += "master.p3d"; // generate file name (with path)
-	std::string prefix = "data";
-	std::string suffix = ".f";
-	std::ostringstream master_file;
-	master_file << strInf;
-	std::ofstream out(master_file.str());
-	out << "{" << std::endl;
-	out << std::endl;
-	out << " \"auto-detect-format\": true," << std::endl;
-	out << std::endl;
-	out << " \"filenames\": [" << std::endl;
-	out << std::endl;
+	const std::string basePath = std::string(PATH_FILES) + "/" + ID_SIM + "/FINE/";
+	const int nprocs = 1;
 
-	for (int iter = 1; iter < N_STEPS; iter++)
+	auto writeInts = [](std::ofstream &f, const std::initializer_list<int> &vals)
 	{
-		if (iter % MACR_SAVE == 0)
+		for (auto v : vals)
+			f.write(reinterpret_cast<const char *>(&v), sizeof(int));
+	};
+
+	auto writeField = [&](std::ofstream &f, int fieldIdx, float scale = 1.0f)
+	{
+		for (int j = 0; j < NY_FINE; ++j)
+			for (int i = 0; i < NX_FINE; ++i)
+			{
+				float val = static_cast<float>(moments[idx_mom(i, j, fieldIdx, NX_FINE)]) / scale;
+				f.write(reinterpret_cast<const char *>(&val), sizeof(float));
+			}
+	};
+
+	// =======================================================================
+	// MASTER FILE (.p3d)
+	// =======================================================================
+	{
+		std::ofstream out(basePath + "master.p3d");
+		if (!out)
 		{
-			std::ostringstream filename_temp;
-			filename_temp << prefix << (10000000 + iter) << suffix;
-			std::string filename = filename_temp.str();
-
-			if (out.is_open())
-			{
-				out << "{ \"time\" :  " << iter / MACR_SAVE << ", \"xyz\" : \"grid.x\", \"function\" : \"" << filename << "\" }," << std::endl;
-			}
-			else
-			{
-				std::cerr << "Failed to open file: master.p3d" << std::endl;
-			}
+			std::cerr << "Failed to open master.p3d\n";
+			return;
 		}
-	}
-	out << std::endl;
-	out << "]" << std::endl;
-	out << "}" << std::endl;
-	out.close();
-	// ======================================================================================================================
 
-	// writing grid.x file
-	// -------------------------------------------------------------------------------------------------------
-	int nprocs = 1;
+		out << "{\n\n \"auto-detect-format\": true,\n\n \"filenames\": [\n\n";
+		for (int iter = 1; iter < N_STEPS; ++iter)
+			if (iter % MACR_SAVE == 0)
+				out << "{ \"time\": " << iter / MACR_SAVE
+					<< ", \"xyz\": \"grid.x\", \"function\": \"data" << (10000000 + iter)
+					<< ".f\" },\n";
+		out << "\n]\n}\n";
+	}
+
+	// =======================================================================
+	// GRID FILE (grid.x)
+	// =======================================================================
 	if (nSteps == 0)
 	{
-		std::string strInf2 = PATH_FILES;
-		strInf2 += "/";
-		strInf2 += ID_SIM;
-		strInf2 += "/FINE/";
-		strInf2 += "grid.x"; // generate file name (with path)
-
-		std::ofstream gridfile(strInf2, std::ios::binary);
-		if (!gridfile)
+		std::ofstream grid(basePath + "grid.x", std::ios::binary);
+		if (!grid)
 		{
-			std::cerr << "Error opening grid file" << std::endl;
+			std::cerr << "Error opening grid file\n";
+			return;
 		}
 
-		// Write nprocs
-		gridfile.write(reinterpret_cast<const char *>(&nprocs), sizeof(int));
+		writeInts(grid, {nprocs});
+		for (int m = 0; m < nprocs; ++m)
+			writeInts(grid, {NX_FINE, NY_FINE});
 
-		// Write (nx, ny) for each processor (Fortran loop: m = 1 to nprocs)
-		for (int m = 1; m <= nprocs; ++m)
-		{
-			gridfile.write(reinterpret_cast<const char *>(&NX_FINE), sizeof(int));
-			gridfile.write(reinterpret_cast<const char *>(&NY_FINE), sizeof(int));
-		}
-
-		// Write x and y arrays for each processor (m = 0 to nprocs - 1)
+		// write x, y coordinates
 		for (int m = 0; m < nprocs; ++m)
 		{
-			// Fortran is column-major: loop j outer, i inner
 			for (int j = 0; j < NY_FINE; ++j)
 				for (int i = 0; i < NX_FINE; ++i)
 				{
-					float val = double(i) * 0.5 + NX_COARSE - 2; // already float
-					gridfile.write(reinterpret_cast<const char *>(&val), sizeof(float));
+					float val = static_cast<float>(i) * 0.5 + NX_COARSE - 2;
+					grid.write(reinterpret_cast<const char *>(&val), sizeof(float));
 				}
-
 			for (int j = 0; j < NY_FINE; ++j)
 				for (int i = 0; i < NX_FINE; ++i)
 				{
-					float val = double(j) * 0.5;
-					gridfile.write(reinterpret_cast<const char *>(&val), sizeof(float));
+					float val = static_cast<float>(j) * 0.5;
+					grid.write(reinterpret_cast<const char *>(&val), sizeof(float));
 				}
 		}
 	}
 
-	// datafile
-
-	std::ostringstream filename_temp;
-
-	std::string strInf3 = PATH_FILES;
-	strInf3 += "/";
-	strInf3 += ID_SIM;
-	strInf3 += "/FINE/";
-	filename_temp << strInf3 << prefix << (10000000 + nSteps) << suffix;
-	std::string filename = filename_temp.str();
-
-	std::ofstream datafile(filename, std::ios::binary);
-	if (!datafile)
+	// =======================================================================
+	// DATA FILE (dataXXXXXXX.f)
+	// =======================================================================
+	const std::string dataFileName = basePath + "data" + std::to_string(10000000 + nSteps) + ".f";
+	std::ofstream data(dataFileName, std::ios::binary);
+	if (!data)
 	{
-		std::cerr << "Error opening grid file" << std::endl;
+		std::cerr << "Error opening data file\n";
+		return;
 	}
 
-	// Write nprocs
-	datafile.write(reinterpret_cast<const char *>(&nprocs), sizeof(int));
-
-	// Write (nx, ny) for each processor (Fortran loop: m = 1 to nprocs)
+	writeInts(data, {nprocs});
 	for (int l = 0; l < nprocs; ++l)
-	{
-		datafile.write(reinterpret_cast<const char *>(&NX_FINE), sizeof(int));
-		datafile.write(reinterpret_cast<const char *>(&NY_FINE), sizeof(int));
-		int nf = 3; // 3 fields: rho, ux, uy
-		datafile.write(reinterpret_cast<const char *>(&nf), sizeof(int));
-	}
+		writeInts(data, {NX_FINE, NY_FINE, 3}); // 3 fields: rho, ux, uy
 
-	// Write x and y arrays for each processor (m = 0 to nprocs - 1)
-	for (int m = 0; m < nprocs; ++m)
-	{
-		// Fortran is column-major: loop j outer, i inner
-		for (int j = 0; j < NY_FINE; ++j)
-			for (int i = 0; i < NX_FINE; ++i)
-			{
-				float val = moments[idx_mom(i, j, M_RHO_INDEX, NX_FINE)]; // already float
-				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
-			}
-
-		for (int j = 0; j < NY_FINE; ++j)
-			for (int i = 0; i < NX_FINE; ++i)
-			{
-				float val = moments[idx_mom(i, j, M_UX_INDEX, NX_FINE)] / F_M_I_SCALE; // already float
-				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
-			}
-
-		for (int j = 0; j < NY_FINE; ++j)
-			for (int i = 0; i < NX_FINE; ++i)
-			{
-				float val = moments[idx_mom(i, j, M_UY_INDEX, NX_FINE)] / F_M_I_SCALE; // already float
-				datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
-			}
-	}
-
-	datafile.close();
-
-	std::string strFileRho, strFileUx, strFileUy;
-
-	strFileRho = getVarFilename("rho", nSteps, ".bin");
-	strFileUx = getVarFilename("ux", nSteps, ".bin");
-	strFileUy = getVarFilename("uy", nSteps, ".bin");
-}
-
-std::string getVarFilename(
-	const std::string varName,
-	unsigned int step,
-	const std::string ext)
-{
-	unsigned int n_zeros = 0, pot_10 = 10;
-	unsigned int aux1 = 1000000; // 6 numbers on step
-	// calculate number of zeros
-	if (step != 0)
-		for (n_zeros = 0; step * pot_10 < aux1; pot_10 *= 10)
-			n_zeros++;
-	else
-		n_zeros = 5;
-
-	// generates the file name as "PATH_FILES/id/id_varName000000.bin"
-	std::string strFile = PATH_FILES;
-	strFile += "/";
-	strFile += ID_SIM;
-	strFile += "/";
-	strFile += ID_SIM;
-	strFile += "_";
-	strFile += varName;
-	for (unsigned int i = 0; i < n_zeros; i++)
-		strFile += "0";
-	strFile += std::to_string(step);
-	strFile += ext;
-
-	return strFile;
-}
-
-void saveVarBin(
-	std::string strFile,
-	dfloat *var,
-	size_t memSize)
-{
-	FILE *outFile = nullptr;
-
-	outFile = fopen(strFile.c_str(), "wb");
-
-	if (outFile != nullptr)
-	{
-		fwrite(var, memSize, 1, outFile);
-		fclose(outFile);
-	}
-	else
-	{
-		printf("Error saving \"%s\" \nProbably wrong path!\n", strFile.c_str());
-	}
+	writeField(data, M_RHO_INDEX);
+	writeField(data, M_UX_INDEX, F_M_I_SCALE);
+	writeField(data, M_UY_INDEX, F_M_I_SCALE);
 }
 
 std::string getSimInfoString(int step, dfloat MLUPS)
@@ -386,7 +206,6 @@ std::string getSimInfoString(int step, dfloat MLUPS)
 	strSimInfo << "                 NX: " << NX << "\n";
 	strSimInfo << "                 NY: " << NY << "\n";
 	strSimInfo << std::scientific << std::setprecision(6);
-	/*strSimInfo << "                Tau: " << TAU << "\n";*/
 	strSimInfo << "               Umax: " << U_MAX << "\n";
 	strSimInfo << "             Macr_save: " << MACR_SAVE << "\n";
 	strSimInfo << "             Nsteps: " << step << "\n";

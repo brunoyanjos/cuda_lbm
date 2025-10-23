@@ -7,10 +7,8 @@ constexpr dfloat RE = 100;
 
 constexpr int SCALE = 1;
 
-constexpr int MACR_SAVE = 1;
-
 constexpr int N = 31 * SCALE;
-constexpr int NX = 4 * N;
+constexpr int NX = 4 * N + 1;
 constexpr int NY = N;
 
 constexpr int N_OVERLAP_LAYER = 1;
@@ -36,6 +34,9 @@ constexpr dfloat TAU_COARSE = 0.5 + 3.0 * VISC_COARSE;
 constexpr dfloat OMEGA_FINE = 1.0 / TAU_FINE;
 constexpr dfloat OMEGA_COARSE = 1.0 / TAU_COARSE;
 
+constexpr dfloat ALPHA = GRID_RATIO * OMEGA_FINE / OMEGA_COARSE;
+constexpr dfloat INV_ALPHA = static_cast<dfloat>(1) / ALPHA;
+
 // value for the velocity initial condition in the domain
 constexpr dfloat U_0_X = 0.0;
 constexpr dfloat U_0_Y = 0.0;
@@ -45,10 +46,8 @@ constexpr dfloat RHO_0 = 1.0;
 constexpr dfloat MACH_NUMBER = U_MAX / 0.57735026918962;
 
 /* --------------------- INITIALIZATION LOADING DEFINES -------------------- */
-constexpr int INI_STEP = 0; // initial simulation step (0 default)
-
-// constexpr int T_STAR_FINAL = 1200;
-constexpr int N_STEPS = 5;
+constexpr int N_STEPS = 1;
+constexpr int MACR_SAVE = 100;
 
 #define BC_X_WALL
 #define BC_Y_WALL

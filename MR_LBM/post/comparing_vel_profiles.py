@@ -1,14 +1,21 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-RE = 1000
+# === Estilo LaTeX (opcional) ===
+plt.rcParams.update({
+    "text.usetex": False,  # usa o motor interno, não o LaTeX real
+    "font.family": "serif",
+    "mathtext.fontset": "cm",  # usa fontes Computer Modern
+})
+
+RE = 100
 
 GRID_RATIO = 2
 
-U_MAX = 0.0256
+U_MAX = 0.01
 
-NY_COARSE = 33
-NY_FINE = NY_COARSE * GRID_RATIO
+NY_COARSE = 64
+NY_FINE = NY_COARSE * GRID_RATIO - 1
 
 VISC_FINE = U_MAX * (NY_FINE - 1) / RE
 VISC_COARSE = U_MAX * (NY_COARSE - 1) / RE
@@ -74,24 +81,293 @@ with open(coarse_myy_path, 'rb') as f:
     
 with open(fine_myy_path, 'rb') as f:
     fine_myy = np.frombuffer(f.read(), dtype=np.float32)
-
-calc_mxx_fine = (1 / ALPHA) * (coarse_mxx - coarse_ux * coarse_ux) + fine_ux[::2] * fine_ux[::2]
-calc_mxx_coarse_norm = ALPHA * (fine_mxx[::2] - fine_ux[::2] * fine_ux[::2]) + coarse_ux * coarse_ux
-
-# calc_mxy_fine = (1 / ALPHA) * (coarse_mxy - coarse_ux * coarse_uy) + fine_ux[::2] * fine_uy[::2]
-# calc_mxy_coarse_norm = ALPHA * (fine_mxy[::2] - fine_ux[::2] * fine_uy[::2]) + coarse_ux * coarse_uy
   
-y_coarse = np.linspace(0, 1, len(coarse_ux))
-y_fine = np.linspace(0, 1, len(fine_ux))
+y_coarse = np.linspace(0, 1, NY_COARSE)
+y_fine = np.linspace(0, 1, NY_FINE)
 
-plt.plot(coarse_mxx , y_coarse, label = "coarse", marker='x')
-plt.plot(fine_mxx, y_fine, label = "fine")
 
-plt.plot(calc_mxx_coarse_norm , y_coarse, label = "calc_coarse")
-plt.plot(calc_mxx_fine, y_coarse, label = "calc_fine")
+green = '#149B55'
+dark_green = '#054B28'
 
-plt.legend(title="grid kind", loc='lower right')
+red = "#F04137"
+coral = '#FF6968'
+
+# -------------------------------------------------------------------------
+# ------------------------------ RHO PROFILE ------------------------------
+# -------------------------------------------------------------------------
+
+plt.figure(figsize=(6, 4), dpi=300)
+
+plt.plot(coarse_rho, y_coarse, label="Coarse grid", 
+         marker='x', markersize=5, linewidth=1.6, color=green)
+plt.plot(fine_rho, y_fine, label="Fine grid", 
+         linestyle='--', linewidth=1.8, color=coral)
+
+plt.xlabel(r"$\rho$", fontsize=12)
+plt.ylabel(r"$y / L$", fontsize=12)
+
+plt.legend(fontsize=10, title_fontsize=10, loc='lower right')
+plt.grid(True, linestyle=':', linewidth=0.8, alpha=0.7)
 
 plt.tight_layout()
+plt.savefig("perfil_rho_normalizado.png", dpi=300, bbox_inches='tight')
+plt.close()
 
-plt.show()
+# -------------------------------------------------------------------------
+# ------------------------------ UX PROFILE -------------------------------
+# -------------------------------------------------------------------------
+
+plt.figure(figsize=(6, 4), dpi=300)
+
+u_norm = np.max([np.max(coarse_ux), np.max(fine_ux)]) 
+
+plt.plot(coarse_ux / u_norm, y_coarse, label="Coarse grid", 
+         marker='x', markersize=5, linewidth=1.6, color=green)
+plt.plot(fine_ux / u_norm, y_fine, label="Fine grid", 
+         linestyle='--', linewidth=1.8, color=coral)
+
+plt.xlabel(r"$u_x / U_x^{\mathrm{max}}$", fontsize=12)
+plt.ylabel(r"$y / L$", fontsize=12)
+
+plt.legend(fontsize=10, title_fontsize=10, loc='lower right')
+plt.grid(True, linestyle=':', linewidth=0.8, alpha=0.7)
+
+plt.tight_layout()
+plt.savefig("perfil_ux_normalizado.png", dpi=300, bbox_inches='tight')
+plt.close()
+
+# -------------------------------------------------------------------------
+# ------------------------------ UY PROFILE -------------------------------
+# -------------------------------------------------------------------------
+
+plt.figure(figsize=(6, 4), dpi=300)
+
+u_norm = np.max([np.max(abs(coarse_uy)), np.max(abs(fine_uy))]) 
+
+plt.plot(coarse_uy / u_norm, y_coarse, label="Coarse grid", 
+         marker='x', markersize=5, linewidth=1.6, color=green)
+plt.plot(fine_uy / u_norm, y_fine, label="Fine grid", 
+         linestyle='--', linewidth=1.8, color=coral)
+
+plt.xlabel(r"$u_y / U_y^{\mathrm{max}}$", fontsize=12)
+plt.ylabel(r"$y / L$", fontsize=12)
+
+plt.legend(fontsize=10, title_fontsize=10, loc='lower right')
+plt.grid(True, linestyle=':', linewidth=0.8, alpha=0.7)
+
+plt.tight_layout()
+plt.savefig("perfil_uy_normalizado.png", dpi=300, bbox_inches='tight')
+plt.close()
+
+# -------------------------------------------------------------------------
+# ------------------------------ MXX PROFILE ------------------------------
+# -------------------------------------------------------------------------
+
+plt.figure(figsize=(6, 4), dpi=300)
+
+m_norm = np.max([np.max(abs(coarse_mxx)), np.max(abs(fine_mxx))]) 
+
+plt.plot(coarse_mxx / m_norm, y_coarse, label="Coarse grid", 
+         marker='x', markersize=5, linewidth=1.6, color=green)
+plt.plot(fine_mxx / m_norm, y_fine, label="Fine grid", 
+         linestyle='--', linewidth=1.8, color=coral)
+
+plt.xlabel(r"$m_{xx} / m_{xx}^{\mathrm{max}}$", fontsize=12)
+plt.ylabel(r"$y / L$", fontsize=12)
+
+plt.legend(fontsize=10, title_fontsize=10, loc='lower right')
+plt.grid(True, linestyle=':', linewidth=0.8, alpha=0.7)
+
+plt.tight_layout()
+plt.savefig("perfil_mxx_normalizado.png", dpi=300, bbox_inches='tight')
+plt.close()
+
+# -------------------------------------------------------------------------
+# ------------------------------ MXY PROFILE ------------------------------
+# -------------------------------------------------------------------------
+
+plt.figure(figsize=(6, 4), dpi=300)
+
+m_norm = np.max([np.max(abs(coarse_mxy)), np.max(abs(fine_mxy))]) 
+
+plt.plot(coarse_mxy / m_norm, y_coarse, label="Coarse grid", 
+         marker='x', markersize=5, linewidth=1.6, color=green)
+plt.plot(fine_mxy / m_norm, y_fine, label="Fine grid", 
+         linestyle='--', linewidth=1.8, color=coral)
+
+plt.xlabel(r"$m_{xy} / m_{xy}^{\mathrm{max}}$", fontsize=12)
+plt.ylabel(r"$y / L$", fontsize=12)
+
+plt.legend(fontsize=10, title_fontsize=10, loc='lower right')
+plt.grid(True, linestyle=':', linewidth=0.8, alpha=0.7)
+
+plt.tight_layout()
+plt.savefig("perfil_mxy_normalizado.png", dpi=300, bbox_inches='tight')
+plt.close()
+
+# -------------------------------------------------------------------------
+# ------------------------------ MYY PROFILE ------------------------------
+# -------------------------------------------------------------------------
+
+plt.figure(figsize=(6, 4), dpi=300)
+
+m_norm = np.max([np.max(abs(coarse_myy)), np.max(abs(fine_myy))]) 
+
+plt.plot(coarse_myy / m_norm, y_coarse, label="Coarse grid", 
+         marker='x', markersize=5, linewidth=1.6, color=green)
+plt.plot(fine_myy / m_norm, y_fine, label="Fine grid", 
+         linestyle='--', linewidth=1.8, color=coral)
+
+plt.xlabel(r"$m_{yy} / m_{yy}^{\mathrm{max}}$", fontsize=12)
+plt.ylabel(r"$y / L$", fontsize=12)
+
+plt.legend(fontsize=10, title_fontsize=10, loc='lower right')
+plt.grid(True, linestyle=':', linewidth=0.8, alpha=0.7)
+
+plt.tight_layout()
+plt.savefig("perfil_myy_normalizado.png", dpi=300, bbox_inches='tight')
+plt.close()
+
+# -------------------------------------------------------------------------
+# ------------------------ MXX PROFILE CORRECTION -------------------------
+# -------------------------------------------------------------------------
+
+plt.figure(figsize=(6, 4), dpi=300)
+
+calc_mxx_coarse = ALPHA * (fine_mxx[::2] - fine_ux[::2] * fine_ux[::2]) + coarse_ux * coarse_ux
+
+m_norm = np.max([np.max(abs(coarse_mxx)), np.max(abs(fine_mxx))]) 
+
+plt.plot(coarse_mxx / m_norm, y_coarse, label="Coarse grid", 
+         marker='x', markersize=5, linewidth=1.6, color=green)
+plt.plot(calc_mxx_coarse / m_norm, y_coarse, label="Evaluate Coarse", 
+        linestyle='--', linewidth=1.8, color=red)
+
+plt.xlabel(r"$m_{xx} / m_{xx}^{\mathrm{max}}$", fontsize=12)
+plt.ylabel(r"$y / L$", fontsize=12)
+
+plt.legend(fontsize=10, title_fontsize=10, loc='lower right')
+plt.grid(True, linestyle=':', linewidth=0.8, alpha=0.7)
+
+plt.tight_layout()
+plt.savefig("perfil_mxx_coarse_evaluate.png", dpi=300, bbox_inches='tight')
+plt.close()
+
+# -------------------------------------------------------------------------
+
+plt.figure(figsize=(6, 4), dpi=300)
+
+calc_mxx_fine = (1 / ALPHA) * (coarse_mxx - coarse_ux * coarse_ux) + fine_ux[::2] * fine_ux[::2]
+
+m_norm = np.max([np.max(abs(calc_mxx_fine)), np.max(abs(fine_mxx))])
+
+plt.plot(calc_mxx_fine / m_norm, y_coarse, label="Evaluate Fine", 
+         marker='x', markersize=5, linewidth=1.6, color=dark_green)
+plt.plot(fine_mxx / m_norm, y_fine, label="Fine grid",
+         linestyle='--', linewidth=1.8, color=coral)
+
+plt.xlabel(r"$m_{xx} / m_{xx}^{\mathrm{max}}$", fontsize=12)
+plt.ylabel(r"$y / L$", fontsize=12)
+
+plt.legend(fontsize=10, title_fontsize=10, loc='lower right')
+plt.grid(True, linestyle=':', linewidth=0.8, alpha=0.7)
+
+plt.tight_layout()
+plt.savefig("perfil_mxx_fine_evaluate.png", dpi=300, bbox_inches='tight')
+plt.close()
+
+# -------------------------------------------------------------------------
+# ------------------------ MXY PROFILE CORRECTION -------------------------
+# -------------------------------------------------------------------------
+
+plt.figure(figsize=(6, 4), dpi=300)
+
+calc_mxy_coarse = ALPHA * (fine_mxy[::2] - fine_ux[::2] * fine_uy[::2]) + coarse_ux * coarse_uy
+
+m_norm = np.max([np.max(abs(coarse_mxy)), np.max(abs(calc_mxy_coarse))])
+
+plt.plot(coarse_mxy / m_norm, y_coarse, label="Coarse grid", 
+         marker='x', markersize=5, linewidth=1.6, color=green)
+plt.plot(calc_mxy_coarse / m_norm, y_coarse, label="Evaluate Coarse", 
+        linestyle='--', linewidth=1.8, color=red)
+
+plt.xlabel(r"$m_{xy} / m_{xy}^{\mathrm{max}}$", fontsize=12)
+plt.ylabel(r"$y / L$", fontsize=12)
+
+plt.legend(fontsize=10, title_fontsize=10, loc='lower right')
+plt.grid(True, linestyle=':', linewidth=0.8, alpha=0.7)
+
+plt.tight_layout()
+plt.savefig("perfil_mxy_coarse_evaluate.png", dpi=300, bbox_inches='tight')
+plt.close()
+
+# -------------------------------------------------------------------------
+
+plt.figure(figsize=(6, 4), dpi=300)
+
+calc_mxy_fine = (1 / ALPHA) * (coarse_mxy - coarse_ux * coarse_uy) + fine_ux[::2] * fine_uy[::2]
+
+m_norm = np.max([np.max(abs(calc_mxy_fine)), np.max(abs(fine_mxy))])
+
+plt.plot(calc_mxy_fine / m_norm, y_coarse, label="Evaluate Fine", 
+         marker='x', markersize=5, linewidth=1.6, color=dark_green)
+plt.plot(fine_mxy / m_norm, y_fine, label="Fine grid",
+         linestyle='--', linewidth=1.8, color=coral)
+
+plt.xlabel(r"$m_{xy} / m_{xy}^{\mathrm{max}}$", fontsize=12)
+plt.ylabel(r"$y / L$", fontsize=12)
+
+plt.legend(fontsize=10, title_fontsize=10, loc='lower right')
+plt.grid(True, linestyle=':', linewidth=0.8, alpha=0.7)
+
+plt.tight_layout()
+plt.savefig("perfil_mxy_fine_evaluate.png", dpi=300, bbox_inches='tight')
+plt.close()
+
+# -------------------------------------------------------------------------
+# ------------------------ MYY PROFILE CORRECTION -------------------------
+# -------------------------------------------------------------------------
+
+plt.figure(figsize=(6, 4), dpi=300)
+
+calc_myy_coarse = ALPHA * (fine_myy[::2] - fine_uy[::2] * fine_uy[::2]) + coarse_uy * coarse_uy
+
+m_norm = np.max([np.max(abs(coarse_myy)), np.max(abs(calc_myy_coarse))])
+
+plt.plot(coarse_myy / m_norm, y_coarse, label="Coarse grid", 
+         marker='x', markersize=5, linewidth=1.6, color=green)
+plt.plot(calc_myy_coarse / m_norm, y_coarse, label="Evaluate Coarse", 
+        linestyle='--', linewidth=1.8, color=red)
+
+plt.xlabel(r"$m_{yy} / m_{yy}^{\mathrm{max}}$", fontsize=12)
+plt.ylabel(r"$y / L$", fontsize=12)
+
+plt.legend(fontsize=10, title_fontsize=10, loc='lower right')
+plt.grid(True, linestyle=':', linewidth=0.8, alpha=0.7)
+
+plt.tight_layout()
+plt.savefig("perfil_myy_coarse_evaluate.png", dpi=300, bbox_inches='tight')
+plt.close()
+
+# -------------------------------------------------------------------------
+
+plt.figure(figsize=(6, 4), dpi=300)
+
+calc_myy_fine = (1 / ALPHA) * (coarse_myy - coarse_uy * coarse_uy) + fine_uy[::2] * fine_uy[::2]
+
+m_norm = np.max([np.max(abs(calc_myy_fine)), np.max(abs(fine_myy))])
+
+plt.plot(calc_myy_fine / m_norm, y_coarse, label="Evaluate Fine", 
+         marker='x', markersize=5, linewidth=1.6, color=dark_green)
+plt.plot(fine_myy/ m_norm, y_fine, label="Fine grid",
+         linestyle='--', linewidth=1.8, color=coral)
+
+plt.xlabel(r"$m_{yy} / m_{yy}^{\mathrm{max}}$", fontsize=12)
+plt.ylabel(r"$y / L$", fontsize=12)
+
+plt.legend(fontsize=10, title_fontsize=10, loc='lower right')
+plt.grid(True, linestyle=':', linewidth=0.8, alpha=0.7)
+
+plt.tight_layout()
+plt.savefig("perfil_myy_fine_evaluate.png", dpi=300, bbox_inches='tight')
+plt.close()

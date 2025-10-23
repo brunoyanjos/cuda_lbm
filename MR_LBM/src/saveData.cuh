@@ -30,17 +30,6 @@ std::string getSimInfoString(int step, dfloat MLUPS);
  */
 void saveSimInfo(int step, dfloat MLUPS);
 
-/*
- *   @brief Save array content to binary file
- *   @param strFile: filename to save
- *   @param var: float variable to save
- *   @param memSize: sizeof var
- */
-void saveVarBin(
-    std::string strFile,
-    dfloat *var,
-    size_t memSize);
-
 void folderSetup();
 
 __host__ void saveMacr_coarse(

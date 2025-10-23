@@ -35,21 +35,17 @@ int main()
 	/* ---------------------------- BEGIN LOOP ------------------------------ */
 	/* ---------------------------------------------------------------------- */
 
-	for (step = INI_STEP; step < N_STEPS; step++)
+	for (step = 0; step < N_STEPS; step++)
 	{
-		coarse_grid_solution(node_type_coarse, moments_coarse, pop_in_coarse, pop_out_coarse);
+		// grid_solution(node_type_coarse, moments_coarse, pop_in_coarse, pop_out_coarse, OMEGA_COARSE, NX_COARSE, NY_COARSE);
 
-		for (size_t fine_step = 0; fine_step < GRID_RATIO; ++fine_step)
-		{
-			fine_grid_solution(node_type_fine, moments_fine, pop_in_fine, pop_out_fine);
-		}
+		// for (size_t fine_step = 0; fine_step < GRID_RATIO; ++fine_step)
+		// {
+		// 	grid_solution(node_type_fine, moments_fine, pop_in_fine, pop_out_fine, OMEGA_FINE, NX_FINE, NY_FINE);
+		// }
 
-		// coarse_to_fine(moments_coarse, moments_fine, node_type_coarse, node_type_fine);
-		// std::cout << "-------------------------------------------------------------------" << std::endl
-		// 		  << std::endl;
-		// fine_to_coarse(moments_fine, moments_coarse, node_type_fine, node_type_coarse);
-		// std::cout << "-------------------------------------------------------------------" << std::endl
-		// 		  << std::endl;
+		coarse_to_fine(moments_coarse, moments_fine, node_type_coarse, node_type_fine);
+		fine_to_coarse(moments_fine, moments_coarse, node_type_fine, node_type_coarse);
 
 		if (step % MACR_SAVE == 0)
 		{

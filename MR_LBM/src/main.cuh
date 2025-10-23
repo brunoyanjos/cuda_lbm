@@ -66,19 +66,29 @@ __host__ inline void initialize_fine_grid(unsigned int *&node_type, dfloat *&mom
 	{
 		for (size_t x = 0; x < NX_FINE; ++x)
 		{
-			moments[idx_mom(x, y, M_RHO_INDEX, NX_FINE)] = RHO_0;
+			const dfloat rho = RHO_0;
+
+			moments[idx_mom(x, y, M_RHO_INDEX, NX_FINE)] = rho - RHO_0;
 
 			dfloat inv_rho = static_cast<dfloat>(1) / RHO_0;
 
-			moments[idx_mom(x, y, M_UX_INDEX, NX_FINE)] = 0.0;
-			moments[idx_mom(x, y, M_UY_INDEX, NX_FINE)] = 0.0;
+			node_type[idx_grid(x, y, NX_FINE)] = fine_boundary_definition(x, y);
 
-			node_type[idx_grid(x, y, NX_FINE)] = BULK;
+			moments[idx_mom(x, y, M_UX_INDEX, NX_FINE)] = node_type[idx_grid(x, y, NX_FINE)] == WEST ? U_MAX : static_cast<dfloat>(0);
+			moments[idx_mom(x, y, M_UY_INDEX, NX_FINE)] = static_cast<dfloat>(0);
 
 			dfloat pop[9];
 
-			init_pop_eq(pop, moments[idx_mom(x, y, M_RHO_INDEX, NX_FINE)],
+			eval_pop_eq(pop, moments[idx_mom(x, y, M_RHO_INDEX, NX_FINE)],
 						moments[idx_mom(x, y, M_UX_INDEX, NX_FINE)], moments[idx_mom(x, y, M_UY_INDEX, NX_FINE)]);
+
+			dfloat mxx = (pop[1] + pop[3] + pop[5] + pop[6] + pop[7] + pop[8]) * inv_rho - cs2;
+			dfloat mxy = ((pop[5] + pop[7]) - (pop[6] + pop[8])) * inv_rho;
+			dfloat myy = (pop[2] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8]) * inv_rho - cs2;
+
+			collision(&mxx, &mxy, &myy,
+					  moments[idx_mom(x, y, M_UX_INDEX, NX_FINE)],
+					  moments[idx_mom(x, y, M_UY_INDEX, NX_FINE)], OMEGA_COARSE);
 
 			moments[idx_mom(x, y, M_MXX_INDEX, NX_FINE)] = (pop[1] + pop[3] + pop[5] + pop[6] + pop[7] + pop[8]) * inv_rho - cs2;
 			moments[idx_mom(x, y, M_MXY_INDEX, NX_FINE)] = ((pop[5] + pop[7]) - (pop[6] + pop[8])) * inv_rho;
@@ -93,19 +103,29 @@ __host__ void initialize_coarse_grid(unsigned int *&node_type, dfloat *&moments,
 	{
 		for (size_t x = 0; x < NX_COARSE; x++)
 		{
-			moments[idx_mom(x, y, M_RHO_INDEX, NX_COARSE)] = RHO_0;
+			const dfloat rho = RHO_0;
+
+			moments[idx_mom(x, y, M_RHO_INDEX, NX_COARSE)] = rho - RHO_0;
 
 			dfloat inv_rho = static_cast<dfloat>(1) / RHO_0;
 
-			moments[idx_mom(x, y, M_UX_INDEX, NX_COARSE)] = 0.0;
-			moments[idx_mom(x, y, M_UY_INDEX, NX_COARSE)] = 0.0;
+			node_type[idx_grid(x, y, NX_COARSE)] = coarse_boundary_definition(x, y);
 
-			node_type[idx_grid(x, y, NX_COARSE)] = BULK;
+			moments[idx_mom(x, y, M_UX_INDEX, NX_COARSE)] = node_type[idx_grid(x, y, NX_COARSE)] == WEST ? U_MAX : static_cast<dfloat>(0);
+			moments[idx_mom(x, y, M_UY_INDEX, NX_COARSE)] = static_cast<dfloat>(0);
 
 			dfloat pop[9];
 
-			init_pop_eq(pop, moments[idx_mom(x, y, M_RHO_INDEX, NX_COARSE)],
+			eval_pop_eq(pop, moments[idx_mom(x, y, M_RHO_INDEX, NX_COARSE)],
 						moments[idx_mom(x, y, M_UX_INDEX, NX_COARSE)], moments[idx_mom(x, y, M_UY_INDEX, NX_COARSE)]);
+
+			dfloat mxx = (pop[1] + pop[3] + pop[5] + pop[6] + pop[7] + pop[8]) * inv_rho - cs2;
+			dfloat mxy = ((pop[5] + pop[7]) - (pop[6] + pop[8])) * inv_rho;
+			dfloat myy = (pop[2] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8]) * inv_rho - cs2;
+
+			collision(&mxx, &mxy, &myy,
+					  moments[idx_mom(x, y, M_UX_INDEX, NX_COARSE)],
+					  moments[idx_mom(x, y, M_UY_INDEX, NX_COARSE)], OMEGA_COARSE);
 
 			moments[idx_mom(x, y, M_MXX_INDEX, NX_COARSE)] = (pop[1] + pop[3] + pop[5] + pop[6] + pop[7] + pop[8]) * inv_rho - cs2;
 			moments[idx_mom(x, y, M_MXY_INDEX, NX_COARSE)] = ((pop[5] + pop[7]) - (pop[6] + pop[8])) * inv_rho;

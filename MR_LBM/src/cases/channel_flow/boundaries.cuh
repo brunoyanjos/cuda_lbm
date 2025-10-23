@@ -16,33 +16,21 @@ __host__ inline size_t coarse_boundary_definition(size_t x, size_t y)
 	{
 		return SOUTH_WEST;
 	}
-	else if (x == 0 && y == (NY - 1))
+	else if (x == 0 && y == (NY_COARSE - 1))
 	{
 		return NORTH_WEST;
-	}
-	else if (x == (NX - 1) && y == 0)
-	{
-		return SOUTH_EAST;
-	}
-	else if (x == (NX - 1) && y == (NY - 1))
-	{
-		return NORTH_EAST;
 	}
 	else if (y == 0)
 	{
 		return SOUTH;
 	}
-	else if (y == (NY - 1))
+	else if (y == (NY_COARSE - 1))
 	{
 		return NORTH;
 	}
 	else if (x == 0)
 	{
 		return WEST;
-	}
-	else if (x == (NX - 1))
-	{
-		return EAST;
 	}
 	else
 	{
@@ -52,20 +40,11 @@ __host__ inline size_t coarse_boundary_definition(size_t x, size_t y)
 
 __host__ inline size_t fine_boundary_definition(size_t x, size_t y)
 {
-	if (x == 0 && y == 0)
+	if (x == (NX_FINE - 1) && y == 0)
 	{
-		return SOUTH_WEST;
-	}
-	else if (x == 0 && y == (NY - 1))
-	{
-		return NORTH_WEST;
-	}
-	else if (x == (NX - 1) && y == 0)
-	{
-
 		return SOUTH_EAST;
 	}
-	else if (x == (NX - 1) && y == (NY - 1))
+	else if (x == (NX_FINE - 1) && y == (NY_FINE - 1))
 	{
 		return NORTH_EAST;
 	}
@@ -73,15 +52,11 @@ __host__ inline size_t fine_boundary_definition(size_t x, size_t y)
 	{
 		return SOUTH;
 	}
-	else if (y == (NY - 1))
+	else if (y == (NY_FINE - 1))
 	{
 		return NORTH;
 	}
-	else if (x == 0)
-	{
-		return WEST;
-	}
-	else if (x == (NX - 1))
+	else if (x == (NX_FINE - 1))
 	{
 		return EAST;
 	}
