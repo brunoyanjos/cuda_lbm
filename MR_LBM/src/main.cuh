@@ -45,13 +45,14 @@ dfloat recordElapsedTime(cudaEvent_t &start_step, cudaEvent_t &stop_step, int st
 }
 
 __host__ void allocateHostMemory(unsigned int **node_type_fine, dfloat **moments_fine, dfloat **pop_in_fine, dfloat **pop_out_fine,
-								 unsigned int **node_type_coarse, dfloat **moments_coarse, dfloat **pop_in_coarse, dfloat **pop_out_coarse)
+								 unsigned int **node_type_coarse, dfloat **moments_coarse, dfloat **moments_coarse_old, dfloat **pop_in_coarse, dfloat **pop_out_coarse)
 {
 	checkCudaErrors(cudaMallocHost((void **)node_type_fine, NUMBER_OF_FINE_NODES * sizeof(unsigned int)));
 	checkCudaErrors(cudaMallocHost((void **)node_type_coarse, NUMBER_OF_COARSE_NODES * sizeof(unsigned int)));
 
 	checkCudaErrors(cudaMallocHost((void **)moments_fine, NUMBER_OF_FINE_NODES * NUMBER_MOMENTS * sizeof(dfloat)));
 	checkCudaErrors(cudaMallocHost((void **)moments_coarse, NUMBER_OF_COARSE_NODES * NUMBER_MOMENTS * sizeof(dfloat)));
+	checkCudaErrors(cudaMallocHost((void **)moments_coarse_old, NUMBER_OF_COARSE_NODES * NUMBER_MOMENTS * sizeof(dfloat)));
 
 	checkCudaErrors(cudaMallocHost((void **)pop_in_fine, NUMBER_OF_FINE_NODES * Q * sizeof(dfloat)));
 	checkCudaErrors(cudaMallocHost((void **)pop_in_coarse, NUMBER_OF_COARSE_NODES * Q * sizeof(dfloat)));

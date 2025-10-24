@@ -8,18 +8,17 @@ using namespace std;
 
 int main()
 {
-	// return 0;
 	folderSetup();
 
 	// variable declaration
 	unsigned int *node_type_fine, *node_type_coarse;
-	dfloat *moments_fine, *moments_coarse;
+	dfloat *moments_fine, *moments_coarse, *moments_coarse_old;
 	dfloat *pop_in_fine, *pop_out_fine, *pop_in_coarse, *pop_out_coarse;
 
 	/* ------------------------- ALLOCATION FOR CPU ------------------------- */
 	size_t step = 0;
 	allocateHostMemory(&node_type_fine, &moments_fine, &pop_in_fine, &pop_out_fine,
-					   &node_type_coarse, &moments_coarse, &pop_in_coarse, &pop_out_coarse);
+					   &node_type_coarse, &moments_coarse, &moments_coarse_old, &pop_in_coarse, &pop_out_coarse);
 
 	initializeDomain(node_type_fine, moments_fine, pop_in_fine, pop_out_fine,
 					 node_type_coarse, moments_coarse, pop_in_coarse, pop_out_coarse);
@@ -37,15 +36,22 @@ int main()
 
 	for (step = 0; step < N_STEPS; step++)
 	{
-		// grid_solution(node_type_coarse, moments_coarse, pop_in_coarse, pop_out_coarse, OMEGA_COARSE, NX_COARSE, NY_COARSE);
+		memcpy(moments_coarse_old, moments_coarse, NUMBER_OF_COARSE_NODES * NUMBER_MOMENTS * sizeof(dfloat));
 
-		// for (size_t fine_step = 0; fine_step < GRID_RATIO; ++fine_step)
-		// {
-		// 	grid_solution(node_type_fine, moments_fine, pop_in_fine, pop_out_fine, OMEGA_FINE, NX_FINE, NY_FINE);
-		// }
+		grid_solution(node_type_coarse, moments_coarse, pop_in_coarse, pop_out_coarse, OMEGA_COARSE, NX_COARSE, NY_COARSE);
 
-		coarse_to_fine(moments_coarse, moments_fine, node_type_coarse, node_type_fine);
-		fine_to_coarse(moments_fine, moments_coarse, node_type_fine, node_type_coarse);
+		for (size_t fine_step = 0; fine_step < GRID_RATIO; ++fine_step)
+		{
+			grid_solution(node_type_fine, moments_fine, pop_in_fine, pop_out_fine, OMEGA_FINE, NX_FINE, NY_FINE);
+
+			if (fine_step == 0)
+			{
+				coarse_to_fine_time(moments_coarse, moments_coarse_old, moments_fine);
+			}
+		}
+
+		coarse_to_fine(moments_coarse, moments_fine);
+		fine_to_coarse(moments_fine, moments_coarse);
 
 		if (step % MACR_SAVE == 0)
 		{
