@@ -138,6 +138,98 @@ __host__ inline void coarse_to_fine_time(dfloat *moments_coarse, dfloat *moments
         {
             if (y == 1)
             {
+                const int yc_mh = static_cast<int>(y / 2);
+                const int yc_ph = yc_mh + 1;
+
+                const int yc_p3h = yc_mh + 2;
+
+                const dfloat rho_ymh = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_mh, M_RHO_INDEX, NX_COARSE)] + RHO_0,
+                    moments_coarse_old[idx_mom(xc, yc_mh, M_RHO_INDEX, NX_COARSE)] + RHO_0);
+                const dfloat rho_yph = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_ph, M_RHO_INDEX, NX_COARSE)] + RHO_0,
+                    moments_coarse_old[idx_mom(xc, yc_ph, M_RHO_INDEX, NX_COARSE)] + RHO_0);
+                const dfloat rho_yp3h = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_p3h, M_RHO_INDEX, NX_COARSE)] + RHO_0,
+                    moments_coarse_old[idx_mom(xc, yc_p3h, M_RHO_INDEX, NX_COARSE)] + RHO_0);
+
+                const dfloat ux_ymh = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_mh, M_UX_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_mh, M_UX_INDEX, NX_COARSE)]);
+                const dfloat ux_yph = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_ph, M_UX_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_ph, M_UX_INDEX, NX_COARSE)]);
+                const dfloat ux_yp3h = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_p3h, M_UX_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_p3h, M_UX_INDEX, NX_COARSE)]);
+
+                const dfloat uy_ymh = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_mh, M_UY_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_mh, M_UY_INDEX, NX_COARSE)]);
+                const dfloat uy_yph = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_ph, M_UY_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_ph, M_UY_INDEX, NX_COARSE)]);
+                const dfloat uy_yp3h = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_p3h, M_UY_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_p3h, M_UY_INDEX, NX_COARSE)]);
+
+                const dfloat mxx_ymh = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_mh, M_MXX_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_mh, M_MXX_INDEX, NX_COARSE)]);
+                const dfloat mxx_yph = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_ph, M_MXX_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_ph, M_MXX_INDEX, NX_COARSE)]);
+                const dfloat mxx_yp3h = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_p3h, M_MXX_INDEX, NX_COARSE)],
+
+                    moments_coarse_old[idx_mom(xc, yc_p3h, M_MXX_INDEX, NX_COARSE)]);
+
+                const dfloat mxy_ymh = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_mh, M_MXY_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_mh, M_MXY_INDEX, NX_COARSE)]);
+                const dfloat mxy_yph = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_ph, M_MXY_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_ph, M_MXY_INDEX, NX_COARSE)]);
+                const dfloat mxy_yp3h = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_p3h, M_MXY_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_p3h, M_MXY_INDEX, NX_COARSE)]);
+
+                const dfloat myy_ymh = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_mh, M_MYY_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_mh, M_MYY_INDEX, NX_COARSE)]);
+                const dfloat myy_yph = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_ph, M_MYY_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_ph, M_MYY_INDEX, NX_COARSE)]);
+                const dfloat myy_yp3h = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_p3h, M_MYY_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_p3h, M_MYY_INDEX, NX_COARSE)]);
+
+                const dfloat rho_mean = second_order_interpolation(rho_ymh, rho_yph, rho_yp3h);
+
+                const dfloat ux_mean = second_order_interpolation(ux_ymh, ux_yph, ux_yp3h);
+                const dfloat uy_mean = second_order_interpolation(uy_ymh, uy_yph, uy_yp3h);
+
+                dfloat fi_mh[9], fi_ph[9], fi_p3h[9];
+                dfloat fi_eq_mh[9], fi_eq_ph[9], fi_eq_p3h[9];
+
+                regularization(fi_mh, rho_ymh, ux_ymh, uy_ymh, mxx_ymh, mxy_ymh, myy_ymh);
+                regularization(fi_ph, rho_yph, ux_yph, uy_yph, mxx_yph, mxy_yph, myy_yph);
+                regularization(fi_p3h, rho_yp3h, ux_yp3h, uy_yp3h, mxx_yp3h, mxy_yp3h, myy_yp3h);
+
+                eval_pop_eq(fi_eq_mh, rho_ymh, ux_ymh, uy_ymh);
+                eval_pop_eq(fi_eq_ph, rho_yph, ux_yph, uy_yph);
+                eval_pop_eq(fi_eq_p3h, rho_yp3h, ux_yp3h, uy_yp3h);
+
+                eval_pop_eq(pop_eq, rho_mean, ux_mean, uy_mean);
+
+                for (int i = 0; i < 9; ++i)
+                {
+                    const dfloat fi_neq_mh = fi_mh[i] - fi_eq_mh[i];
+                    const dfloat fi_neq_ph = fi_ph[i] - fi_eq_ph[i];
+                    const dfloat fi_neq_p3h = fi_p3h[i] - fi_eq_p3h[i];
+
+                    pop_neq[i] = second_order_interpolation(fi_neq_mh, fi_neq_ph, fi_neq_p3h);
+                }
             }
             else if (y == NY_COARSE - 2)
             {
@@ -146,29 +238,65 @@ __host__ inline void coarse_to_fine_time(dfloat *moments_coarse, dfloat *moments
 
                 const int yc_m3h = yc_mh - 1;
 
-                const dfloat rho_ymh = moments_coarse[idx_mom(xc, yc_mh, M_RHO_INDEX, NX_COARSE)] + RHO_0;
-                const dfloat rho_yph = moments_coarse[idx_mom(xc, yc_ph, M_RHO_INDEX, NX_COARSE)] + RHO_0;
-                const dfloat rho_ym3h = moments_coarse[idx_mom(xc, yc_m3h, M_RHO_INDEX, NX_COARSE)] + RHO_0;
+                const dfloat rho_ymh = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_mh, M_RHO_INDEX, NX_COARSE)] + RHO_0,
+                    moments_coarse_old[idx_mom(xc, yc_mh, M_RHO_INDEX, NX_COARSE)] + RHO_0);
+                const dfloat rho_yph = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_ph, M_RHO_INDEX, NX_COARSE)] + RHO_0,
+                    moments_coarse_old[idx_mom(xc, yc_ph, M_RHO_INDEX, NX_COARSE)] + RHO_0);
+                const dfloat rho_ym3h = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_m3h, M_RHO_INDEX, NX_COARSE)] + RHO_0,
+                    moments_coarse_old[idx_mom(xc, yc_m3h, M_RHO_INDEX, NX_COARSE)] + RHO_0);
 
-                const dfloat ux_ymh = moments_coarse[idx_mom(xc, yc_mh, M_UX_INDEX, NX_COARSE)];
-                const dfloat ux_yph = moments_coarse[idx_mom(xc, yc_ph, M_UX_INDEX, NX_COARSE)];
-                const dfloat ux_ym3h = moments_coarse[idx_mom(xc, yc_m3h, M_UX_INDEX, NX_COARSE)];
+                const dfloat ux_ymh = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_mh, M_UX_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_mh, M_UX_INDEX, NX_COARSE)]);
+                const dfloat ux_yph = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_ph, M_UX_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_ph, M_UX_INDEX, NX_COARSE)]);
+                const dfloat ux_ym3h = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_m3h, M_UX_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_m3h, M_UX_INDEX, NX_COARSE)]);
 
-                const dfloat uy_ymh = moments_coarse[idx_mom(xc, yc_mh, M_UY_INDEX, NX_COARSE)];
-                const dfloat uy_yph = moments_coarse[idx_mom(xc, yc_ph, M_UY_INDEX, NX_COARSE)];
-                const dfloat uy_ym3h = moments_coarse[idx_mom(xc, yc_m3h, M_UY_INDEX, NX_COARSE)];
+                const dfloat uy_ymh = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_mh, M_UY_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_mh, M_UY_INDEX, NX_COARSE)]);
+                const dfloat uy_yph = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_ph, M_UY_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_ph, M_UY_INDEX, NX_COARSE)]);
+                const dfloat uy_ym3h = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_m3h, M_UY_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_m3h, M_UY_INDEX, NX_COARSE)]);
 
-                const dfloat mxx_ymh = moments_coarse[idx_mom(xc, yc_mh, M_MXX_INDEX, NX_COARSE)];
-                const dfloat mxx_yph = moments_coarse[idx_mom(xc, yc_ph, M_MXX_INDEX, NX_COARSE)];
-                const dfloat mxx_ym3h = moments_coarse[idx_mom(xc, yc_m3h, M_MXX_INDEX, NX_COARSE)];
+                const dfloat mxx_ymh = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_mh, M_MXX_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_mh, M_MXX_INDEX, NX_COARSE)]);
+                const dfloat mxx_yph = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_ph, M_MXX_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_ph, M_MXX_INDEX, NX_COARSE)]);
+                const dfloat mxx_ym3h = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_m3h, M_MXX_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_m3h, M_MXX_INDEX, NX_COARSE)]);
 
-                const dfloat mxy_ymh = moments_coarse[idx_mom(xc, yc_mh, M_MXY_INDEX, NX_COARSE)];
-                const dfloat mxy_yph = moments_coarse[idx_mom(xc, yc_ph, M_MXY_INDEX, NX_COARSE)];
-                const dfloat mxy_ym3h = moments_coarse[idx_mom(xc, yc_m3h, M_MXY_INDEX, NX_COARSE)];
+                const dfloat mxy_ymh = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_mh, M_MXY_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_mh, M_MXY_INDEX, NX_COARSE)]);
+                const dfloat mxy_yph = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_ph, M_MXY_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_ph, M_MXY_INDEX, NX_COARSE)]);
+                const dfloat mxy_ym3h = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_m3h, M_MXY_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_m3h, M_MXY_INDEX, NX_COARSE)]);
 
-                const dfloat myy_ymh = moments_coarse[idx_mom(xc, yc_mh, M_MYY_INDEX, NX_COARSE)];
-                const dfloat myy_yph = moments_coarse[idx_mom(xc, yc_ph, M_MYY_INDEX, NX_COARSE)];
-                const dfloat myy_ym3h = moments_coarse[idx_mom(xc, yc_m3h, M_MYY_INDEX, NX_COARSE)];
+                const dfloat myy_ymh = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_mh, M_MYY_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_mh, M_MYY_INDEX, NX_COARSE)]);
+                const dfloat myy_yph = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_ph, M_MYY_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_ph, M_MYY_INDEX, NX_COARSE)]);
+                const dfloat myy_ym3h = first_order_interpolation(
+                    moments_coarse[idx_mom(xc, yc_m3h, M_MYY_INDEX, NX_COARSE)],
+                    moments_coarse_old[idx_mom(xc, yc_m3h, M_MYY_INDEX, NX_COARSE)]);
 
                 const dfloat rho_mean = second_order_interpolation(rho_yph, rho_ymh, rho_ym3h);
 

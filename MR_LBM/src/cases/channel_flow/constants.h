@@ -46,8 +46,8 @@ constexpr dfloat RHO_0 = 1.0;
 constexpr dfloat MACH_NUMBER = U_MAX / 0.57735026918962;
 
 /* --------------------- INITIALIZATION LOADING DEFINES -------------------- */
-constexpr int N_STEPS = 1;
-constexpr int MACR_SAVE = 100;
+constexpr int N_STEPS = 1000;
+constexpr int MACR_SAVE = 1;
 
 #define BC_X_WALL
 #define BC_Y_WALL

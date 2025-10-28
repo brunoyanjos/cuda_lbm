@@ -11,16 +11,16 @@ constexpr dfloat W1 = 1.0 / 9;	// adjacent populations (1, 0, 0)
 constexpr dfloat W2 = 1.0 / 36; // diagonal populations (1, 1, 0)
 
 // velocities weight vector
-__device__ const dfloat w[Q] = {W0,
-								W1, W1, W1, W1,
-								W2, W2, W2, W2};
+const dfloat w[Q] = {W0,
+					 W1, W1, W1, W1,
+					 W2, W2, W2, W2};
 
 constexpr dfloat as2 = 3.0;
 constexpr dfloat cs2 = 1.0 / as2;
 
 // populations velocities      0  1  2  3  4  5  6  7  8
-__device__ constexpr dfloat cx[Q] = {0, 1, 0, -1, 0, 1, -1, -1, 1};
-__device__ constexpr dfloat cy[Q] = {0, 0, 1, 0, -1, 1, 1, -1, -1};
+constexpr dfloat cx[Q] = {0, 1, 0, -1, 0, 1, -1, -1, 1};
+constexpr dfloat cy[Q] = {0, 0, 1, 0, -1, 1, 1, -1, -1};
 
 constexpr dfloat F_M_0_SCALE = 1.0;
 constexpr dfloat F_M_I_SCALE = as2;
