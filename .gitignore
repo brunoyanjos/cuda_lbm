@@ -33,7 +33,10 @@ venv
 *sim*
 GRID/*
 LDC/*
+CYLINDER/*
 MR_LBM/*.dat
+MR_LBM/lit/*
+MR_LBM/x64/*
 MR_LBM/OUTPUT/*
 MR_LBM/CYLINDER/*
 MR_LBM/simulations/*
