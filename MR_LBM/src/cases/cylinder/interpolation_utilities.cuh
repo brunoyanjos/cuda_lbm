@@ -4,8 +4,8 @@
 #include "../../var.h"
 #include "../../globalFunctions.h"
 
-__device__
-inline void bilinear_density_interpolation(dfloat x, dfloat y, int x0, int y0, int x1, int y1, dfloat* moms, int mom_index, dfloat* r_f) {
+__device__ inline void bilinear_density_interpolation(dfloat x, dfloat y, int x0, int y0, int x1, int y1, dfloat *moms, int mom_index, dfloat *r_f)
+{
 	const dfloat xd = x - x0;
 	const dfloat yd = y - y0;
 
@@ -14,14 +14,14 @@ inline void bilinear_density_interpolation(dfloat x, dfloat y, int x0, int y0, i
 	const dfloat r3 = RHO_0 + moms[idxMom(x0 % BLOCK_NX, y1 % BLOCK_NY, mom_index, x0 / BLOCK_NX, y1 / BLOCK_NY)];
 	const dfloat r4 = RHO_0 + moms[idxMom(x1 % BLOCK_NX, y1 % BLOCK_NY, mom_index, x1 / BLOCK_NX, y1 / BLOCK_NY)];
 
-	const dfloat r_y0 = (1.0 - xd) * r1 + xd * r2;
-	const dfloat r_y1 = (1.0 - xd) * r3 + xd * r4;
+	const dfloat r_y0 = (static_cast<dfloat>(1.0) - xd) * r1 + xd * r2;
+	const dfloat r_y1 = (static_cast<dfloat>(1.0) - xd) * r3 + xd * r4;
 
-	*r_f = (1.0 - yd) * r_y0 + yd * r_y1;
+	*r_f = (static_cast<dfloat>(1.0) - yd) * r_y0 + yd * r_y1;
 }
 
-__device__
-inline void bilinear_velocity_interpolation(dfloat x, dfloat y, int x0, int y0, int x1, int y1, dfloat* moms, int mom_index, dfloat* u_f) {
+__device__ inline void bilinear_velocity_interpolation(dfloat x, dfloat y, int x0, int y0, int x1, int y1, dfloat *moms, int mom_index, dfloat *u_f)
+{
 	const dfloat xd = x - x0;
 	const dfloat yd = y - y0;
 
@@ -30,14 +30,14 @@ inline void bilinear_velocity_interpolation(dfloat x, dfloat y, int x0, int y0, 
 	const dfloat ux3 = moms[idxMom(x0 % BLOCK_NX, y1 % BLOCK_NY, mom_index, x0 / BLOCK_NX, y1 / BLOCK_NY)];
 	const dfloat ux4 = moms[idxMom(x1 % BLOCK_NX, y1 % BLOCK_NY, mom_index, x1 / BLOCK_NX, y1 / BLOCK_NY)];
 
-	const dfloat ux_y0 = (1.0 - xd) * ux1 + xd * ux2;
-	const dfloat ux_y1 = (1.0 - xd) * ux3 + xd * ux4;
+	const dfloat ux_y0 = (static_cast<dfloat>(1.0) - xd) * ux1 + xd * ux2;
+	const dfloat ux_y1 = (static_cast<dfloat>(1.0) - xd) * ux3 + xd * ux4;
 
-	*u_f = (1.0 - yd) * ux_y0 + yd * ux_y1;
+	*u_f = (static_cast<dfloat>(1.0) - yd) * ux_y0 + yd * ux_y1;
 }
 
-__device__
-inline void bilinear_moment_interpolation(dfloat x, dfloat y, int x0, int y0, int x1, int y1, dfloat* moms, dfloat* mxx_f, dfloat* myy_f) {
+__device__ inline void bilinear_moment_interpolation(dfloat x, dfloat y, int x0, int y0, int x1, int y1, dfloat *moms, dfloat *mxx_f, dfloat *myy_f)
+{
 
 	const dfloat xd = x - dfloat(x0);
 	const dfloat yd = y - dfloat(y0);
@@ -57,10 +57,10 @@ inline void bilinear_moment_interpolation(dfloat x, dfloat y, int x0, int y0, in
 	const dfloat sen_theta_3 = (dfloat(y1) - yc) / radius_3;
 	const dfloat sen_theta_4 = (dfloat(y1) - yc) / radius_4;
 
-	const dfloat sen_two_theta_1 = 2.0 * cos_theta_1 * sen_theta_1;
-	const dfloat sen_two_theta_2 = 2.0 * cos_theta_2 * sen_theta_2;
-	const dfloat sen_two_theta_3 = 2.0 * cos_theta_3 * sen_theta_3;
-	const dfloat sen_two_theta_4 = 2.0 * cos_theta_4 * sen_theta_4;
+	const dfloat sen_two_theta_1 = static_cast<dfloat>(2.0) * cos_theta_1 * sen_theta_1;
+	const dfloat sen_two_theta_2 = static_cast<dfloat>(2.0) * cos_theta_2 * sen_theta_2;
+	const dfloat sen_two_theta_3 = static_cast<dfloat>(2.0) * cos_theta_3 * sen_theta_3;
+	const dfloat sen_two_theta_4 = static_cast<dfloat>(2.0) * cos_theta_4 * sen_theta_4;
 
 	const dfloat mxx1 = moms[idxMom(x0 % BLOCK_NX, y0 % BLOCK_NY, M_MXX_INDEX, x0 / BLOCK_NX, y0 / BLOCK_NY)];
 	const dfloat mxx2 = moms[idxMom(x1 % BLOCK_NX, y0 % BLOCK_NY, M_MXX_INDEX, x1 / BLOCK_NX, y0 / BLOCK_NY)];
@@ -89,18 +89,18 @@ inline void bilinear_moment_interpolation(dfloat x, dfloat y, int x0, int y0, in
 	const dfloat mxx_p4 = mxx4 * cos_theta_4 * cos_theta_4 + myy4 * sen_theta_4 * sen_theta_4 + mxy4 * sen_two_theta_4;
 	const dfloat myy_p4 = mxx4 * sen_theta_4 * sen_theta_4 + myy4 * cos_theta_4 * cos_theta_4 - mxy4 * sen_two_theta_4;
 
-	const dfloat mxx_temp = (1.0 - xd) * mxx_p1 + xd * mxx_p2;
-	const dfloat mxx_temp2 = (1.0 - xd) * mxx_p3 + xd * mxx_p4;
+	const dfloat mxx_temp = (static_cast<dfloat>(1.0) - xd) * mxx_p1 + xd * mxx_p2;
+	const dfloat mxx_temp2 = (static_cast<dfloat>(1.0) - xd) * mxx_p3 + xd * mxx_p4;
 
-	const dfloat myy_temp = (1.0 - xd) * myy_p1 + xd * myy_p2;
-	const dfloat myy_temp2 = (1.0 - xd) * myy_p3 + xd * myy_p4;
+	const dfloat myy_temp = (static_cast<dfloat>(1.0) - xd) * myy_p1 + xd * myy_p2;
+	const dfloat myy_temp2 = (static_cast<dfloat>(1.0) - xd) * myy_p3 + xd * myy_p4;
 
-	*mxx_f = (1.0 - yd) * mxx_temp + yd * mxx_temp2;
-	*myy_f = (1.0 - yd) * myy_temp + yd * myy_temp2;
+	*mxx_f = (static_cast<dfloat>(1.0) - yd) * mxx_temp + yd * mxx_temp2;
+	*myy_f = (static_cast<dfloat>(1.0) - yd) * myy_temp + yd * myy_temp2;
 }
 
-__device__
-inline void pressure_extrapolation(dfloat xw, dfloat yw, dfloat x1, dfloat y1, dfloat x2, dfloat y2, dfloat x3, dfloat y3, dfloat rho1, dfloat rho2, dfloat rho3, dfloat* pressure) {
+__device__ inline void pressure_extrapolation(dfloat xw, dfloat yw, dfloat x1, dfloat y1, dfloat x2, dfloat y2, dfloat x3, dfloat y3, dfloat rho1, dfloat rho2, dfloat rho3, dfloat *pressure)
+{
 
 	// pressure interpolation
 	dfloat xw_diff = xw - xc;
@@ -138,11 +138,11 @@ inline void pressure_extrapolation(dfloat xw, dfloat yw, dfloat x1, dfloat y1, d
 	*pressure = a0 + a1 * rw + a2 * (rw * rw);
 }
 
-__device__
-inline dfloat extrapolation(dfloat delta, dfloat value1, dfloat value2) {
-	const dfloat deltax = sqrt(2.0);
+__device__ inline dfloat extrapolation(dfloat delta, dfloat value1, dfloat value2)
+{
+	const dfloat deltax = sqrt(static_cast<dfloat>(2.0));
 
-	return (delta * (delta - 2.0 * deltax) / (deltax * deltax)) * value1 - (delta * (delta - deltax) / (2.0 * deltax * deltax)) * value2;
+	return (delta * (delta - static_cast<dfloat>(2.0) * deltax) / (deltax * deltax)) * value1 - (delta * (delta - deltax) / (static_cast<dfloat>(2.0) * deltax * deltax)) * value2;
 }
 
 #endif

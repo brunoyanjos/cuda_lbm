@@ -10,8 +10,8 @@
 #include "../globalFunctions.h"
 #include "interface.h"
 
-__device__
-inline void pop_load(ghostInterfaceData ghostInterface, size_t tx, size_t ty, size_t bx, size_t by, dfloat* pop) {
+__device__ inline void pop_load(ghostInterfaceData ghostInterface, size_t tx, size_t ty, size_t bx, size_t by, dfloat *pop)
+{
     const int txm1 = (tx - 1 + BLOCK_NX) % BLOCK_NX;
     const int txp1 = (tx + 1 + BLOCK_NX) % BLOCK_NX;
 
@@ -52,31 +52,31 @@ inline void pop_load(ghostInterfaceData ghostInterface, size_t tx, size_t ty, si
     }
 }
 
-__device__
-inline void pop_save(ghostInterfaceData ghostInterface, size_t tx, size_t ty, size_t bx, size_t by, unsigned int x, unsigned int y, dfloat* pop) {
+__device__ inline void pop_save(ghostInterfaceData ghostInterface, size_t tx, size_t ty, size_t bx, size_t by, unsigned int x, unsigned int y, dfloat *pop)
+{
     /* write to global pop */
-    if (INTERFACE_BC_WEST)
+    if (tx == 0 && x != 0)
     { // w
         ghostInterface.gGhost.X_0[idxPopX(ty, 0, bx, by)] = pop[3];
         ghostInterface.gGhost.X_0[idxPopX(ty, 1, bx, by)] = pop[6];
         ghostInterface.gGhost.X_0[idxPopX(ty, 2, bx, by)] = pop[7];
     }
 
-    if (INTERFACE_BC_EAST)
+    if (tx == (BLOCK_NX - 1) && x != (NX - 1))
     { // e
         ghostInterface.gGhost.X_1[idxPopX(ty, 0, bx, by)] = pop[1];
         ghostInterface.gGhost.X_1[idxPopX(ty, 1, bx, by)] = pop[5];
         ghostInterface.gGhost.X_1[idxPopX(ty, 2, bx, by)] = pop[8];
     }
 
-    if (INTERFACE_BC_SOUTH)
+    if (ty == 0)
     { // s
         ghostInterface.gGhost.Y_0[idxPopY(tx, 0, bx, by)] = pop[4];
         ghostInterface.gGhost.Y_0[idxPopY(tx, 1, bx, by)] = pop[7];
         ghostInterface.gGhost.Y_0[idxPopY(tx, 2, bx, by)] = pop[8];
     }
 
-    if (INTERFACE_BC_NORTH)
+    if (ty == (BLOCK_NY - 1))
     { // n
         ghostInterface.gGhost.Y_1[idxPopY(tx, 0, bx, by)] = pop[2];
         ghostInterface.gGhost.Y_1[idxPopY(tx, 1, bx, by)] = pop[5];

@@ -47,8 +47,7 @@ constexpr dfloat MACH_NUMBER = U_MAX / 0.57735026918962;
 constexpr int INI_STEP = 0; // initial simulation step (0 default)
 
 #define BC_X_WALL
-#define BC_Y_WALL
-// #define BC_Y_PERIODIC
+#define BC_Y_PERIODIC
 
 constexpr bool IRBC = false;
 constexpr bool ROTATIONAL_COORDINATES = true;

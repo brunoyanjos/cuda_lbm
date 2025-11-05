@@ -74,9 +74,6 @@ int main()
 					 &D_Max, &h_cylinder_properties,
 					 d_cylinder_properties, &cylinder_count, &boundary_count);
 
-	printf("final_time: %d, begin_stat: %d\n", N_STEPS, STAT_BEGIN_TIME);
-	printf("count: %zu, d_max:%f\n", boundary_count, D_Max);
-
 	const dfloat VISC = U_MAX * D_Max / RE;
 	const dfloat TAU = 0.5 + 3.0 * VISC; // relaxation time
 	const dfloat OMEGA = 1.0 / TAU;		 // (tau)^-1

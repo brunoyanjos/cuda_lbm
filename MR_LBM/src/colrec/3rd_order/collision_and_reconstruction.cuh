@@ -8,8 +8,8 @@
 
 #include "../../var.h"
 
-__device__
-inline void pop_reconstruction(dfloat rhoVar, dfloat ux, dfloat uy, dfloat mxx, dfloat myy, dfloat mxy, dfloat* pop) {
+__device__ inline void pop_reconstruction(dfloat rhoVar, dfloat ux, dfloat uy, dfloat mxx, dfloat myy, dfloat mxy, dfloat *pop)
+{
 	dfloat mxxy = ux * mxy + uy * mxx;
 	dfloat mxyy = uy * mxy + ux * myy;
 
@@ -35,15 +35,11 @@ inline void pop_reconstruction(dfloat rhoVar, dfloat ux, dfloat uy, dfloat mxx, 
 	pop[8] = multiplyTerm * (pics2 + ux - uy + mxx + myy - mxy - one_cs2 * mxxy + one_cs2 * mxyy);
 }
 
-__device__
-inline void moment_collision(dfloat ux, dfloat uy, dfloat* mxx, dfloat* myy, dfloat* mxy,
-#ifdef CYLINDER
-dfloat OMEGA
-#endif
-) {
+__device__ inline void moment_collision(dfloat ux, dfloat uy, dfloat *mxx, dfloat *myy, dfloat *mxy, dfloat OMEGA)
+{
 	const dfloat omegaVar = OMEGA;
-	const dfloat t_omegaVar = 1 - omegaVar;
-	const dfloat omegaVar_d2 = omegaVar / 2;
+	const dfloat t_omegaVar = static_cast<dfloat>(1) - omegaVar;
+	const dfloat omegaVar_d2 = omegaVar * static_cast<dfloat>(0.5);
 
 	*mxx = (t_omegaVar * (*mxx) + omegaVar_d2 * ux * ux);
 	*myy = (t_omegaVar * (*myy) + omegaVar_d2 * uy * uy);
