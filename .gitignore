@@ -27,6 +27,10 @@ src/CUDA/x64
 *.test
 *.pdf
 *.dat
+venv
+*.png
+*.avi
+*sim*
 GRID/*
 LDC/*
 MR_LBM/*.dat
