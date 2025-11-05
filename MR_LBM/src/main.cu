@@ -71,11 +71,8 @@ int main()
 
 	initializeDomain(ghostInterface, d_fMom, h_fMom, hNodeType, dNodeType,
 					 &step, gridBlock, threadBlock,
-#ifdef CYLINDER
 					 &D_Max, &h_cylinder_properties,
-					 d_cylinder_properties, &cylinder_count, &boundary_count
-#endif
-	);
+					 d_cylinder_properties, &cylinder_count, &boundary_count);
 
 	printf("final_time: %d, begin_stat: %d\n", N_STEPS, STAT_BEGIN_TIME);
 	printf("count: %zu, d_max:%f\n", boundary_count, D_Max);
@@ -99,22 +96,17 @@ int main()
 	/* --------------------------------------------------------------------- */
 	for (step = INI_STEP; step < N_STEPS; step++)
 	{
-#ifdef CYLINDER
 		streamingAndMom<<<gridBlock, threadBlock>>>(d_fMom, OMEGA, cylinder_count, dNodeType, ghostInterface, d_cylinder_properties, step);
 		checkCudaErrors(cudaDeviceSynchronize());
 		updateInnerBoundaries<<<1, cylinder_count>>>(d_fMom, d_cylinder_properties, OMEGA, step);
 
 		checkCudaErrors(cudaDeviceSynchronize());
 		boundaryAndCollision<<<gridBlock, threadBlock>>>(d_fMom, cylinder_count, OMEGA, dNodeType, ghostInterface, d_cylinder_properties, step);
-#else
-		gpuMomCollisionStream<<<gridBlock, threadBlock>>>(d_fMom, dNodeType, ghostInterface, step);
-#endif
 
 		// swap interface pointers
 		checkCudaErrors(cudaDeviceSynchronize());
 		swapGhostInterfaces(ghostInterface);
 
-#ifdef CYLINDER
 		if (step >= STAT_BEGIN_TIME && step <= STAT_END_TIME)
 		{
 			checkCudaErrors(cudaDeviceSynchronize());
@@ -127,7 +119,6 @@ int main()
 			calculate_pressure(h_cylinder_properties, cylinder_count, boundary_count, step);
 			calculate_inlet_density(h_fMom, step, &rho_infty);
 		}
-#endif // CYLINDER
 
 		if (MACR_SAVE != 0 && step % MACR_SAVE == 0)
 		{

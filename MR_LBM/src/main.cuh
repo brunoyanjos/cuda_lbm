@@ -163,12 +163,9 @@ __host__ void initializeDomain(
 	dfloat *&d_fMom, dfloat *&h_fMom,
 	unsigned int *&hNodeType, unsigned int *&dNodeType, int *step,
 	dim3 gridBlock, dim3 threadBlock,
-#ifdef CYLINDER
 	dfloat *D_max, cylinderProperties **h_cylinder_properties,
 	cylinderProperties *&d_cylinder_properties,
-	size_t *cylinder_count, size_t *boundary_count
-#endif
-)
+	size_t *cylinder_count, size_t *boundary_count)
 {
 	// LBM Initialization
 	gpuInitialization_mom<<<gridBlock, threadBlock>>>(d_fMom);
@@ -180,11 +177,9 @@ __host__ void initializeDomain(
 	hostInitialization_nodeType_bulk(hNodeType);
 	hostInitialization_nodeType(hNodeType);
 
-#ifdef CYLINDER
 	hostInitialization_innerNodes(hNodeType, D_max, h_cylinder_properties, cylinder_count, boundary_count);
 	checkCudaErrors(cudaMalloc((void **)&d_cylinder_properties, sizeof(cylinderProperties) * (*cylinder_count)));
 	checkCudaErrors(cudaMemcpy(d_cylinder_properties, *h_cylinder_properties, sizeof(cylinderProperties) * (*cylinder_count), cudaMemcpyHostToDevice));
-#endif
 
 	checkCudaErrors(cudaMemcpy(dNodeType, hNodeType, sizeof(unsigned int) * NUMBER_LBM_NODES, cudaMemcpyHostToDevice));
 	checkCudaErrors(cudaDeviceSynchronize());
