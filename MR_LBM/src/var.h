@@ -12,9 +12,26 @@
 #include <cstring>
 
 /* ----------------------------- PROBLEM DEFINE ---------------------------- */
-typedef double dfloat;
+typedef float dfloat;
 
 #define GPU_INDEX 0
+/* -------------------------------  TEMPLATE ------------------------------- */
+
+template <typename T>
+__host__ __device__ inline T dsqrt(T x);
+
+template <>
+__host__ __device__ inline float dsqrt<float>(float x)
+{
+	return sqrtf(x);
+}
+
+template <>
+__host__ __device__ inline double dsqrt<double>(double x)
+{
+	return sqrt(x);
+}
+
 /* --------------------------  SIMULATION DEFINES -------------------------- */
 
 #define STR_IMPL(A) #A

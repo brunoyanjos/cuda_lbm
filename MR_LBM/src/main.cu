@@ -94,6 +94,7 @@ int main()
 	for (step = INI_STEP; step < N_STEPS; step++)
 	{
 		streamingAndMom<<<gridBlock, threadBlock>>>(d_fMom, OMEGA, cylinder_count, dNodeType, ghostInterface, d_cylinder_properties, step);
+
 		checkCudaErrors(cudaDeviceSynchronize());
 		updateInnerBoundaries<<<1, cylinder_count>>>(d_fMom, d_cylinder_properties, OMEGA, step);
 

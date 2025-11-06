@@ -24,10 +24,10 @@ __device__ inline cylinderProperties *findCylindeProperty(
 __device__ inline void immersedBoundaryLoop(
 	const int (&incomings)[9],
 	const dfloat (&pop)[9],
-	dfloat *rhoVar,
-	dfloat *m_xx_t45,
-	dfloat *m_yy_t45,
-	dfloat *m_xy_t90,
+	dfloat &rhoVar,
+	dfloat &m_xx_t45,
+	dfloat &m_yy_t45,
+	dfloat &m_xy_t90,
 	int x,
 	int y)
 {
@@ -78,10 +78,10 @@ __device__ inline void immersedBoundaryLoop(
 
 	const dfloat inv_rho_I = 1.0 / rho_I;
 
-	*rhoVar = rho_I;
-	*m_xx_t45 = m_xx_I * inv_rho_I;
-	*m_yy_t45 = m_yy_I * inv_rho_I;
-	*m_xy_t90 = m_xy_I * inv_rho_I;
+	rhoVar = rho_I;
+	m_xx_t45 = m_xx_I * inv_rho_I;
+	m_yy_t45 = m_yy_I * inv_rho_I;
+	m_xy_t90 = m_xy_I * inv_rho_I;
 }
 
 __device__ inline void incoming_forces(
