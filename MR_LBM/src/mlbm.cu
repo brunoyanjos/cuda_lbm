@@ -185,13 +185,13 @@ __global__ void updateInnerBoundaries(dfloat *fMom, cylinderProperties *cylinder
 		{
 			dfloat rho1;
 			dfloat rho2;
-			dfloat rho3;
+			// dfloat rho3;
 
 			bilinear_density_interpolation(property.x1, property.y1, int(property.x1), int(property.y1), int(property.x1) + 1, int(property.y1) + 1, fMom, M_RHO_INDEX, &rho1);
 			bilinear_density_interpolation(property.x2, property.y2, int(property.x2), int(property.y2), int(property.x2) + 1, int(property.y2) + 1, fMom, M_RHO_INDEX, &rho2);
-			bilinear_density_interpolation(property.x3, property.y3, int(property.x3), int(property.y3), int(property.x3) + 1, int(property.y3) + 1, fMom, M_RHO_INDEX, &rho3);
+			// bilinear_density_interpolation(property.x3, property.y3, int(property.x3), int(property.y3), int(property.x3) + 1, int(property.y3) + 1, fMom, M_RHO_INDEX, &rho3);
 
-			pressure_extrapolation(property.xw, property.yw, property.x1, property.y1, property.x2, property.y2, property.x3, property.y3, rho1, rho2, rho3, &(cylinder_properties[threadIdx.x].ps));
+			pressure_extrapolation(rhoVar, rho1, rho2, &(cylinder_properties[threadIdx.x].ps), property.dr);
 		}
 
 		const dfloat delta = property.dr;

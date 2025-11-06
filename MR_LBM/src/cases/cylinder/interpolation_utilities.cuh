@@ -99,7 +99,7 @@ __device__ inline void bilinear_moment_interpolation(dfloat x, dfloat y, int x0,
 	*myy_f = (static_cast<dfloat>(1.0) - yd) * myy_temp + yd * myy_temp2;
 }
 
-__device__ inline void pressure_extrapolation(dfloat xw, dfloat yw, dfloat x1, dfloat y1, dfloat x2, dfloat y2, dfloat x3, dfloat y3, dfloat rho1, dfloat rho2, dfloat rho3, dfloat *pressure)
+__device__ inline void pressure_extrapolation_old(dfloat xw, dfloat yw, dfloat x1, dfloat y1, dfloat x2, dfloat y2, dfloat x3, dfloat y3, dfloat rho1, dfloat rho2, dfloat rho3, dfloat *pressure)
 {
 
 	// pressure interpolation
@@ -136,6 +136,30 @@ __device__ inline void pressure_extrapolation(dfloat xw, dfloat yw, dfloat x1, d
 	dfloat a2 = (r3 * (p2 - p1) + r2 * (p1 - p3) + r1 * (p3 - p2)) / denom;
 
 	*pressure = a0 + a1 * rw + a2 * (rw * rw);
+}
+
+__device__ inline void pressure_extrapolation(dfloat rhob, dfloat rho1, dfloat rho2, dfloat *pressure, dfloat delta)
+{
+	dfloat pb = rhob * cs2;
+
+	dfloat p1 = rho1 * cs2;
+	dfloat p2 = rho2 * cs2;
+
+	const dfloat deltax = dsqrt(static_cast<dfloat>(2.0));
+
+	const dfloat deltax2 = deltax * deltax;
+	const dfloat inv_deltax2 = static_cast<dfloat>(1) / deltax2;
+
+	const dfloat delta2 = delta * delta;
+
+	const dfloat first_term = (static_cast<dfloat>(2) * deltax2 - delta2 + static_cast<dfloat>(3) * delta * deltax) * static_cast<dfloat>(0.5) * inv_deltax2;
+	const dfloat second_term = delta * (delta - static_cast<dfloat>(2.0) * deltax) * inv_deltax2;
+	const dfloat third_term = delta * (delta - deltax) * static_cast<dfloat>(0.5) * inv_deltax2;
+
+	const dfloat inv_first = static_cast<dfloat>(1) / first_term;
+
+	*pressure = (pb - second_term * p1 - third_term * p2) * inv_first;
+	;
 }
 
 __device__ inline dfloat extrapolation(dfloat delta, dfloat value1, dfloat value2)
