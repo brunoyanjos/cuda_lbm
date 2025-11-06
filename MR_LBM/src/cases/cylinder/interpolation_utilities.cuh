@@ -42,10 +42,10 @@ __device__ inline void bilinear_moment_interpolation(dfloat x, dfloat y, int x0,
 	const dfloat xd = x - dfloat(x0);
 	const dfloat yd = y - dfloat(y0);
 
-	const dfloat radius_1 = sqrt((dfloat(x0) - xc) * (dfloat(x0) - xc) + (dfloat(y0) - yc) * (dfloat(y0) - yc));
-	const dfloat radius_2 = sqrt((dfloat(x1) - xc) * (dfloat(x1) - xc) + (dfloat(y0) - yc) * (dfloat(y0) - yc));
-	const dfloat radius_3 = sqrt((dfloat(x0) - xc) * (dfloat(x0) - xc) + (dfloat(y1) - yc) * (dfloat(y1) - yc));
-	const dfloat radius_4 = sqrt((dfloat(x1) - xc) * (dfloat(x1) - xc) + (dfloat(y1) - yc) * (dfloat(y1) - yc));
+	const dfloat radius_1 = dsqrt((dfloat(x0) - xc) * (dfloat(x0) - xc) + (dfloat(y0) - yc) * (dfloat(y0) - yc));
+	const dfloat radius_2 = dsqrt((dfloat(x1) - xc) * (dfloat(x1) - xc) + (dfloat(y0) - yc) * (dfloat(y0) - yc));
+	const dfloat radius_3 = dsqrt((dfloat(x0) - xc) * (dfloat(x0) - xc) + (dfloat(y1) - yc) * (dfloat(y1) - yc));
+	const dfloat radius_4 = dsqrt((dfloat(x1) - xc) * (dfloat(x1) - xc) + (dfloat(y1) - yc) * (dfloat(y1) - yc));
 
 	const dfloat cos_theta_1 = (dfloat(x0) - xc) / radius_1;
 	const dfloat cos_theta_2 = (dfloat(x1) - xc) / radius_2;
@@ -120,10 +120,10 @@ __device__ inline void pressure_extrapolation(dfloat xw, dfloat yw, dfloat x1, d
 	dfloat r22 = x2_diff * x2_diff + y2_diff * y2_diff;
 	dfloat r32 = x3_diff * x3_diff + y3_diff * y3_diff;
 
-	dfloat rw = sqrt(rw2);
-	dfloat r1 = sqrt(r12);
-	dfloat r2 = sqrt(r22);
-	dfloat r3 = sqrt(r32);
+	dfloat rw = dsqrt(rw2);
+	dfloat r1 = dsqrt(r12);
+	dfloat r2 = dsqrt(r22);
+	dfloat r3 = dsqrt(r32);
 
 	dfloat denom = (r1 - r2) * (r1 - r3) * (r2 - r3);
 
@@ -140,7 +140,7 @@ __device__ inline void pressure_extrapolation(dfloat xw, dfloat yw, dfloat x1, d
 
 __device__ inline dfloat extrapolation(dfloat delta, dfloat value1, dfloat value2)
 {
-	const dfloat deltax = sqrt(static_cast<dfloat>(2.0));
+	const dfloat deltax = dsqrt(static_cast<dfloat>(2.0));
 
 	return (delta * (delta - static_cast<dfloat>(2.0) * deltax) / (deltax * deltax)) * value1 - (delta * (delta - deltax) / (static_cast<dfloat>(2.0) * deltax * deltax)) * value2;
 }

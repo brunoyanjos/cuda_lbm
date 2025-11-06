@@ -145,7 +145,7 @@ __global__ void updateInnerBoundaries(dfloat *fMom, cylinderProperties *cylinder
 	dfloat m_xy_t90 = fMom[idxMom(tx, ty, M_MXY_INDEX, bx, by)];
 	dfloat m_yy_t45 = fMom[idxMom(tx, ty, M_MYY_INDEX, bx, by)];
 
-	if (!property.isBulk)
+	if (property.isBulk == false)
 	{
 		// for first point
 

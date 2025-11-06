@@ -16,7 +16,7 @@ __host__ void calculate_pressure(cylinderProperties *h_cylinder_properties, unsi
 		{
 			cylinderProperties property = h_cylinder_properties[i];
 
-			if (!property.isBulk)
+			if (property.isBulk == false)
 			{
 				data_file << std::setprecision(10) << " " << property.theta;
 			}
@@ -38,7 +38,7 @@ __host__ void calculate_pressure(cylinderProperties *h_cylinder_properties, unsi
 	{
 		cylinderProperties property = h_cylinder_properties[i];
 
-		if (!property.isBulk)
+		if (property.isBulk == false)
 		{
 			data_file << std::setprecision(10) << " " << property.ps;
 		}
