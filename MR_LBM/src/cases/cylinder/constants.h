@@ -7,21 +7,21 @@ constexpr dfloat RE = 100;
 
 constexpr int SCALE = 1;
 
-constexpr int D = 16; // Diameter of the cylinder
+constexpr int D = 32; // Diameter of the cylinder
 
-constexpr int HD = 10 * D; // Height of the Domain !!!!should be a odd number!!!!
-constexpr int LD = 60 * D; // Length of the Domain
-constexpr int L_front = 15 * D;
+constexpr int HD = 8 * D;  // Height of the Domain !!!!should be a odd number!!!!
+constexpr int LD = 32 * D; // Length of the Domain
+constexpr int L_front = 8 * D;
 
-constexpr int L_bot = (HD - D) / 2;
+constexpr int L_bot = HD;
 constexpr int L_top = L_bot;
 
 constexpr int L_back = LD - L_front - D;
 
 constexpr int N = 1 * SCALE;
 
-constexpr int NX = LD; // size x of the grid
-constexpr int NY = HD; // size y of the grid
+constexpr int NX = LD;                // size x of the grid
+constexpr int NY = L_bot + L_bot + D; // size y of the grid
 
 constexpr dfloat xc = (dfloat)(L_front + D * 0.5);
 constexpr dfloat yc = (dfloat)(L_bot + D * 0.5);
