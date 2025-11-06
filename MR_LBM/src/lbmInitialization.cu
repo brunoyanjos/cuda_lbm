@@ -242,103 +242,108 @@ __host__ void hostInitialization_innerNodes(
 				int bit_4 = node_2 != BULK && node_3 != BULK && node_6 != BULK ? 0 : 1;
 				int bit_8 = node_1 != BULK && node_2 != BULK && node_5 != BULK ? 0 : 1;
 
-				if (bit_1 + bit_2 + bit_4 + bit_8 > 1)
-				{
-					(*cylinder_properties)[count].isBulk = false;
+				(*cylinder_properties)[count].isBulk = false;
 
-					hNodeType[idxScalarBlock(x % BLOCK_NX, y % BLOCK_NY, x / BLOCK_NX, y / BLOCK_NY)] = 100;
-					cylinder_count++;
-				}
-				else
-				{
-					(*cylinder_properties)[count].isBulk = true;
+				hNodeType[idxScalarBlock(x % BLOCK_NX, y % BLOCK_NY, x / BLOCK_NX, y / BLOCK_NY)] = 100;
+				cylinder_count++;
 
-					if (bit_1)
-					{
-						(*cylinder_properties)[count].xb = xm1;
-						(*cylinder_properties)[count].yb = ym1;
-					}
-					else if (bit_2)
-					{
-						(*cylinder_properties)[count].xb = xp1;
-						(*cylinder_properties)[count].yb = ym1;
-					}
-					else if (bit_4)
-					{
-						(*cylinder_properties)[count].xb = xm1;
-						(*cylinder_properties)[count].yb = yp1;
-					}
-					else if (bit_8)
-					{
-						(*cylinder_properties)[count].xb = xp1;
-						(*cylinder_properties)[count].yb = yp1;
-					}
-				}
+				// if (bit_1 + bit_2 + bit_4 + bit_8 > 1)
+				// {
+				// 	(*cylinder_properties)[count].isBulk = false;
+
+				// 	hNodeType[idxScalarBlock(x % BLOCK_NX, y % BLOCK_NY, x / BLOCK_NX, y / BLOCK_NY)] = 100;
+				// 	cylinder_count++;
+				// }
+				// else
+				// {
+				// 	(*cylinder_properties)[count].isBulk = true;
+
+				// 	if (bit_1)
+				// 	{
+				// 		(*cylinder_properties)[count].xb = xm1;
+				// 		(*cylinder_properties)[count].yb = ym1;
+				// 	}
+				// 	else if (bit_2)
+				// 	{
+				// 		(*cylinder_properties)[count].xb = xp1;
+				// 		(*cylinder_properties)[count].yb = ym1;
+				// 	}
+				// 	else if (bit_4)
+				// 	{
+				// 		(*cylinder_properties)[count].xb = xm1;
+				// 		(*cylinder_properties)[count].yb = yp1;
+				// 	}
+				// 	else if (bit_8)
+				// 	{
+				// 		(*cylinder_properties)[count].xb = xp1;
+				// 		(*cylinder_properties)[count].yb = yp1;
+				// 	}
+				// }
 
 				count++;
 			}
 		}
 	}
 
-	for (int y = L_bot - 1; y < L_bot + D + 2; y++)
-	{
-		for (int x = L_front - 1; x < L_front + D + 2; x++)
-		{
-			const unsigned short int xp1 = x + 1;
-			const unsigned short int xm1 = x - 1;
+	// for (int y = L_bot - 1; y < L_bot + D + 2; y++)
+	// {
+	// 	for (int x = L_front - 1; x < L_front + D + 2; x++)
+	// 	{
+	// 		const unsigned short int xp1 = x + 1;
+	// 		const unsigned short int xm1 = x - 1;
 
-			const unsigned short int yp1 = y + 1;
-			const unsigned short int ym1 = y - 1;
+	// 		const unsigned short int yp1 = y + 1;
+	// 		const unsigned short int ym1 = y - 1;
 
-			int node_0 = hNodeType[idxScalarBlock(x % BLOCK_NX, y % BLOCK_NY, x / BLOCK_NX, y / BLOCK_NY)];
-			int node_1 = hNodeType[idxScalarBlock(xp1 % BLOCK_NX, y % BLOCK_NY, xp1 / BLOCK_NX, y / BLOCK_NY)];
-			int node_2 = hNodeType[idxScalarBlock(x % BLOCK_NX, yp1 % BLOCK_NY, x / BLOCK_NX, yp1 / BLOCK_NY)];
-			int node_3 = hNodeType[idxScalarBlock(xm1 % BLOCK_NX, y % BLOCK_NY, xm1 / BLOCK_NX, y / BLOCK_NY)];
-			int node_4 = hNodeType[idxScalarBlock(x % BLOCK_NX, ym1 % BLOCK_NY, x / BLOCK_NX, ym1 / BLOCK_NY)];
-			int node_5 = hNodeType[idxScalarBlock(xp1 % BLOCK_NX, yp1 % BLOCK_NY, xp1 / BLOCK_NX, yp1 / BLOCK_NY)];
-			int node_6 = hNodeType[idxScalarBlock(xm1 % BLOCK_NX, yp1 % BLOCK_NY, xm1 / BLOCK_NX, yp1 / BLOCK_NY)];
-			int node_7 = hNodeType[idxScalarBlock(xm1 % BLOCK_NX, ym1 % BLOCK_NY, xm1 / BLOCK_NX, ym1 / BLOCK_NY)];
-			int node_8 = hNodeType[idxScalarBlock(xp1 % BLOCK_NX, ym1 % BLOCK_NY, xp1 / BLOCK_NX, ym1 / BLOCK_NY)];
+	// 		int node_0 = hNodeType[idxScalarBlock(x % BLOCK_NX, y % BLOCK_NY, x / BLOCK_NX, y / BLOCK_NY)];
+	// 		int node_1 = hNodeType[idxScalarBlock(xp1 % BLOCK_NX, y % BLOCK_NY, xp1 / BLOCK_NX, y / BLOCK_NY)];
+	// 		int node_2 = hNodeType[idxScalarBlock(x % BLOCK_NX, yp1 % BLOCK_NY, x / BLOCK_NX, yp1 / BLOCK_NY)];
+	// 		int node_3 = hNodeType[idxScalarBlock(xm1 % BLOCK_NX, y % BLOCK_NY, xm1 / BLOCK_NX, y / BLOCK_NY)];
+	// 		int node_4 = hNodeType[idxScalarBlock(x % BLOCK_NX, ym1 % BLOCK_NY, x / BLOCK_NX, ym1 / BLOCK_NY)];
+	// 		int node_5 = hNodeType[idxScalarBlock(xp1 % BLOCK_NX, yp1 % BLOCK_NY, xp1 / BLOCK_NX, yp1 / BLOCK_NY)];
+	// 		int node_6 = hNodeType[idxScalarBlock(xm1 % BLOCK_NX, yp1 % BLOCK_NY, xm1 / BLOCK_NX, yp1 / BLOCK_NY)];
+	// 		int node_7 = hNodeType[idxScalarBlock(xm1 % BLOCK_NX, ym1 % BLOCK_NY, xm1 / BLOCK_NX, ym1 / BLOCK_NY)];
+	// 		int node_8 = hNodeType[idxScalarBlock(xp1 % BLOCK_NX, ym1 % BLOCK_NY, xp1 / BLOCK_NX, ym1 / BLOCK_NY)];
 
-			bool anyBulk =
-				node_1 == BULK ||
-				node_2 == BULK ||
-				node_3 == BULK ||
-				node_4 == BULK ||
-				node_5 == BULK ||
-				node_6 == BULK ||
-				node_7 == BULK ||
-				node_8 == BULK;
+	// 		bool anyBulk =
+	// 			node_1 == BULK ||
+	// 			node_2 == BULK ||
+	// 			node_3 == BULK ||
+	// 			node_4 == BULK ||
+	// 			node_5 == BULK ||
+	// 			node_6 == BULK ||
+	// 			node_7 == BULK ||
+	// 			node_8 == BULK;
 
-			if (node_0 == SOLID_NODE && anyBulk)
-			{
-				int bit_1 = node_3 != BULK && node_4 != BULK && node_7 != BULK ? 0 : 1;
-				int bit_2 = node_1 != BULK && node_4 != BULK && node_8 != BULK ? 0 : 1;
-				int bit_4 = node_2 != BULK && node_3 != BULK && node_6 != BULK ? 0 : 1;
-				int bit_8 = node_1 != BULK && node_2 != BULK && node_5 != BULK ? 0 : 1;
+	// 		if (node_0 == SOLID_NODE && anyBulk)
+	// 		{
+	// 			int bit_1 = node_3 != BULK && node_4 != BULK && node_7 != BULK ? 0 : 1;
+	// 			int bit_2 = node_1 != BULK && node_4 != BULK && node_8 != BULK ? 0 : 1;
+	// 			int bit_4 = node_2 != BULK && node_3 != BULK && node_6 != BULK ? 0 : 1;
+	// 			int bit_8 = node_1 != BULK && node_2 != BULK && node_5 != BULK ? 0 : 1;
 
-				if (bit_1 + bit_2 + bit_4 + bit_8 == 1)
-				{
-					if (bit_1)
-					{
-						hNodeType[idxScalarBlock(xm1 % BLOCK_NX, ym1 % BLOCK_NY, xm1 / BLOCK_NX, ym1 / BLOCK_NY)] = 203;
-					}
-					else if (bit_2)
-					{
-						hNodeType[idxScalarBlock(xp1 % BLOCK_NX, ym1 % BLOCK_NY, xp1 / BLOCK_NX, ym1 / BLOCK_NY)] = 204;
-					}
-					else if (bit_4)
-					{
-						hNodeType[idxScalarBlock(xm1 % BLOCK_NX, yp1 % BLOCK_NY, xm1 / BLOCK_NX, yp1 / BLOCK_NY)] = 201;
-					}
-					else if (bit_8)
-					{
-						hNodeType[idxScalarBlock(xp1 % BLOCK_NX, yp1 % BLOCK_NY, xp1 / BLOCK_NX, yp1 / BLOCK_NY)] = 202;
-					}
-				}
-			}
-		}
-	}
+	// 			if (bit_1 + bit_2 + bit_4 + bit_8 == 1)
+	// 			{
+	// 				if (bit_1)
+	// 				{
+	// 					hNodeType[idxScalarBlock(xm1 % BLOCK_NX, ym1 % BLOCK_NY, xm1 / BLOCK_NX, ym1 / BLOCK_NY)] = 203;
+	// 				}
+	// 				else if (bit_2)
+	// 				{
+	// 					hNodeType[idxScalarBlock(xp1 % BLOCK_NX, ym1 % BLOCK_NY, xp1 / BLOCK_NX, ym1 / BLOCK_NY)] = 204;
+	// 				}
+	// 				else if (bit_4)
+	// 				{
+	// 					hNodeType[idxScalarBlock(xm1 % BLOCK_NX, yp1 % BLOCK_NY, xm1 / BLOCK_NX, yp1 / BLOCK_NY)] = 201;
+	// 				}
+	// 				else if (bit_8)
+	// 				{
+	// 					hNodeType[idxScalarBlock(xp1 % BLOCK_NX, yp1 % BLOCK_NY, xp1 / BLOCK_NX, yp1 / BLOCK_NY)] = 202;
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	for (int i = 0; i < count; i++)
 	{
