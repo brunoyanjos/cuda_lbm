@@ -56,11 +56,9 @@ __host__ void calculate_forces(cylinderProperties *h_cylinder_properties, unsign
 
 	for (int i = 0; i < count; i++)
 	{
-		if (!h_cylinder_properties[i].isBulk)
-		{
-			f_x_net += h_cylinder_properties[i].Fx;
-			f_y_net += h_cylinder_properties[i].Fy;
-		}
+
+		f_x_net += h_cylinder_properties[i].Fx;
+		f_y_net += h_cylinder_properties[i].Fy;
 	}
 
 	// write to a file

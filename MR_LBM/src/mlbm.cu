@@ -80,8 +80,15 @@ __global__ void streamingAndMom(
 		}
 		else if (nodeType > 200)
 		{
+			cylinderProperties *bc_property = findCylindeProperty(cylinder_properties, cylinder_counter, x, y);
+
 			fluid_boundary_evaluation(nodeType, cylinder_properties, cylinder_counter, pop, OMEGA,
 									  rhoVar, ux_t30, uy_t30, m_xx_t45, m_yy_t45, m_xy_t90, x, y);
+
+			if (step >= STAT_BEGIN_TIME && step <= STAT_END_TIME && CALCULATE_FORCES)
+			{
+				incoming_forces(bc_property, pop);
+			}
 		}
 		else
 		{
@@ -185,13 +192,26 @@ __global__ void updateInnerBoundaries(dfloat *fMom, cylinderProperties *cylinder
 		{
 			dfloat rho1;
 			dfloat rho2;
-			// dfloat rho3;
+			dfloat rho3;
 
-			bilinear_density_interpolation(property.x1, property.y1, int(property.x1), int(property.y1), int(property.x1) + 1, int(property.y1) + 1, fMom, M_RHO_INDEX, &rho1);
-			bilinear_density_interpolation(property.x2, property.y2, int(property.x2), int(property.y2), int(property.x2) + 1, int(property.y2) + 1, fMom, M_RHO_INDEX, &rho2);
-			// bilinear_density_interpolation(property.x3, property.y3, int(property.x3), int(property.y3), int(property.x3) + 1, int(property.y3) + 1, fMom, M_RHO_INDEX, &rho3);
+			bilinear_density_interpolation(property.x1, property.y1,
+										   int(property.x1), int(property.y1),
+										   int(property.x1) + 1, int(property.y1) + 1,
+										   fMom, M_RHO_INDEX, &rho1);
+			bilinear_density_interpolation(property.x2, property.y2,
+										   int(property.x2), int(property.y2),
+										   int(property.x2) + 1, int(property.y2) + 1,
+										   fMom, M_RHO_INDEX, &rho2);
+			bilinear_density_interpolation(property.x3, property.y3,
+										   int(property.x3), int(property.y3),
+										   int(property.x3) + 1, int(property.y3) + 1,
+										   fMom, M_RHO_INDEX, &rho3);
 
-			pressure_extrapolation(rhoVar, rho1, rho2, &(cylinder_properties[threadIdx.x].ps), property.dr);
+			pressure_extrapolation_old(property.xw, property.yw,
+									   property.x1, property.y1,
+									   property.x2, property.y2,
+									   property.x3, property.y3,
+									   rho1, rho2, rho3, &(cylinder_properties[threadIdx.x].ps));
 		}
 
 		const dfloat delta = property.dr;
@@ -264,7 +284,7 @@ __global__ void boundaryAndCollision(
 
 	pop_reconstruction(rhoVar, ux_t30, uy_t30, m_xx_t45, m_yy_t45, m_xy_t90, pop);
 
-	if (nodeType == 100 && step >= STAT_BEGIN_TIME && step <= STAT_END_TIME && CALCULATE_FORCES)
+	if (nodeType >= 100 && step >= STAT_BEGIN_TIME && step <= STAT_END_TIME && CALCULATE_FORCES)
 	{
 		cylinderProperties *bc_property = findCylindeProperty(cylinder_properties, cylinder_count, x, y);
 
