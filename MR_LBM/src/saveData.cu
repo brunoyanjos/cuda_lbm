@@ -1,180 +1,217 @@
 #include "saveData.cuh"
 
 __host__ void saveMacr(
-	dfloat* h_fMom, dfloat* rho, dfloat* ux, dfloat* uy, unsigned int nSteps
-)
+	dfloat *h_fMom, dfloat *rho, dfloat *ux, dfloat *uy, unsigned int nSteps)
 {
 	int x, y;
-
-	// linearize
 	size_t indexMacr;
-	// double uSum = 0;
-	// double t_star = 0;
-	
-	// printf("\n--------------------------- Save macr %d ---------------------------\n", step);
 
+	// ---------------------------------------------------------------------
+	// 1) Reconstrói campos macroscópicos (pode zerar se quiser testar)
+	// ---------------------------------------------------------------------
 	for (y = 0; y < NY; y++)
 	{
 		for (x = 0; x < NX; x++)
 		{
 			indexMacr = idxScalarGlobal(x, y);
 
-			rho[indexMacr] = RHO_0 + h_fMom[idxMom(x % BLOCK_NX, y % BLOCK_NY, M_RHO_INDEX, x / BLOCK_NX, y / BLOCK_NY)];
-			ux[indexMacr] = h_fMom[idxMom(x % BLOCK_NX, y % BLOCK_NY, M_UX_INDEX, x / BLOCK_NX, y / BLOCK_NY)] / F_M_I_SCALE;
-			uy[indexMacr] = h_fMom[idxMom(x % BLOCK_NX, y % BLOCK_NY, M_UY_INDEX, x / BLOCK_NX, y / BLOCK_NY)] / F_M_I_SCALE;
+			rho[indexMacr] =
+				RHO_0 +
+				h_fMom[idxMom(x % BLOCK_NX, y % BLOCK_NY,
+							  M_RHO_INDEX, x / BLOCK_NX, y / BLOCK_NY)];
 
+			ux[indexMacr] =
+				h_fMom[idxMom(x % BLOCK_NX, y % BLOCK_NY,
+							  M_UX_INDEX, x / BLOCK_NX, y / BLOCK_NY)] /
+				F_M_I_SCALE;
+
+			uy[indexMacr] =
+				h_fMom[idxMom(x % BLOCK_NX, y % BLOCK_NY,
+							  M_UY_INDEX, x / BLOCK_NX, y / BLOCK_NY)] /
+				F_M_I_SCALE;
 		}
 	}
 
-	// Sakthi-modifications
-	// Creating master.p3d file
-	// ======================================================================================================================
-	std::string strInf = PATH_FILES;
-	strInf += "/";
-	strInf += ID_SIM;
-	strInf += "/";
-	strInf += "master.p3d"; // generate file name (with path)
-	std::string prefix = "data";
-	std::string suffix = ".f";
-	std::ostringstream master_file;
-	master_file << strInf;
-	std::ofstream out(master_file.str());
-	out << "{" << std::endl;;
-	out << std::endl;;
-	out << " \"auto-detect-format\": true," << std::endl;;
-	out << std::endl;;
-	out << " \"filenames\": [" << std::endl;;
-	out << std::endl;;
+	const int nprocs = 1;
+	const int nz = 1; // 2D em PLOT3D
+	const int nf = 3; // rho, ux, uy
+	const std::string prefix = "data";
+	const std::string suffix = ".f";
 
-	for (int iter = 1; iter < N_STEPS; iter++) {
-		if (iter % MACR_SAVE == 0) {
-			std::ostringstream filename_temp;
-			filename_temp << prefix << (10000000 + iter) << suffix;
-			std::string filename = filename_temp.str();
+	// Caminho base dos arquivos
+	std::string basePath = std::string(PATH_FILES) + "/" + ID_SIM + "/";
 
-			if (out.is_open()) {
-				out << "{ \"time\" :  " << iter / MACR_SAVE << ", \"xyz\" : \"grid.x\", \"function\" : \"" << filename << "\" }," << std::endl;;
+	// ---------------------------------------------------------------------
+	// 2) master.p3d – só precisa ser criado uma vez (nSteps == 0)
+	//    aqui desligamos o auto-detect e descrevemos o formato explicitamente
+	// ---------------------------------------------------------------------
+	if (nSteps == 0)
+	{
+		std::string metaFile = basePath + "master.p3d";
+		std::ofstream out(metaFile.c_str());
+		if (!out)
+		{
+			std::cerr << "Erro abrindo master.p3d\n";
+		}
+		else
+		{
+			out << "{\n";
+			out << "  \"auto-detect-format\" : false,\n";
+			out << "  \"format\"            : \"binary\",\n";
+			out << "  \"byte-order\"        : \"little\",\n";
+			out << "  \"precision\"         : 32,\n";
+			out << "  \"multi-grid\"        : true,\n";
+			out << "  \"language\"          : \"C\",\n";
+			out << "  \"blanking\"          : false,\n";
+			out << "  \"2D\"                : true,\n";
+			out << "  \"filenames\"         : [\n";
+
+			bool first = true;
+			for (int iter = 1; iter < N_STEPS; ++iter)
+			{
+				if (iter % MACR_SAVE == 0)
+				{
+					if (!first)
+						out << ",\n";
+					first = false;
+
+					out << "    { \"time\" : "
+						<< (iter / MACR_SAVE)
+						<< ", \"xyz\" : \"grid.x\", \"function\" : \""
+						<< prefix << (10000000 + iter) << suffix << "\" }";
+				}
 			}
-			else {
-				std::cerr << "Failed to open file: master.p3d" << std::endl;
-			}
-
+			out << "\n  ]\n";
+			out << "}\n";
 		}
 	}
-	out << std::endl;;
-	out << "]" << std::endl;;
-	out << "}" << std::endl;;
-	out.close();
-	// ======================================================================================================================
 
-	// writing grid.x file
-	// -------------------------------------------------------------------------------------------------------
-	int nprocs = 1;
-	if(nSteps==0){
-		std::string strInf2 = PATH_FILES;
-		strInf2 += "/";
-		strInf2 += ID_SIM;
-		strInf2 += "/";
-		strInf2 += "grid.x"; // generate file name (with path)
-
-		std::ofstream gridfile(strInf2, std::ios::binary);
-		if (!gridfile) {
-			std::cerr << "Error opening grid file" << std::endl;
+	// ---------------------------------------------------------------------
+	// 3) grid.x – geometria PLOT3D (XYZ)
+	//    também só precisa uma vez, no início da simulação
+	// ---------------------------------------------------------------------
+	if (nSteps == 0)
+	{
+		std::string gridFile = basePath + "grid.x";
+		std::ofstream grid(gridFile.c_str(), std::ios::binary);
+		if (!grid)
+		{
+			std::cerr << "Erro abrindo grid.x\n";
+			return;
 		}
 
-		// Write nprocs
-		gridfile.write(reinterpret_cast<const char*>(&nprocs), sizeof(int));
+		// número de blocos
+		grid.write(reinterpret_cast<const char *>(&nprocs), sizeof(int));
 
-		// Write (nx, ny) for each processor (Fortran loop: m = 1 to nprocs)
-		for (int m = 1; m <= nprocs; ++m) {
-			gridfile.write(reinterpret_cast<const char*>(&NX), sizeof(int));
-			gridfile.write(reinterpret_cast<const char*>(&NY), sizeof(int));
+		// (NI, NJ, NK) de cada bloco
+		for (int p = 0; p < nprocs; ++p)
+		{
+			grid.write(reinterpret_cast<const char *>(&NX), sizeof(int));
+			grid.write(reinterpret_cast<const char *>(&NY), sizeof(int));
+			grid.write(reinterpret_cast<const char *>(&nz), sizeof(int));
 		}
 
-		// Write x and y arrays for each processor (m = 0 to nprocs - 1)
-		for (int m = 0; m < nprocs; ++m) {
-			// Fortran is column-major: loop j outer, i inner
+		// X(i,j,k)
+		for (int k = 0; k < nz; ++k)
 			for (int j = 0; j < NY; ++j)
-				for (int i = 0; i < NX; ++i) {
-					float val = double(i);  // already float
-					gridfile.write(reinterpret_cast<const char*>(&val), sizeof(float));
+				for (int i = 0; i < NX; ++i)
+				{
+					float v = static_cast<float>(i);
+					grid.write(reinterpret_cast<const char *>(&v), sizeof(float));
 				}
 
+		// Y(i,j,k)
+		for (int k = 0; k < nz; ++k)
 			for (int j = 0; j < NY; ++j)
-				for (int i = 0; i < NX; ++i) {
-					float val = double(j);
-					gridfile.write(reinterpret_cast<const char*>(&val), sizeof(float));
+				for (int i = 0; i < NX; ++i)
+				{
+					float v = static_cast<float>(j);
+					grid.write(reinterpret_cast<const char *>(&v), sizeof(float));
+				}
+
+		// Z(i,j,k) = 0
+		for (int k = 0; k < nz; ++k)
+			for (int j = 0; j < NY; ++j)
+				for (int i = 0; i < NX; ++i)
+				{
+					float v = 0.0f;
+					grid.write(reinterpret_cast<const char *>(&v), sizeof(float));
+				}
+
+		grid.close();
+	}
+
+	// ---------------------------------------------------------------------
+	// 4) Arquivo de dados PLOT3D (functions) – um por nSteps salvo
+	// ---------------------------------------------------------------------
+	{
+		std::ostringstream fname;
+		fname << basePath << prefix << (10000000 + nSteps) << suffix;
+		std::string filename = fname.str();
+
+		std::ofstream datafile(filename.c_str(), std::ios::binary);
+		if (!datafile)
+		{
+			std::cerr << "Erro abrindo " << filename << "\n";
+			return;
+		}
+
+		// nprocs
+		datafile.write(reinterpret_cast<const char *>(&nprocs), sizeof(int));
+
+		// (NI, NJ, NK, NF) por bloco
+		for (int p = 0; p < nprocs; ++p)
+		{
+			datafile.write(reinterpret_cast<const char *>(&NX), sizeof(int));
+			datafile.write(reinterpret_cast<const char *>(&NY), sizeof(int));
+			datafile.write(reinterpret_cast<const char *>(&nz), sizeof(int));
+			datafile.write(reinterpret_cast<const char *>(&nf), sizeof(int));
+		}
+
+		// Campos na ordem: rho, ux, uy (3 * NX*NY*nz floats)
+		for (int k = 0; k < nz; ++k)
+		{
+			// rho
+			for (int j = 0; j < NY; ++j)
+				for (int i = 0; i < NX; ++i)
+				{
+					indexMacr = idxScalarGlobal(i, j);
+					float val = static_cast<float>(rho[indexMacr]);
+					datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
+				}
+
+			// ux
+			for (int j = 0; j < NY; ++j)
+				for (int i = 0; i < NX; ++i)
+				{
+					indexMacr = idxScalarGlobal(i, j);
+					float val = static_cast<float>(ux[indexMacr]);
+					datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
+				}
+
+			// uy
+			for (int j = 0; j < NY; ++j)
+				for (int i = 0; i < NX; ++i)
+				{
+					indexMacr = idxScalarGlobal(i, j);
+					float val = static_cast<float>(uy[indexMacr]);
+					datafile.write(reinterpret_cast<const char *>(&val), sizeof(float));
 				}
 		}
+
+		datafile.close();
 	}
 
-
-	// datafile
-
-	std::ostringstream filename_temp;
-
-	std::string strInf3 = PATH_FILES;
-	strInf3 += "/";
-	strInf3 += ID_SIM;
-	strInf3 += "/";
-	filename_temp << strInf3 << prefix << (10000000 + nSteps) << suffix;
-	std::string filename = filename_temp.str();
-
-	std::ofstream datafile(filename, std::ios::binary);
-	if (!datafile) {
-		std::cerr << "Error opening grid file" << std::endl;
-	}
-
-	// Write nprocs
-	datafile.write(reinterpret_cast<const char*>(&nprocs), sizeof(int));
-
-	// Write (nx, ny) for each processor (Fortran loop: m = 1 to nprocs)
-	for (int l = 0; l < nprocs; ++l) {
-		datafile.write(reinterpret_cast<const char*>(&NX), sizeof(int));
-		datafile.write(reinterpret_cast<const char*>(&NY), sizeof(int));
-		int nf = 3;  // 3 fields: rho, ux, uy
-		datafile.write(reinterpret_cast<const char*>(&nf), sizeof(int));
-	}
-
-	// Write x and y arrays for each processor (m = 0 to nprocs - 1)
-	for (int m = 0; m < nprocs; ++m) {
-		// Fortran is column-major: loop j outer, i inner
-		for (int j = 0; j < NY; ++j)
-			for (int i = 0; i < NX; ++i) {
-				indexMacr = idxScalarGlobal(i, j);
-				float val = rho[indexMacr];  // already float
-				datafile.write(reinterpret_cast<const char*>(&val), sizeof(float));
-			}
-
-		for (int j = 0; j < NY; ++j)
-			for (int i = 0; i < NX; ++i) {
-				indexMacr = idxScalarGlobal(i, j);
-				float val = ux[indexMacr];
-				datafile.write(reinterpret_cast<const char*>(&val), sizeof(float));
-			}
-
-		for (int j = 0; j < NY; ++j)
-			for (int i = 0; i < NX; ++i) {
-				indexMacr = idxScalarGlobal(i, j);
-				float val = uy[indexMacr];
-				datafile.write(reinterpret_cast<const char*>(&val), sizeof(float));
-			}
-	}
-	datafile.close();
-
-
-	std::string strFileRho, strFileUx, strFileUy;
-
-	strFileRho = getVarFilename("rho", nSteps, ".bin");
-	strFileUx = getVarFilename("ux", nSteps, ".bin");
-	strFileUy = getVarFilename("uy", nSteps, ".bin");
+	// Saídas auxiliares da tua infra antiga (binários separados)
+	std::string strFileRho = getVarFilename("rho", nSteps, ".bin");
+	std::string strFileUx = getVarFilename("ux", nSteps, ".bin");
+	std::string strFileUy = getVarFilename("uy", nSteps, ".bin");
 }
 
 std::string getVarFilename(
 	const std::string varName,
 	unsigned int step,
-	const std::string ext
-)
+	const std::string ext)
 {
 	unsigned int n_zeros = 0, pot_10 = 10;
 	unsigned int aux1 = 1000000; // 6 numbers on step
@@ -203,11 +240,10 @@ std::string getVarFilename(
 
 void saveVarBin(
 	std::string strFile,
-	dfloat* var,
+	dfloat *var,
 	size_t memSize)
 {
-	FILE* outFile = nullptr;
-
+	FILE *outFile = nullptr;
 
 	outFile = fopen(strFile.c_str(), "wb");
 
@@ -237,7 +273,7 @@ std::string getSimInfoString(int step, dfloat MLUPS)
 	strSimInfo << "               IRBC: " << IRBC << "\n";
 	strSimInfo << "                 Re: " << RE << "\n";
 	strSimInfo << "          Precision: float\n";
-	strSimInfo << "                 NX: " << NX << "\n";	
+	strSimInfo << "                 NX: " << NX << "\n";
 	strSimInfo << "                 NY: " << NY << "\n";
 	strSimInfo << std::scientific << std::setprecision(6);
 	/*strSimInfo << "                Tau: " << TAU << "\n";*/
@@ -290,7 +326,7 @@ void saveSimInfo(int step, dfloat MLUPS)
 	strInf += ID_SIM;
 	strInf += "/";
 	strInf += "info.txt"; // generate file name (with path)
-	FILE* outFile = nullptr;
+	FILE *outFile = nullptr;
 
 	outFile = fopen(strInf.c_str(), "w");
 	if (outFile != nullptr)

@@ -101,15 +101,16 @@ int main()
 			checkCudaErrors(cudaDeviceSynchronize());
 			checkCudaErrors(cudaMemcpy(h_fMom, d_fMom, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyDeviceToHost));
 
-			kinetic_energy(h_fMom, step);
-			saving_probes(h_fMom, probes, step);
+			// kinetic_energy(h_fMom, step);
+			// saving_probes(h_fMom, probes, step);
 
-			if (step >= N_STAT)
-			{
-				velocity_average<<<avg_gridSize, avg_blockSize>>>(d_fMom, ux_mean_device, uy_mean_device, step);
-			}
+			// if (step >= N_STAT)
+			// {
+			// 	velocity_average<<<avg_gridSize, avg_blockSize>>>(d_fMom, ux_mean_device, uy_mean_device, step);
+			// }
 
-			// saveMacr(h_fMom, rho, ux, uy, step);
+			saveMacr(h_fMom, rho, ux, uy, step);
+			checkCudaErrors(cudaDeviceSynchronize());
 		}
 	}
 

@@ -3,8 +3,7 @@
 #include "globalFunctions.h"
 
 __global__ void gpuMomCollisionStream(
-	dfloat* fMom, unsigned int* dNodeType, ghostInterfaceData ghostInterface, unsigned int step
-)
+	dfloat *fMom, unsigned int *dNodeType, ghostInterfaceData ghostInterface, unsigned int step)
 {
 	const int x = threadIdx.x + blockDim.x * blockIdx.x;
 	const int y = threadIdx.y + blockDim.y * blockIdx.y;
