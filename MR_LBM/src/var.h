@@ -32,6 +32,21 @@ __host__ __device__ inline double dsqrt<double>(double x)
 	return sqrt(x);
 }
 
+template <typename T>
+__host__ __device__ inline T dabs(T x);
+
+template <>
+__host__ __device__ inline float dabs<float>(float x)
+{
+	return fabsf(x);
+}
+
+template <>
+__host__ __device__ inline double dabs<double>(double x)
+{
+	return fabs(x);
+}
+
 /* --------------------------  SIMULATION DEFINES -------------------------- */
 
 #define STR_IMPL(A) #A

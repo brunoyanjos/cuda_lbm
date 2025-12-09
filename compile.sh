@@ -38,12 +38,9 @@ cd MR_LBM/src || {
 
 nvcc -gencode arch=compute_${CompCap},code=sm_${CompCap} -rdc=true -O3 --restrict \
     -D ID_SIM=\"$ID_SIM\" \
-     *.cu \
-     -lcudadevrt -lcurand -o ../../"$EXEC_NAME" || {
-    echo "Error: Compilation failed" >&2
-    cd ../..
-    exit 1
-}
+    $(find . -name "*.cu") \
+    -lcudadevrt -lcurand -o ../../"$EXEC_NAME"
+
 
 # Return and run with simulation ID
 cd ../..

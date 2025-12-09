@@ -1,5 +1,4 @@
-#ifndef __GLOBAL_STRUCTS_H
-#define __GLOBAL_STRUCTS_H
+#pragma once
 
 #include "var.h"
 #include "errorDef.h"
@@ -18,35 +17,3 @@ typedef struct ghostInterfaceData
     ghostData gGhost;
     ghostData h_fGhost;
 } GhostInterfaceData;
-
-typedef struct cylinderProperties
-{
-    bool isBulk;
-
-    // x coordinates
-    dfloat xb;
-    dfloat xw;
-    dfloat x1;
-    dfloat x2;
-    dfloat x3;
-
-    // y coordinates
-    dfloat yb;
-    dfloat yw;
-    dfloat y1;
-    dfloat y2;
-    dfloat y3;
-
-    // incomings and outgoings
-    int is[9];
-    int os[9];
-
-    // other properties
-    double Fx;
-    double Fy;
-    dfloat ps;
-    dfloat dr;
-    dfloat theta;
-} CylinderProperties;
-
-#endif //__GLOBAL_STRUCTS
