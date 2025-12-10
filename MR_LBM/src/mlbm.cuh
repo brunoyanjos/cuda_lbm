@@ -9,10 +9,9 @@
 #include <builtin_types.h>
 #include "var.h"
 #include "globalStructs.h"
+#include "init/state.cuh"
 
-__global__ void streamingAndMom(
-	dfloat *fMom, dfloat OMEGA, size_t cylinder_counter, unsigned int *dNodeType,
-	ghostInterfaceData ghostInterface, unsigned int step);
+__global__ void streamingAndMom(LBMState state, dfloat OMEGA, ghostInterfaceData ghostInterface);
 
 __global__ void updateInnerBoundaries(dfloat *fMom, dfloat OMEGA, unsigned int step);
 

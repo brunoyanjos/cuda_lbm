@@ -1,133 +1,97 @@
 #include "mlbm.cuh"
 #include "globalStructs.h"
 #include "globalFunctions.h"
+#include "init/state.cuh"
+#include "boundaries/node_type.h"
+#include "boundaries/boundary_formulation.cuh"
+#include "colrec/collision_and_reconstruction.cuh"
+#include "interface/interface_handling.cuh"
 
-__global__ void streamingAndMom(
-	dfloat *fMom, dfloat OMEGA, size_t cylinder_counter, unsigned int *dNodeType,
-	ghostInterfaceData ghostInterface, unsigned int step)
+__global__ void streamingAndMom(LBMState state, dfloat OMEGA, ghostInterfaceData ghostInterface)
 {
-	// const int x = threadIdx.x + blockDim.x * blockIdx.x;
-	// const int y = threadIdx.y + blockDim.y * blockIdx.y;
+	const int x = threadIdx.x + blockDim.x * blockIdx.x;
+	const int y = threadIdx.y + blockDim.y * blockIdx.y;
 
-	// if (x >= NX || y >= NY)
-	// 	return;
+	if (x >= NX || y >= NY)
+		return;
 
-	// dfloat pop[Q];
+	dfloat pop[Q];
 
-	// __shared__ dfloat s_pop[BLOCK_LBM_SIZE * (Q - 1)];
+	__shared__ dfloat s_pop[BLOCK_LBM_SIZE * (Q - 1)];
 
-	// // Load moments from global memory
+	unsigned int nodeType = state.d_node_type[idxBlock()];
 
-	// // rho'
-	// unsigned int nodeType = dNodeType[idxScalarBlock(threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y)];
-	// if (nodeType == 0b11111111)
-	// 	return;
-	// dfloat rhoVar = RHO_0 + fMom[idxMom(threadIdx.x, threadIdx.y, M_RHO_INDEX, blockIdx.x, blockIdx.y)];
-	// dfloat ux_t30 = fMom[idxMom(threadIdx.x, threadIdx.y, M_UX_INDEX, blockIdx.x, blockIdx.y)];
-	// dfloat uy_t30 = fMom[idxMom(threadIdx.x, threadIdx.y, M_UY_INDEX, blockIdx.x, blockIdx.y)];
-	// dfloat m_xx_t45 = fMom[idxMom(threadIdx.x, threadIdx.y, M_MXX_INDEX, blockIdx.x, blockIdx.y)];
-	// dfloat m_xy_t90 = fMom[idxMom(threadIdx.x, threadIdx.y, M_MXY_INDEX, blockIdx.x, blockIdx.y)];
-	// dfloat m_yy_t45 = fMom[idxMom(threadIdx.x, threadIdx.y, M_MYY_INDEX, blockIdx.x, blockIdx.y)];
+	if (nodeType == SOLID_NODE)
+		return;
 
-	// pop_reconstruction(rhoVar, ux_t30, uy_t30, m_xx_t45, m_yy_t45, m_xy_t90, pop);
+	dfloat rho = state.d_rho[idxBlock()] + RHO_0;
+	dfloat ux = state.d_ux[idxBlock()];
+	dfloat uy = state.d_uy[idxBlock()];
+	dfloat mxx = state.d_mxx[idxBlock()];
+	dfloat mxy = state.d_mxy[idxBlock()];
+	dfloat myy = state.d_myy[idxBlock()];
 
-	// const unsigned short int xp1 = (threadIdx.x + 1 + BLOCK_NX) % BLOCK_NX;
-	// const unsigned short int xm1 = (threadIdx.x - 1 + BLOCK_NX) % BLOCK_NX;
+	second::pop_reconstruction(pop, rho, ux, uy, mxx, mxy, myy);
 
-	// const unsigned short int yp1 = (threadIdx.y + 1 + BLOCK_NY) % BLOCK_NY;
-	// const unsigned short int ym1 = (threadIdx.y - 1 + BLOCK_NY) % BLOCK_NY;
+	const unsigned short int xp1 = (threadIdx.x + 1 + BLOCK_NX) % BLOCK_NX;
+	const unsigned short int xm1 = (threadIdx.x - 1 + BLOCK_NX) % BLOCK_NX;
 
-	// // save populations in shared memory
-	// s_pop[idxPopBlock(threadIdx.x, threadIdx.y, 0)] = pop[1];
-	// s_pop[idxPopBlock(threadIdx.x, threadIdx.y, 1)] = pop[2];
-	// s_pop[idxPopBlock(threadIdx.x, threadIdx.y, 2)] = pop[3];
-	// s_pop[idxPopBlock(threadIdx.x, threadIdx.y, 3)] = pop[4];
-	// s_pop[idxPopBlock(threadIdx.x, threadIdx.y, 4)] = pop[5];
-	// s_pop[idxPopBlock(threadIdx.x, threadIdx.y, 5)] = pop[6];
-	// s_pop[idxPopBlock(threadIdx.x, threadIdx.y, 6)] = pop[7];
-	// s_pop[idxPopBlock(threadIdx.x, threadIdx.y, 7)] = pop[8];
+	const unsigned short int yp1 = (threadIdx.y + 1 + BLOCK_NY) % BLOCK_NY;
+	const unsigned short int ym1 = (threadIdx.y - 1 + BLOCK_NY) % BLOCK_NY;
 
-	// // sync threads of the block so all populations are saved
-	// __syncthreads();
+	// save populations in shared memory
+	s_pop[idxPopBlock(threadIdx.x, threadIdx.y, 0)] = pop[1];
+	s_pop[idxPopBlock(threadIdx.x, threadIdx.y, 1)] = pop[2];
+	s_pop[idxPopBlock(threadIdx.x, threadIdx.y, 2)] = pop[3];
+	s_pop[idxPopBlock(threadIdx.x, threadIdx.y, 3)] = pop[4];
+	s_pop[idxPopBlock(threadIdx.x, threadIdx.y, 4)] = pop[5];
+	s_pop[idxPopBlock(threadIdx.x, threadIdx.y, 5)] = pop[6];
+	s_pop[idxPopBlock(threadIdx.x, threadIdx.y, 6)] = pop[7];
+	s_pop[idxPopBlock(threadIdx.x, threadIdx.y, 7)] = pop[8];
 
-	// pop[1] = s_pop[idxPopBlock(xm1, threadIdx.y, 0)];
-	// pop[2] = s_pop[idxPopBlock(threadIdx.x, ym1, 1)];
-	// pop[3] = s_pop[idxPopBlock(xp1, threadIdx.y, 2)];
-	// pop[4] = s_pop[idxPopBlock(threadIdx.x, yp1, 3)];
-	// pop[5] = s_pop[idxPopBlock(xm1, ym1, 4)];
-	// pop[6] = s_pop[idxPopBlock(xp1, ym1, 5)];
-	// pop[7] = s_pop[idxPopBlock(xp1, yp1, 6)];
-	// pop[8] = s_pop[idxPopBlock(xm1, yp1, 7)];
+	// sync threads of the block so all populations are saved
+	__syncthreads();
 
-	// /* load pop from global in cover nodes */
+	pop[1] = s_pop[idxPopBlock(xm1, threadIdx.y, 0)];
+	pop[2] = s_pop[idxPopBlock(threadIdx.x, ym1, 1)];
+	pop[3] = s_pop[idxPopBlock(xp1, threadIdx.y, 2)];
+	pop[4] = s_pop[idxPopBlock(threadIdx.x, yp1, 3)];
+	pop[5] = s_pop[idxPopBlock(xm1, ym1, 4)];
+	pop[6] = s_pop[idxPopBlock(xp1, ym1, 5)];
+	pop[7] = s_pop[idxPopBlock(xp1, yp1, 6)];
+	pop[8] = s_pop[idxPopBlock(xm1, yp1, 7)];
 
-	// pop_load(ghostInterface, threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y, pop);
+	/* load pop from global in cover nodes */
 
-	// dfloat invRho;
+	pop_load(ghostInterface, threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y, pop);
 
-	// if (nodeType != BULK)
-	// {
-	// 	if (nodeType == 100)
-	// 	{
-	// 		cylinderProperties *bc_property = findCylindeProperty(cylinder_properties, cylinder_counter, x, y);
+	dfloat invRho;
 
-	// 		immersedBoundaryLoop((*bc_property).is, pop, rhoVar, m_xx_t45, m_yy_t45, m_xy_t90, x, y);
+	if (nodeType != BULK)
+	{
+		boundary::eval_incoming_properties(nodeType, pop, rho, ux, uy, mxx, mxy, myy);
+	}
+	else
+	{
+		rho = pop[0] + pop[1] + pop[2] + pop[3] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8];
+		invRho = static_cast<dfloat>(1) / rho;
 
-	// 		if (step >= STAT_BEGIN_TIME && step <= STAT_END_TIME && CALCULATE_FORCES)
-	// 		{
-	// 			incoming_forces(bc_property, pop);
-	// 		}
-	// 	}
-	// 	else if (nodeType > 200)
-	// 	{
-	// 		cylinderProperties *bc_property = findCylindeProperty(cylinder_properties, cylinder_counter, x, y);
+		ux = ((pop[1] + pop[5] + pop[8]) - (pop[3] + pop[6] + pop[7])) * invRho;
+		uy = ((pop[2] + pop[5] + pop[6]) - (pop[4] + pop[7] + pop[8])) * invRho;
 
-	// 		fluid_boundary_evaluation(nodeType, cylinder_properties, cylinder_counter, pop, OMEGA,
-	// 								  rhoVar, ux_t30, uy_t30, m_xx_t45, m_yy_t45, m_xy_t90, x, y);
+		mxx = (pop[1] + pop[3] + pop[5] + pop[6] + pop[7] + pop[8]) * invRho - cs2;
+		mxy = ((pop[5] + pop[7]) - (pop[6] + pop[8])) * invRho;
+		myy = (pop[2] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8]) * invRho - cs2;
+	}
 
-	// 		if (step >= STAT_BEGIN_TIME && step <= STAT_END_TIME && CALCULATE_FORCES)
-	// 		{
-	// 			incoming_forces(bc_property, pop);
-	// 		}
-	// 	}
-	// 	else
-	// 	{
-	// 		boundary_calculation(nodeType, rhoVar, ux_t30, uy_t30, m_xx_t45, m_yy_t45, m_xy_t90, pop, fMom, x, y, OMEGA);
-	// 	}
-	// }
-	// else
-	// {
-	// 	const dfloat pop_0 = pop[0] + W0;
+	state.d_rho[idxBlock()] = rho - RHO_0;
 
-	// 	const dfloat pop_1 = pop[1] + W1;
-	// 	const dfloat pop_2 = pop[2] + W1;
-	// 	const dfloat pop_3 = pop[3] + W1;
-	// 	const dfloat pop_4 = pop[4] + W1;
+	state.d_ux[idxBlock()] = ux;
+	state.d_uy[idxBlock()] = uy;
 
-	// 	const dfloat pop_5 = pop[5] + W2;
-	// 	const dfloat pop_6 = pop[6] + W2;
-	// 	const dfloat pop_7 = pop[7] + W2;
-	// 	const dfloat pop_8 = pop[8] + W2;
-
-	// 	rhoVar = pop_0 + pop_1 + pop_2 + pop_3 + pop_4 + pop_5 + pop_6 + pop_7 + pop_8;
-	// 	invRho = static_cast<dfloat>(1) / rhoVar;
-
-	// 	ux_t30 = ((pop_1 + pop_5 + pop_8) - (pop_3 + pop_6 + pop_7)) * invRho;
-	// 	uy_t30 = ((pop_2 + pop_5 + pop_6) - (pop_4 + pop_7 + pop_8)) * invRho;
-
-	// 	m_xx_t45 = (pop_1 + pop_3 + pop_5 + pop_6 + pop_7 + pop_8) * invRho - cs2;
-	// 	m_xy_t90 = ((pop_5 + pop_7) - (pop_6 + pop_8)) * invRho;
-	// 	m_yy_t45 = (pop_2 + pop_4 + pop_5 + pop_6 + pop_7 + pop_8) * invRho - cs2;
-	// }
-
-	// fMom[idxMom(threadIdx.x, threadIdx.y, M_RHO_INDEX, blockIdx.x, blockIdx.y)] = rhoVar - RHO_0;
-
-	// fMom[idxMom(threadIdx.x, threadIdx.y, M_UX_INDEX, blockIdx.x, blockIdx.y)] = ux_t30;
-	// fMom[idxMom(threadIdx.x, threadIdx.y, M_UY_INDEX, blockIdx.x, blockIdx.y)] = uy_t30;
-
-	// fMom[idxMom(threadIdx.x, threadIdx.y, M_MXX_INDEX, blockIdx.x, blockIdx.y)] = m_xx_t45;
-	// fMom[idxMom(threadIdx.x, threadIdx.y, M_MXY_INDEX, blockIdx.x, blockIdx.y)] = m_xy_t90;
-	// fMom[idxMom(threadIdx.x, threadIdx.y, M_MYY_INDEX, blockIdx.x, blockIdx.y)] = m_yy_t45;
+	state.d_mxx[idxBlock()] = mxx;
+	state.d_mxy[idxBlock()] = mxy;
+	state.d_myy[idxBlock()] = myy;
 }
 
 __global__ void updateInnerBoundaries(dfloat *fMom, dfloat OMEGA, unsigned int step)

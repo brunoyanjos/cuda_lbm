@@ -10,24 +10,24 @@
 
 namespace second
 {
-	__device__ inline void pop_reconstruction(dfloat rhoVar, dfloat ux, dfloat uy, dfloat mxx, dfloat myy, dfloat mxy, dfloat *pop)
+	__device__ inline void pop_reconstruction(dfloat *pop, dfloat rho, dfloat ux, dfloat uy, dfloat mxx, dfloat mxy, dfloat myy)
 	{
 		dfloat pics2 = dfloat(1.0) - cs2 * (mxx + myy);
 
-		dfloat multiplyTerm = W0 * rhoVar;
-		pop[0] = multiplyTerm * pics2 - W0;
+		dfloat multiplyTerm = W0 * rho;
+		pop[0] = multiplyTerm * pics2;
 
-		multiplyTerm = W1 * rhoVar;
-		pop[1] = multiplyTerm * (pics2 + ux + mxx) - W1;
-		pop[2] = multiplyTerm * (pics2 + uy + myy) - W1;
-		pop[3] = multiplyTerm * (pics2 - ux + mxx) - W1;
-		pop[4] = multiplyTerm * (pics2 - uy + myy) - W1;
+		multiplyTerm = W1 * rho;
+		pop[1] = multiplyTerm * (pics2 + ux + mxx);
+		pop[2] = multiplyTerm * (pics2 + uy + myy);
+		pop[3] = multiplyTerm * (pics2 - ux + mxx);
+		pop[4] = multiplyTerm * (pics2 - uy + myy);
 
-		multiplyTerm = W2 * rhoVar;
-		pop[5] = multiplyTerm * (pics2 + ux + uy + mxx + myy + mxy) - W2;
-		pop[6] = multiplyTerm * (pics2 - ux + uy + mxx + myy - mxy) - W2;
-		pop[7] = multiplyTerm * (pics2 - ux - uy + mxx + myy + mxy) - W2;
-		pop[8] = multiplyTerm * (pics2 + ux - uy + mxx + myy - mxy) - W2;
+		multiplyTerm = W2 * rho;
+		pop[5] = multiplyTerm * (pics2 + ux + uy + mxx + myy + mxy);
+		pop[6] = multiplyTerm * (pics2 - ux + uy + mxx + myy - mxy);
+		pop[7] = multiplyTerm * (pics2 - ux - uy + mxx + myy + mxy);
+		pop[8] = multiplyTerm * (pics2 + ux - uy + mxx + myy - mxy);
 	}
 }
 

@@ -45,3 +45,26 @@ __host__ inline void interfaceMalloc(ghostInterfaceData &ghostInterface)
     cudaMalloc((void **)&(ghostInterface.gGhost.Y_0), sizeof(dfloat) * NUMBER_GHOST_FACE_Y * QF);
     cudaMalloc((void **)&(ghostInterface.gGhost.Y_1), sizeof(dfloat) * NUMBER_GHOST_FACE_Y * QF);
 }
+
+__host__ inline void interfaceCudaMemcpy(GhostInterfaceData &ghostInterface, ghostData &dst, const ghostData &src, cudaMemcpyKind kind, int Q)
+{
+    struct MemcpyPair
+    {
+        dfloat *dst;
+        const dfloat *src;
+        size_t size;
+    };
+
+    MemcpyPair memcpyPairs[] = {
+        {dst.X_0, src.X_0, sizeof(dfloat) * NUMBER_GHOST_FACE_X * Q},
+        {dst.X_1, src.X_1, sizeof(dfloat) * NUMBER_GHOST_FACE_X * Q},
+        {dst.Y_0, src.Y_0, sizeof(dfloat) * NUMBER_GHOST_FACE_Y * Q},
+        {dst.Y_1, src.Y_1, sizeof(dfloat) * NUMBER_GHOST_FACE_Y * Q},
+    };
+
+    checkCudaErrors(cudaDeviceSynchronize());
+    for (const auto &pair : memcpyPairs)
+    {
+        checkCudaErrors(cudaMemcpy(pair.dst, pair.src, pair.size, kind));
+    }
+}

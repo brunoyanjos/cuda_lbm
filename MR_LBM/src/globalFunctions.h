@@ -49,7 +49,7 @@ __host__ __device__
     return tx + BLOCK_NX * (ty + BLOCK_NY * (bx + NUM_BLOCK_X * by));
 }
 
-__host__
+__host__ __device__
     size_t __forceinline__
     idxBlockCoord(const int x, const int y)
 {

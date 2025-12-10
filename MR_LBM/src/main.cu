@@ -1,9 +1,12 @@
 #include "saveData.cuh"
 #include "interface/ghost_interface.cuh"
+#include "mlbm.cuh"
 #include "init/state.cuh"
+#include "globalFunctions.h"
 #include "init/domain.cuh"
 #include "time_events.cuh"
 #include "post_processing.cuh"
+#include "boundaries/node_type.h"
 
 int main()
 {
@@ -17,16 +20,18 @@ int main()
 	ghostInterfaceData ghostInterface;
 
 	/* ------------------------- ALLOCATION FOR CPU ------------------------- */
+	dfloat D_out = D * 2, D_in = 0;
+
 	int step = 0;
 	auto state = init_state();
 
 	interfaceMalloc(ghostInterface);
 
-	init_domain(state);
+	init_domain(state, ghostInterface, D_out, D_in);
 
-	// const dfloat VISC = U_MAX * 0.01 / RE;
-	// const dfloat TAU = 0.5 + 3.0 * VISC;
-	// const dfloat OMEGA = 1.0 / TAU;
+	const dfloat VISC = U_MAX * (D_out - D_in) / RE;
+	const dfloat TAU = 0.5 + 3.0 * VISC;
+	const dfloat OMEGA = 1.0 / TAU;
 
 	/* ------------------------------ TIMER EVENTS  ------------------------------ */
 	checkCudaErrors(cudaSetDevice(GPU_INDEX));
@@ -38,8 +43,12 @@ int main()
 	/* --------------------------------------------------------------------- */
 	/* ---------------------------- BEGIN LOOP ------------------------------ */
 	/* --------------------------------------------------------------------- */
-	for (step = INI_STEP; step < N_STEPS; step++)
+	for (step = INI_STEP; step < 1; step++)
 	{
+		streamingAndMom<<<gridBlock, threadBlock>>>(state, OMEGA, ghostInterface);
+
+		checkCudaErrors(cudaDeviceSynchronize());
+		swapGhostInterfaces(ghostInterface);
 	}
 
 	/* --------------------------------------------------------------------- */
