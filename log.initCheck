@@ -1,0 +1,141 @@
+========= COMPUTE-SANITIZER
+========= Error: Failed to initialize WDDM debugger interface. Please run EnableDebuggerInterface.bat as an administrator
+========= 
+========= Error: Device not supported. Please refer to the "Supported Devices" section of the sanitizer documentation
+========= 
+=========  Unused memory in allocation 0x707a00000 of size 4096 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x53e06] in sim_D2Q9_sm89
+=========         Host Frame: init_state() [0xb6a2] in sim_D2Q9_sm89
+=========         Host Frame: main [0xa320] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a01000 of size 16384 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x53e06] in sim_D2Q9_sm89
+=========         Host Frame: init_state() [0xb6b3] in sim_D2Q9_sm89
+=========         Host Frame: main [0xa320] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a05000 of size 16384 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x53e06] in sim_D2Q9_sm89
+=========         Host Frame: init_state() [0xb6c8] in sim_D2Q9_sm89
+=========         Host Frame: main [0xa320] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a09000 of size 16384 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x53e06] in sim_D2Q9_sm89
+=========         Host Frame: init_state() [0xb6dd] in sim_D2Q9_sm89
+=========         Host Frame: main [0xa320] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a0d000 of size 16384 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x53e06] in sim_D2Q9_sm89
+=========         Host Frame: init_state() [0xb6f2] in sim_D2Q9_sm89
+=========         Host Frame: main [0xa320] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a11000 of size 16384 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x53e06] in sim_D2Q9_sm89
+=========         Host Frame: init_state() [0xb703] in sim_D2Q9_sm89
+=========         Host Frame: main [0xa320] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a15000 of size 16384 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x53e06] in sim_D2Q9_sm89
+=========         Host Frame: init_state() [0xb714] in sim_D2Q9_sm89
+=========         Host Frame: main [0xa320] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a19000 of size 1536 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x53e06] in sim_D2Q9_sm89
+=========         Host Frame: main [0xa32d] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a19600 of size 1536 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x53e06] in sim_D2Q9_sm89
+=========         Host Frame: main [0xa33c] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a19c00 of size 3072 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x53e06] in sim_D2Q9_sm89
+=========         Host Frame: main [0xa34b] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a1a800 of size 3072 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x53e06] in sim_D2Q9_sm89
+=========         Host Frame: main [0xa35a] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a1b400 of size 1536 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x53e06] in sim_D2Q9_sm89
+=========         Host Frame: main [0xa369] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a1ba00 of size 1536 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x53e06] in sim_D2Q9_sm89
+=========         Host Frame: main [0xa378] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a1c000 of size 3072 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x53e06] in sim_D2Q9_sm89
+=========         Host Frame: main [0xa387] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a1cc00 of size 3072 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x53e06] in sim_D2Q9_sm89
+=========         Host Frame: main [0xa396] in sim_D2Q9_sm89
+========= 
+
+----------------------------------- (0/100000) 0.00% -----------------------------------
+
+----------------------------------- (10000/100000) 10.00% -----------------------------------
+
+----------------------------------- (20000/100000) 20.00% -----------------------------------
+
+----------------------------------- (30000/100000) 30.00% -----------------------------------
+
+----------------------------------- (40000/100000) 40.00% -----------------------------------
+
+----------------------------------- (50000/100000) 50.00% -----------------------------------
+
+----------------------------------- (60000/100000) 60.00% -----------------------------------
+
+----------------------------------- (70000/100000) 70.00% -----------------------------------
+
+----------------------------------- (80000/100000) 80.00% -----------------------------------
+
+----------------------------------- (90000/100000) 90.00% -----------------------------------
+
+--------------------------- Last Time Step 100000 ---------------------------
+MLUPS: 6.411222
+========= ERROR SUMMARY: 17 errors

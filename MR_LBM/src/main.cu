@@ -29,7 +29,7 @@ int main()
 
 	init_domain(state, ghostInterface, D_out, D_in);
 
-	const dfloat VISC = U_MAX * (D_out - D_in) / RE;
+	const dfloat VISC = U_MAX * NX / RE;
 	const dfloat TAU = 0.5 + 3.0 * VISC;
 	const dfloat OMEGA = 1.0 / TAU;
 
@@ -43,12 +43,31 @@ int main()
 	/* --------------------------------------------------------------------- */
 	/* ---------------------------- BEGIN LOOP ------------------------------ */
 	/* --------------------------------------------------------------------- */
-	for (step = INI_STEP; step < 1; step++)
+	for (step = INI_STEP; step < N_STEPS; step++)
 	{
-		streamingAndMom<<<gridBlock, threadBlock>>>(state, OMEGA, ghostInterface);
-
+		mlbmKernel<<<gridBlock, threadBlock>>>(state, OMEGA, ghostInterface);
 		checkCudaErrors(cudaDeviceSynchronize());
+
+		// streamingAndMom<<<gridBlock, threadBlock>>>(state, OMEGA, ghostInterface);
+		// checkCudaErrors(cudaDeviceSynchronize());
+
+		// updateBoundaries<<<gridBlock, threadBlock>>>(state, OMEGA, D_in, D_out);
+		// checkCudaErrors(cudaDeviceSynchronize());
+
+		// boundaryAndCollision<<<gridBlock, threadBlock>>>(state, OMEGA, ghostInterface);
+		// checkCudaErrors(cudaDeviceSynchronize());
+
 		swapGhostInterfaces(ghostInterface);
+		checkCudaErrors(cudaDeviceSynchronize());
+
+		if (step % MACR_SAVE == 0)
+		{
+			printf("\n----------------------------------- (%d/%d) %.2f%% -----------------------------------\n",
+				   step, N_STEPS, static_cast<float>(step) / static_cast<float>(N_STEPS) * 100.0f);
+
+			upload_state_to_host(state);
+			create_vtk(state, step);
+		}
 	}
 
 	/* --------------------------------------------------------------------- */
@@ -63,6 +82,7 @@ int main()
 	printf("MLUPS: %f\n", MLUPS);
 
 	upload_state_to_host(state);
+	write_average_velocity_profile(state.h_ux);
 	create_vtk(state, step);
 
 	/* ------------------------------ POST ------------------------------ */

@@ -13,10 +13,10 @@
 
 __global__ void streamingAndMom(LBMState state, dfloat OMEGA, ghostInterfaceData ghostInterface);
 
-__global__ void updateInnerBoundaries(dfloat *fMom, dfloat OMEGA, unsigned int step);
+__global__ void updateBoundaries(LBMState state, dfloat OMEGA, dfloat D_in, dfloat D_out);
 
-__global__ void boundaryAndCollision(
-	dfloat *fMom, size_t cylinder_count, dfloat OMEGA, unsigned int *dNodeType,
-	ghostInterfaceData ghostInterface, unsigned int step);
+__global__ void boundaryAndCollision(LBMState state, dfloat OMEGA, ghostInterfaceData ghostInterface);
+
+__global__ void mlbmKernel(LBMState state, dfloat OMEGA, ghostInterfaceData ghostInterface);
 
 #endif

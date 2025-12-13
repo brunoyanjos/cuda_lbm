@@ -6,6 +6,7 @@
 #include "boundaries/boundary_formulation.cuh"
 #include "colrec/collision_and_reconstruction.cuh"
 #include "interface/interface_handling.cuh"
+#include "interpolation_utilities.cuh"
 
 __global__ void streamingAndMom(LBMState state, dfloat OMEGA, ghostInterfaceData ghostInterface)
 {
@@ -94,175 +95,318 @@ __global__ void streamingAndMom(LBMState state, dfloat OMEGA, ghostInterfaceData
 	state.d_myy[idxBlock()] = myy;
 }
 
-__global__ void updateInnerBoundaries(dfloat *fMom, dfloat OMEGA, unsigned int step)
-{
-	// cylinderProperties property = cylinder_properties[threadIdx.x];
-
-	// const int xb = (int)property.xb;
-	// const int yb = (int)property.yb;
-
-	// const int tx = xb % BLOCK_NX;
-	// const int ty = yb % BLOCK_NY;
-
-	// const int bx = xb / BLOCK_NX;
-	// const int by = yb / BLOCK_NY;
-
-	// dfloat rhoVar = RHO_0 + fMom[idxMom(tx, ty, M_RHO_INDEX, bx, by)];
-
-	// dfloat ux_t30 = fMom[idxMom(tx, ty, M_UX_INDEX, bx, by)];
-	// dfloat uy_t30 = fMom[idxMom(tx, ty, M_UY_INDEX, bx, by)];
-
-	// dfloat m_xx_t45 = fMom[idxMom(tx, ty, M_MXX_INDEX, bx, by)];
-	// dfloat m_xy_t90 = fMom[idxMom(tx, ty, M_MXY_INDEX, bx, by)];
-	// dfloat m_yy_t45 = fMom[idxMom(tx, ty, M_MYY_INDEX, bx, by)];
-
-	// if (property.isBulk == false)
-	// {
-	// for first point
-
-	// dfloat ux1;
-	// dfloat uy1;
-
-	// bilinear_velocity_interpolation(property.x1, property.y1, int(property.x1), int(property.y1),
-	// 								int(property.x1) + 1, int(property.y1) + 1, fMom, M_UX_INDEX, &ux1);
-	// bilinear_velocity_interpolation(property.x1, property.y1, int(property.x1), int(property.y1),
-	// 								int(property.x1) + 1, int(property.y1) + 1, fMom, M_UY_INDEX, &uy1);
-
-	// // for second point
-
-	// dfloat ux2;
-	// dfloat uy2;
-
-	// bilinear_velocity_interpolation(property.x2, property.y2, int(property.x2), int(property.y2),
-	// 								int(property.x2) + 1, int(property.y2) + 1, fMom, M_UX_INDEX, &ux2);
-	// bilinear_velocity_interpolation(property.x2, property.y2, int(property.x2), int(property.y2),
-	// 								int(property.x2) + 1, int(property.y2) + 1, fMom, M_UY_INDEX, &uy2);
-
-	// // moment interpolation to first point
-	// dfloat mxx1 = 0.0;
-	// dfloat myy1 = 0.0;
-	// dfloat mxx2 = 0.0;
-	// dfloat myy2 = 0.0;
-
-	// if (ROTATIONAL_COORDINATES)
-	// {
-	// 	bilinear_moment_interpolation(property.x1, property.y1, int(property.x1), int(property.y1),
-	// 								  int(property.x1) + 1, int(property.y1) + 1, fMom, &mxx1, &myy1);
-	// 	bilinear_moment_interpolation(property.x2, property.y2, int(property.x2), int(property.y2),
-	// 								  int(property.x2) + 1, int(property.y2) + 1, fMom, &mxx2, &myy2);
-	// }
-
-	// if (CALCULATE_PRESSURE && step >= STAT_BEGIN_TIME && step <= STAT_END_TIME)
-	// {
-	// 	dfloat rho1;
-	// 	dfloat rho2;
-	// 	dfloat rho3;
-
-	// 	bilinear_density_interpolation(property.x1, property.y1,
-	// 								   int(property.x1), int(property.y1),
-	// 								   int(property.x1) + 1, int(property.y1) + 1,
-	// 								   fMom, M_RHO_INDEX, &rho1);
-	// 	bilinear_density_interpolation(property.x2, property.y2,
-	// 								   int(property.x2), int(property.y2),
-	// 								   int(property.x2) + 1, int(property.y2) + 1,
-	// 								   fMom, M_RHO_INDEX, &rho2);
-	// 	bilinear_density_interpolation(property.x3, property.y3,
-	// 								   int(property.x3), int(property.y3),
-	// 								   int(property.x3) + 1, int(property.y3) + 1,
-	// 								   fMom, M_RHO_INDEX, &rho3);
-
-	// 	pressure_extrapolation_old(property.xw, property.yw,
-	// 							   property.x1, property.y1,
-	// 							   property.x2, property.y2,
-	// 							   property.x3, property.y3,
-	// 							   rho1, rho2, rho3, &(cylinder_properties[threadIdx.x].ps));
-	// }
-
-	// const dfloat delta = property.dr;
-
-	// ux_t30 = extrapolation(delta, ux1, ux2);
-	// uy_t30 = extrapolation(delta, uy1, uy2);
-
-	// const dfloat m_xx_int = extrapolation(delta, mxx1, mxx2);
-	// const dfloat m_yy_int = extrapolation(delta, myy1, myy2);
-
-	// if (ROTATIONAL_COORDINATES)
-	// {
-	// 	if (RHO_STRONG)
-	// 	{
-	// 		numericalSolution_rotation(&rhoVar, ux_t30, uy_t30, &m_xx_t45, &m_xy_t90, &m_yy_t45, m_xx_int, m_yy_int, property.is, property.os, OMEGA, xb, yb);
-	// 	}
-	// 	if (RHO_EQ)
-	// 	{
-	// 		numericalSolution_rotation_rhoeq(&rhoVar, ux_t30, uy_t30, &m_xx_t45, &m_xy_t90, &m_yy_t45, m_xx_int, m_yy_int, property.is, property.os, OMEGA, xb, yb);
-	// 	}
-	// }
-	// else
-	// {
-	// 	numericalSolution(&rhoVar, ux_t30, uy_t30, &m_xx_t45, &m_xy_t90, &m_yy_t45, property.is, property.os, OMEGA);
-	// }
-	// }
-
-	// fMom[idxMom(tx, ty, M_RHO_INDEX, bx, by)] = rhoVar - RHO_0;
-
-	// fMom[idxMom(tx, ty, M_UX_INDEX, bx, by)] = ux_t30;
-	// fMom[idxMom(tx, ty, M_UY_INDEX, bx, by)] = uy_t30;
-
-	// fMom[idxMom(tx, ty, M_MXX_INDEX, bx, by)] = m_xx_t45;
-	// fMom[idxMom(tx, ty, M_MXY_INDEX, bx, by)] = m_xy_t90;
-	// fMom[idxMom(tx, ty, M_MYY_INDEX, bx, by)] = m_yy_t45;
-}
-
-__global__ void boundaryAndCollision(
-	dfloat *fMom, size_t cylinder_count, dfloat OMEGA, unsigned int *dNodeType,
-	ghostInterfaceData ghostInterface, unsigned int step)
+__global__ void updateBoundaries(LBMState state, dfloat OMEGA, dfloat D_in, dfloat D_out)
 {
 	const int x = threadIdx.x + blockDim.x * blockIdx.x;
 	const int y = threadIdx.y + blockDim.y * blockIdx.y;
 
 	if (x >= NX || y >= NY)
 		return;
-	// dfloat pop[Q];
 
-	// Load moments from global memory
+	unsigned int node_type = state.d_node_type[idxBlock()];
 
-	// rho'
-	unsigned int nodeType = dNodeType[idxScalarBlock(threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y)];
-	if (nodeType == 0b11111111)
+	if (node_type == SOLID_NODE || node_type == BULK)
 		return;
-	dfloat rhoVar = RHO_0 + fMom[idxMom(threadIdx.x, threadIdx.y, M_RHO_INDEX, blockIdx.x, blockIdx.y)];
-	dfloat ux_t30 = fMom[idxMom(threadIdx.x, threadIdx.y, M_UX_INDEX, blockIdx.x, blockIdx.y)];
-	dfloat uy_t30 = fMom[idxMom(threadIdx.x, threadIdx.y, M_UY_INDEX, blockIdx.x, blockIdx.y)];
-	dfloat m_xx_t45 = fMom[idxMom(threadIdx.x, threadIdx.y, M_MXX_INDEX, blockIdx.x, blockIdx.y)];
-	dfloat m_xy_t90 = fMom[idxMom(threadIdx.x, threadIdx.y, M_MXY_INDEX, blockIdx.x, blockIdx.y)];
-	dfloat m_yy_t45 = fMom[idxMom(threadIdx.x, threadIdx.y, M_MYY_INDEX, blockIdx.x, blockIdx.y)];
 
-	ux_t30 = F_M_I_SCALE * ux_t30;
-	uy_t30 = F_M_I_SCALE * uy_t30;
+	dfloat rho = state.d_rho[idxBlock()] + RHO_0;
 
-	m_xx_t45 = F_M_II_SCALE * (m_xx_t45);
-	m_xy_t90 = F_M_IJ_SCALE * (m_xy_t90);
-	m_yy_t45 = F_M_II_SCALE * (m_yy_t45);
+	dfloat ux = state.d_ux[idxBlock()];
+	dfloat uy = state.d_uy[idxBlock()];
 
-	// moment_collision(ux_t30, uy_t30, &m_xx_t45, &m_yy_t45, &m_xy_t90, OMEGA);
+	dfloat mxx = state.d_mxx[idxBlock()];
+	dfloat mxy = state.d_mxy[idxBlock()];
+	dfloat myy = state.d_myy[idxBlock()];
 
-	// pop_reconstruction(rhoVar, ux_t30, uy_t30, m_xx_t45, m_yy_t45, m_xy_t90, pop);
+	const dfloat xb_diff = static_cast<dfloat>(x) - xc;
+	const dfloat yb_diff = static_cast<dfloat>(y) - yc;
 
-	// if (nodeType >= 100 && step >= STAT_BEGIN_TIME && step <= STAT_END_TIME && CALCULATE_FORCES)
-	// {
-	// 	cylinderProperties *bc_property = findCylindeProperty(cylinder_properties, cylinder_count, x, y);
+	const dfloat rb2 = xb_diff * xb_diff + yb_diff * yb_diff;
 
-	// 	outgoing_forces(bc_property, cylinder_count, pop);
-	// }
+	const dfloat rb = dsqrt(rb2);
+	const dfloat inv_rb = static_cast<dfloat>(1) / rb;
 
-	// fMom[idxMom(threadIdx.x, threadIdx.y, M_RHO_INDEX, blockIdx.x, blockIdx.y)] = rhoVar - RHO_0;
+	const dfloat del_x = dsqrt(static_cast<dfloat>(2));
 
-	// fMom[idxMom(threadIdx.x, threadIdx.y, M_UX_INDEX, blockIdx.x, blockIdx.y)] = ux_t30;
-	// fMom[idxMom(threadIdx.x, threadIdx.y, M_UY_INDEX, blockIdx.x, blockIdx.y)] = uy_t30;
+	const dfloat unit_nx = xb_diff * inv_rb;
+	const dfloat unit_ny = yb_diff * inv_rb;
 
-	// fMom[idxMom(threadIdx.x, threadIdx.y, M_MXX_INDEX, blockIdx.x, blockIdx.y)] = m_xx_t45;
-	// fMom[idxMom(threadIdx.x, threadIdx.y, M_MXY_INDEX, blockIdx.x, blockIdx.y)] = m_xy_t90;
-	// fMom[idxMom(threadIdx.x, threadIdx.y, M_MYY_INDEX, blockIdx.x, blockIdx.y)] = m_yy_t45;
+	dfloat ux_boundary;
+	dfloat uy_boundary;
 
-	// pop_save(ghostInterface, threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y, x, y, pop);
+	dfloat mxx_prime;
+	dfloat myy_prime;
+
+	if (node_type & INNER_BOUNDARY)
+	{
+		const dfloat radii = D_in * static_cast<dfloat>(0.5);
+		const dfloat inv_radii = dfloat(1) / radii;
+
+		const dfloat xw = xc + radii * unit_nx;
+		const dfloat yw = yc + radii * unit_ny;
+
+		const dfloat xwb_diff = xw - static_cast<dfloat>(x);
+		const dfloat ywb_diff = yw - static_cast<dfloat>(y);
+
+		const dfloat dr2 = xwb_diff * xwb_diff + ywb_diff * ywb_diff;
+		const dfloat dr = dsqrt(dr2);
+
+		const dfloat x1 = xw + del_x * unit_nx;
+		const dfloat y1 = yw + del_x * unit_ny;
+
+		const int int_x1 = int(x1);
+		const int int_y1 = int(y1);
+
+		const dfloat x2 = xw + static_cast<dfloat>(2) * del_x * unit_nx;
+		const dfloat y2 = yw + static_cast<dfloat>(2) * del_x * unit_ny;
+
+		const int int_x2 = int(x2);
+		const int int_y2 = int(y2);
+
+		dfloat ux1 = bilinear_velocity_interpolation(x1, y1, int_x1, int_y1, state.d_ux);
+		dfloat ux2 = bilinear_velocity_interpolation(x2, y2, int_x2, int_y2, state.d_ux);
+
+		dfloat uy1 = bilinear_velocity_interpolation(x1, y1, int_x1, int_y1, state.d_uy);
+		dfloat uy2 = bilinear_velocity_interpolation(x2, y2, int_x2, int_y2, state.d_uy);
+
+		dfloat mxx1, mxx2;
+		dfloat myy1, myy2;
+
+		bilinear_moment_interpolation(x1, y1, int_x1, int_y1, state, mxx1, myy1);
+		bilinear_moment_interpolation(x2, y2, int_x2, int_y2, state, mxx2, myy2);
+
+		const dfloat dx = dsqrt(static_cast<dfloat>(2.0));
+		const dfloat dx2 = dx * dx;
+
+		const dfloat inv_dr2 = dfloat(1) / dx2;
+		const dfloat inv_2dr2 = dfloat(0.5) / dx2;
+
+		const dfloat ux_wall = -U_MAX * (yw - yc) * inv_radii;
+		const dfloat uy_wall = U_MAX * (xw - xc) * inv_radii;
+
+		const dfloat mxx_wall = ux_wall * ux_wall;
+		const dfloat myy_wall = uy_wall * uy_wall;
+
+		const dfloat wall_term = (dfloat(2) * dx2 - dr2 + dfloat(3) * dr * dx) * inv_2dr2;
+		const dfloat one_term = dr * (dr - dfloat(2) * dx) * inv_dr2;
+		const dfloat two_term = dr * (dr - dx) * inv_2dr2;
+
+		ux_boundary = wall_term * ux_wall + one_term * ux1 - two_term * ux2;
+		uy_boundary = wall_term * uy_wall + one_term * uy1 - two_term * uy2;
+
+		mxx_prime = wall_term * mxx_wall + one_term * mxx1 - two_term * mxx2;
+		myy_prime = wall_term * myy_wall + one_term * myy1 - two_term * myy2;
+	}
+	else
+	{
+		const dfloat radii = D_out * static_cast<dfloat>(0.5);
+
+		const dfloat xw = xc + radii * unit_nx;
+		const dfloat yw = yc + radii * unit_ny;
+
+		const dfloat xwb_diff = xw - static_cast<dfloat>(x);
+		const dfloat ywb_diff = yw - static_cast<dfloat>(y);
+
+		const dfloat dr2 = xwb_diff * xwb_diff + ywb_diff * ywb_diff;
+		const dfloat dr = dsqrt(dr2);
+
+		const dfloat x1 = xw - del_x * unit_nx;
+		const dfloat y1 = yw - del_x * unit_ny;
+
+		const int int_x1 = int(x1);
+		const int int_y1 = int(y1);
+
+		const dfloat x2 = xw - static_cast<dfloat>(2) * del_x * unit_nx;
+		const dfloat y2 = yw - static_cast<dfloat>(2) * del_x * unit_ny;
+
+		const int int_x2 = int(x2);
+		const int int_y2 = int(y2);
+
+		dfloat ux1 = bilinear_velocity_interpolation(x1, y1, int_x1, int_y1, state.d_ux);
+		dfloat ux2 = bilinear_velocity_interpolation(x2, y2, int_x2, int_y2, state.d_ux);
+
+		dfloat uy1 = bilinear_velocity_interpolation(x1, y1, int_x1, int_y1, state.d_uy);
+		dfloat uy2 = bilinear_velocity_interpolation(x2, y2, int_x2, int_y2, state.d_uy);
+
+		dfloat mxx1, mxx2;
+		dfloat myy1, myy2;
+
+		bilinear_moment_interpolation(x1, y1, int_x1, int_y1, state, mxx1, myy1);
+		bilinear_moment_interpolation(x2, y2, int_x2, int_y2, state, mxx2, myy2);
+
+		const dfloat dx = dsqrt(static_cast<dfloat>(2.0));
+		const dfloat dx2 = dx * dx;
+
+		const dfloat inv_dr2 = dfloat(1) / dx2;
+		const dfloat inv_2dr2 = dfloat(0.5) / dx2;
+
+		const dfloat one_term = dr * (dr - dfloat(2) * dx) * inv_dr2;
+		const dfloat two_term = dr * (dr - dx) * inv_2dr2;
+
+		ux_boundary = one_term * ux1 - two_term * ux2;
+		uy_boundary = one_term * uy1 - two_term * uy2;
+
+		mxx_prime = one_term * mxx1 - two_term * mxx2;
+		myy_prime = one_term * myy1 - two_term * myy2;
+	}
+
+	boundary::numerical_solution(node_type, OMEGA,
+								 mxx_prime, myy_prime,
+								 rho, ux_boundary, uy_boundary,
+								 mxx, mxy, myy);
+
+	state.d_rho[idxBlock()] = rho - RHO_0;
+
+	state.d_ux[idxBlock()] = ux_boundary;
+	state.d_uy[idxBlock()] = uy_boundary;
+
+	state.d_mxx[idxBlock()] = mxx;
+	state.d_mxy[idxBlock()] = mxy;
+	state.d_myy[idxBlock()] = myy;
+}
+
+__global__ void boundaryAndCollision(LBMState state, dfloat OMEGA, ghostInterfaceData ghostInterface)
+{
+	const int x = threadIdx.x + blockDim.x * blockIdx.x;
+	const int y = threadIdx.y + blockDim.y * blockIdx.y;
+
+	if (x >= NX || y >= NY)
+		return;
+
+	dfloat pop[Q];
+
+	unsigned int nodeType = state.d_node_type[idxBlock()];
+
+	if (nodeType == SOLID_NODE)
+		return;
+
+	dfloat rho = state.d_rho[idxBlock()] + RHO_0;
+	dfloat ux = state.d_ux[idxBlock()];
+	dfloat uy = state.d_uy[idxBlock()];
+	dfloat mxx = state.d_mxx[idxBlock()];
+	dfloat mxy = state.d_mxy[idxBlock()];
+	dfloat myy = state.d_myy[idxBlock()];
+
+	ux *= F_M_I_SCALE;
+	uy *= F_M_I_SCALE;
+
+	mxx *= F_M_II_SCALE;
+	mxy *= F_M_IJ_SCALE;
+	myy *= F_M_II_SCALE;
+
+	moment_collision(ux, uy, mxx, mxy, myy, OMEGA);
+
+	second::pop_reconstruction(pop, rho, ux, uy, mxx, mxy, myy);
+
+	state.d_rho[idxBlock()] = rho - RHO_0;
+
+	state.d_ux[idxBlock()] = ux;
+	state.d_uy[idxBlock()] = uy;
+
+	state.d_mxx[idxBlock()] = mxx;
+	state.d_mxy[idxBlock()] = mxy;
+	state.d_myy[idxBlock()] = myy;
+
+	pop_save(ghostInterface, threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y, x, y, pop);
+}
+
+__global__ void mlbmKernel(LBMState state, dfloat OMEGA, ghostInterfaceData ghostInterface)
+{
+	const int x = threadIdx.x + blockDim.x * blockIdx.x;
+	const int y = threadIdx.y + blockDim.y * blockIdx.y;
+
+	if (x >= NX || y >= NY)
+		return;
+
+	dfloat pop[Q];
+
+	__shared__ dfloat s_pop[BLOCK_LBM_SIZE * (Q - 1)];
+
+	unsigned int nodeType = state.d_node_type[idxBlock()];
+
+	dfloat rho = state.d_rho[idxBlock()] + RHO_0;
+	dfloat ux = state.d_ux[idxBlock()];
+	dfloat uy = state.d_uy[idxBlock()];
+	dfloat mxx = state.d_mxx[idxBlock()];
+	dfloat mxy = state.d_mxy[idxBlock()];
+	dfloat myy = state.d_myy[idxBlock()];
+
+	second::pop_reconstruction(pop, rho, ux, uy, mxx, mxy, myy);
+
+	const unsigned short int xp1 = (threadIdx.x + 1 + BLOCK_NX) % BLOCK_NX;
+	const unsigned short int xm1 = (threadIdx.x - 1 + BLOCK_NX) % BLOCK_NX;
+
+	const unsigned short int yp1 = (threadIdx.y + 1 + BLOCK_NY) % BLOCK_NY;
+	const unsigned short int ym1 = (threadIdx.y - 1 + BLOCK_NY) % BLOCK_NY;
+
+	// save populations in shared memory
+	s_pop[idxPopBlock(threadIdx.x, threadIdx.y, 0)] = pop[1];
+	s_pop[idxPopBlock(threadIdx.x, threadIdx.y, 1)] = pop[2];
+	s_pop[idxPopBlock(threadIdx.x, threadIdx.y, 2)] = pop[3];
+	s_pop[idxPopBlock(threadIdx.x, threadIdx.y, 3)] = pop[4];
+	s_pop[idxPopBlock(threadIdx.x, threadIdx.y, 4)] = pop[5];
+	s_pop[idxPopBlock(threadIdx.x, threadIdx.y, 5)] = pop[6];
+	s_pop[idxPopBlock(threadIdx.x, threadIdx.y, 6)] = pop[7];
+	s_pop[idxPopBlock(threadIdx.x, threadIdx.y, 7)] = pop[8];
+
+	// sync threads of the block so all populations are saved
+	__syncthreads();
+
+	pop[1] = s_pop[idxPopBlock(xm1, threadIdx.y, 0)];
+	pop[2] = s_pop[idxPopBlock(threadIdx.x, ym1, 1)];
+	pop[3] = s_pop[idxPopBlock(xp1, threadIdx.y, 2)];
+	pop[4] = s_pop[idxPopBlock(threadIdx.x, yp1, 3)];
+	pop[5] = s_pop[idxPopBlock(xm1, ym1, 4)];
+	pop[6] = s_pop[idxPopBlock(xp1, ym1, 5)];
+	pop[7] = s_pop[idxPopBlock(xp1, yp1, 6)];
+	pop[8] = s_pop[idxPopBlock(xm1, yp1, 7)];
+
+	/* load pop from global in cover nodes */
+
+	pop_load(ghostInterface, threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y, pop);
+
+	dfloat invRho;
+
+	if (nodeType != BULK)
+	{
+		// if (y == NY - 1)
+		// {
+		// 	ux = U_MAX;
+		// }
+
+		boundary::boundary_calculation(nodeType, rho, ux, uy, mxx, mxy, myy, pop, OMEGA);
+	}
+	else
+	{
+		rho = pop[0] + pop[1] + pop[2] + pop[3] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8];
+		invRho = static_cast<dfloat>(1) / rho;
+
+		ux = ((pop[1] + pop[5] + pop[8]) - (pop[3] + pop[6] + pop[7])) * invRho;
+		uy = ((pop[2] + pop[5] + pop[6]) - (pop[4] + pop[7] + pop[8])) * invRho;
+
+		mxx = (pop[1] + pop[3] + pop[5] + pop[6] + pop[7] + pop[8]) * invRho - cs2;
+		mxy = ((pop[5] + pop[7]) - (pop[6] + pop[8])) * invRho;
+		myy = (pop[2] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8]) * invRho - cs2;
+	}
+
+	ux *= F_M_I_SCALE;
+	uy *= F_M_I_SCALE;
+
+	mxx *= F_M_II_SCALE;
+	mxy *= F_M_IJ_SCALE;
+	myy *= F_M_II_SCALE;
+
+	moment_collision(ux, uy, mxx, mxy, myy, OMEGA);
+
+	second::pop_reconstruction(pop, rho, ux, uy, mxx, mxy, myy);
+
+	state.d_rho[idxBlock()] = rho - RHO_0;
+
+	state.d_ux[idxBlock()] = U_MAX;
+	state.d_uy[idxBlock()] = uy;
+
+	state.d_mxx[idxBlock()] = mxx;
+	state.d_mxy[idxBlock()] = mxy;
+	state.d_myy[idxBlock()] = myy;
+
+	pop_save(ghostInterface, threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y, x, y, pop);
 }

@@ -26,7 +26,7 @@ __global__ void initialize_bulk(LBMState state)
     if (x >= NX || y >= NY)
         return;
 
-    state.d_node_type[idxBlock()] = boundary::definition(x, y);
+    state.d_node_type[idxBlock()] = boundary::ldc_definition(x, y);
 }
 
 __global__ void initialize_boundaries(LBMState state)
@@ -87,11 +87,18 @@ __global__ void initialize_moments(LBMState state)
     dfloat rho = RHO_0;
     dfloat inv_rho = 1.0 / rho;
 
-    const dfloat ux = dfloat(0.0) * F_M_I_SCALE;
-    const dfloat uy = dfloat(0.0) * F_M_I_SCALE;
+    dfloat ux = dfloat(0.0);
+    dfloat uy = dfloat(0.0);
 
     if (state.d_node_type[idxBlock()] == SOLID_NODE)
         rho -= RHO_0;
+
+    if (state.d_node_type[idxBlock()] == NORTH ||
+        state.d_node_type[idxBlock()] == NORTH_WEST ||
+        state.d_node_type[idxBlock()] == NORTH_EAST)
+    {
+        ux = U_MAX;
+    }
 
     dfloat pop[9];
 
@@ -103,8 +110,8 @@ __global__ void initialize_moments(LBMState state)
 
     state.d_rho[idxBlock()] = rho - RHO_0;
 
-    state.d_ux[idxBlock()] = ux;
-    state.d_uy[idxBlock()] = uy;
+    state.d_ux[idxBlock()] = ux * F_M_I_SCALE;
+    state.d_uy[idxBlock()] = uy * F_M_I_SCALE;
 
     state.d_mxx[idxBlock()] = mxx * F_M_II_SCALE;
     state.d_mxy[idxBlock()] = mxy * F_M_IJ_SCALE;
@@ -132,6 +139,17 @@ __global__ void gpuInitialization_pop(LBMState state, ghostInterfaceData ghostIn
     dfloat pop[Q];
 
     second::pop_reconstruction(pop, rho, ux, uy, mxx, mxy, myy);
+
+    if (y == NY - 1)
+    {
+        for (int i = 0; y < 9; ++i)
+        {
+            printf("%f %f %f %f %f %f %f %f %f\n", pop[0],
+                   pop[1], pop[2], pop[3],
+                   pop[4], pop[5], pop[6],
+                   pop[7], pop[8]);
+        }
+    }
 
     // thread xyz
     int tx = threadIdx.x;
@@ -210,11 +228,11 @@ void init_domain(LBMState &state, ghostInterfaceData &ghostInterface, dfloat &D_
     initialize_bulk<<<gridBlock, threadBlock>>>(state);
     checkCudaErrors(cudaDeviceSynchronize());
 
-    initialize_boundaries<<<gridBlock, threadBlock>>>(state);
-    checkCudaErrors(cudaDeviceSynchronize());
+    // initialize_boundaries<<<gridBlock, threadBlock>>>(state);
+    // checkCudaErrors(cudaDeviceSynchronize());
 
     checkCudaErrors(cudaMemcpy(state.h_node_type, state.d_node_type, state.bytes_types, cudaMemcpyDeviceToHost));
-    defining_geometry(state, D_in, D_out);
+    // defining_geometry(state, D_in, D_out);
 
     initialize_moments<<<gridBlock, threadBlock>>>(state);
     checkCudaErrors(cudaDeviceSynchronize());

@@ -1,7 +1,7 @@
 #ifndef OUTPUTS_AND_MODEL_H
 #define OUTPUTS_AND_MODEL_H
 
-#define PATH_FILES "CYLINDER"
+#define PATH_FILES "ANNUL"
 
 #ifndef ID_SIM
 #define ID_SIM "000"

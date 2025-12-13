@@ -16,6 +16,7 @@ __device__ const dfloat w[Q] = {W0,
 								W2, W2, W2, W2};
 
 constexpr dfloat as2 = 3.0;
+constexpr dfloat as4 = 9.0;
 constexpr dfloat cs2 = 1.0 / as2;
 
 // populations velocities      0  1  2  3  4  5  6  7  8
@@ -36,7 +37,7 @@ constexpr int MAX_ELEMENTS_IN_BLOCK = 48128 / SHARED_MEMORY_ELEMENT_SIZE;
 constexpr BlockDim optimalBlockDimArray = findOptimalBlockDimensions(MAX_ELEMENTS_IN_BLOCK);
 
 constexpr int BLOCK_NX = optimalBlockDimArray.x;
-constexpr int BLOCK_NY = optimalBlockDimArray.y;
+constexpr int BLOCK_NY = optimalBlockDimArray.y / 2;
 
 #define BLOCK_LBM_SIZE (BLOCK_NX * BLOCK_NY)
 

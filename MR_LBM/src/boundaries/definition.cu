@@ -53,4 +53,42 @@ namespace boundary
         // ---------------------------
         return BULK;
     }
+
+    __device__ uint8_t ldc_definition(int x, int y)
+    {
+        if (x == 0 && y == 0)
+        {
+            return SOUTH_WEST;
+        }
+        else if (x == 0 && y == NY - 1)
+        {
+            return NORTH_WEST;
+        }
+        else if (x == NX - 1 && y == 0)
+        {
+            return SOUTH_EAST;
+        }
+        else if (x == NX - 1 && y == NY - 1)
+        {
+            return NORTH_EAST;
+        }
+        else if (x == 0)
+        {
+            return WEST;
+        }
+        else if (x == NX - 1)
+        {
+            return EAST;
+        }
+        else if (y == 0)
+        {
+            return SOUTH;
+        }
+        else if (y == NY - 1)
+        {
+            return NORTH;
+        }
+
+        return BULK;
+    }
 }

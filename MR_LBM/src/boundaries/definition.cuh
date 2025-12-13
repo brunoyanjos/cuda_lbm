@@ -5,4 +5,6 @@
 namespace boundary
 {
     [[nodiscard]] __device__ uint8_t definition(int x, int y);
+
+    [[nodiscard]] __device__ uint8_t ldc_definition(int x, int y);
 }
