@@ -56,4 +56,6 @@ __host__ void saveMacr(dfloat *h_fMom, dfloat *rho, dfloat *ux, dfloat *uy, unsi
 
 std::string getVarFilename(const std::string varName, unsigned int step, const std::string ext);
 
+__host__ void create_vtk(const LBMState &state, const unsigned int &step);
+
 #endif

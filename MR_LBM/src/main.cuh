@@ -151,50 +151,85 @@ __host__ void allocateHostMemory(
 	checkCudaErrors(cudaMallocHost((void **)uy_mean, MEM_SIZE_UY_AVG));
 }
 
-__host__ void allocateDeviceMemory(
-	dfloat **d_fMom, unsigned int **dNodeType, GhostInterfaceData *ghostInterface, dfloat **ux_mean, dfloat **uy_mean)
+LBMState init_state()
 {
-	cudaMalloc((void **)d_fMom, MEM_SIZE_MOM);
-	cudaMalloc((void **)dNodeType, sizeof(int) * NUMBER_LBM_NODES);
+	LBMState state;
 
-	cudaMalloc((void **)ux_mean, MEM_SIZE_UX_AVG);
-	cudaMalloc((void **)uy_mean, MEM_SIZE_UY_AVG);
+	// Defining Variable Sizes
+	state.bytes_fields = NUMBER_LBM_NODES * sizeof(dfloat);
+	state.bytes_types = NUMBER_LBM_NODES * sizeof(uint8_t);
+
+	// Allocating HOST memory
+	state.h_node_type = (uint8_t *)malloc(state.bytes_types);
+	state.h_rho = (dfloat *)malloc(state.bytes_fields);
+
+	state.h_ux = (dfloat *)malloc(state.bytes_fields);
+	state.h_uy = (dfloat *)malloc(state.bytes_fields);
+
+	state.h_mxx = (dfloat *)malloc(state.bytes_fields);
+	state.h_mxy = (dfloat *)malloc(state.bytes_fields);
+	state.h_myy = (dfloat *)malloc(state.bytes_fields);
+
+	// Allocating DEVICE mesmory
+	checkCudaErrors(cudaMalloc(&state.d_node_type, state.bytes_types));
+	checkCudaErrors(cudaMalloc(&state.d_rho, state.bytes_fields));
+
+	checkCudaErrors(cudaMalloc(&state.d_ux, state.bytes_fields));
+	checkCudaErrors(cudaMalloc(&state.d_uy, state.bytes_fields));
+
+	checkCudaErrors(cudaMalloc(&state.d_mxx, state.bytes_fields));
+	checkCudaErrors(cudaMalloc(&state.d_mxy, state.bytes_fields));
+	checkCudaErrors(cudaMalloc(&state.d_myy, state.bytes_fields));
+
+	return state;
+}
+
+__host__ void allocateDeviceMemory(
+	unsigned int **dNodeType, GhostInterfaceData *ghostInterface)
+{
+	cudaMalloc((void **)dNodeType, sizeof(int) * NUMBER_LBM_NODES);
 
 	interfaceMalloc(*ghostInterface);
 }
 
+void upload_state_to_host(LBMState &state)
+{
+	checkCudaErrors(cudaMemcpy(state.h_rho, state.d_rho, state.bytes_fields, cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(state.h_ux, state.d_ux, state.bytes_fields, cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(state.h_uy, state.d_uy, state.bytes_fields, cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(state.h_mxx, state.d_mxx, state.bytes_fields, cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(state.h_mxy, state.d_mxy, state.bytes_fields, cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(state.h_myy, state.d_myy, state.bytes_fields, cudaMemcpyDeviceToHost));
+}
+
+void free_state(LBMState &state)
+{
+	free(state.h_node_type);
+	free(state.h_rho);
+	free(state.h_ux);
+	free(state.h_uy);
+	free(state.h_mxx);
+	free(state.h_mxy);
+	free(state.h_myy);
+
+	checkCudaErrors(cudaFree(state.d_node_type));
+	checkCudaErrors(cudaFree(state.d_rho));
+	checkCudaErrors(cudaFree(state.d_ux));
+	checkCudaErrors(cudaFree(state.d_uy));
+	checkCudaErrors(cudaFree(state.d_mxx));
+	checkCudaErrors(cudaFree(state.d_mxy));
+	checkCudaErrors(cudaFree(state.d_myy));
+}
+
 __host__ bool initializeDomain(
 	GhostInterfaceData &ghostInterface,
-	dfloat *&d_fMom, dfloat *&h_fMom,
+	LBMState &state,
 	unsigned int *&hNodeType, unsigned int *&dNodeType, int *ini_step,
 	dim3 gridBlock, dim3 threadBlock)
 {
-	if (LOAD_CHECKPOINT)
-	{
-		bool loaded = load_checkpoint(ini_step, h_fMom);
-
-		if (loaded)
-		{
-			std::cout << "Restarting simulation from: " << *ini_step << " steps" << std::endl;
-
-			truncate_tke_file(*ini_step);
-
-			checkCudaErrors(cudaDeviceSynchronize());
-			checkCudaErrors(cudaMemcpy(d_fMom, h_fMom, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyHostToDevice));
-			gpuInitialization_pop<<<gridBlock, threadBlock>>>(d_fMom, ghostInterface);
-		}
-		else
-		{
-			std::cout << "Failed to load checkpoint." << std::endl;
-			return false;
-		}
-	}
-	else
-	{
-		// LBM Initialization
-		gpuInitialization_mom<<<gridBlock, threadBlock>>>(d_fMom);
-		gpuInitialization_pop<<<gridBlock, threadBlock>>>(d_fMom, ghostInterface);
-	}
+	// LBM Initialization
+	gpuInitialization_mom<<<gridBlock, threadBlock>>>(state);
+	gpuInitialization_pop<<<gridBlock, threadBlock>>>(state, ghostInterface);
 
 	// Node type initialization
 	checkCudaErrors(cudaMallocHost((void **)&hNodeType, sizeof(unsigned int) * NUMBER_LBM_NODES));
@@ -210,7 +245,7 @@ __host__ bool initializeDomain(
 
 	// Synchronize and transfer data back to host if needed
 	checkCudaErrors(cudaDeviceSynchronize());
-	checkCudaErrors(cudaMemcpy(h_fMom, d_fMom, sizeof(dfloat) * NUMBER_LBM_NODES * NUMBER_MOMENTS, cudaMemcpyDeviceToHost));
+	upload_state_to_host(state);
 	checkCudaErrors(cudaDeviceSynchronize());
 
 	return true;

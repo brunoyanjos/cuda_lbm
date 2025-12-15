@@ -14,7 +14,6 @@
 #include COLREC
 #include CASE_BC
 
-
 #include "globalStructs.h"
 
 /*
@@ -29,7 +28,7 @@
  *   @param save: if is necessary save some data
  */
 __global__ void gpuMomCollisionStream(
-	dfloat* fMom, unsigned int* dNodeType, ghostInterfaceData ghostInterface, unsigned int step
-);
+	LBMState state, unsigned int *dNodeType,
+	ghostInterfaceData ghostInterface, unsigned int step);
 
 #endif

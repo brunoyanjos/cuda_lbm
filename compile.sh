@@ -26,6 +26,17 @@ if [ -z "$CompCap" ]; then
     fi
 fi
 
+# Create output directory
+OUTPUT_DIR="ANNUL/$ID_SIM"
+echo "Output directory: $OUTPUT_DIR"
+
+if [ -d "$OUTPUT_DIR" ]; then
+    echo "Warning: Directory $OUTPUT_DIR already exists - overwriting"
+    rm -rf "$OUTPUT_DIR"
+fi
+
+mkdir -p "$OUTPUT_DIR"
+
 # Clean specific executable
 EXEC_NAME="sim_${LT}_sm${CompCap}"
 rm -f "$EXEC_NAME"
@@ -38,12 +49,8 @@ cd MR_LBM/src || {
 
 nvcc -gencode arch=compute_${CompCap},code=sm_${CompCap} -rdc=true -O3 --restrict \
     -D ID_SIM=\"$ID_SIM\" \
-     *.cu \
-     -lcudadevrt -lcurand -o ../../"$EXEC_NAME" || {
-    echo "Error: Compilation failed" >&2
-    cd ../..
-    exit 1
-}
+    $(find . -name "*.cu") \
+    -lcudadevrt -lcurand -o ../../"$EXEC_NAME"
 
 # Return and run with simulation ID
 cd ../..

@@ -1,0 +1,638 @@
+========= COMPUTE-SANITIZER
+========= Error: Failed to initialize WDDM debugger interface. Please run EnableDebuggerInterface.bat as an administrator
+========= 
+========= Error: Device not supported. Please refer to the "Supported Devices" section of the sanitizer documentation
+========= 
+BLOCK_NX: 32, BLOCK_NY: 32
+
+----------------------------------- (0/1000000) 0.00% -----------------------------------
+
+----------------------------------- (10000/1000000) 1.00% -----------------------------------
+Elapsed time: 5.33971 seconds
+MLUPS: 30.6833
+Estimated time left: 0h 8min 48s
+
+----------------------------------- (20000/1000000) 2.00% -----------------------------------
+Elapsed time: 5.44681 seconds
+MLUPS: 30.08
+Estimated time left: 0h 8min 53s
+
+----------------------------------- (30000/1000000) 3.00% -----------------------------------
+Elapsed time: 5.31733 seconds
+MLUPS: 30.8125
+Estimated time left: 0h 8min 35s
+
+----------------------------------- (40000/1000000) 4.00% -----------------------------------
+Elapsed time: 5.52425 seconds
+MLUPS: 29.6583
+Estimated time left: 0h 8min 50s
+
+----------------------------------- (50000/1000000) 5.00% -----------------------------------
+Elapsed time: 5.22885 seconds
+MLUPS: 31.3338
+Estimated time left: 0h 8min 16s
+
+----------------------------------- (60000/1000000) 6.00% -----------------------------------
+Elapsed time: 5.06183 seconds
+MLUPS: 32.3677
+Estimated time left: 0h 7min 55s
+
+----------------------------------- (70000/1000000) 7.00% -----------------------------------
+Elapsed time: 5.03672 seconds
+MLUPS: 32.5291
+Estimated time left: 0h 7min 48s
+
+----------------------------------- (80000/1000000) 8.00% -----------------------------------
+Elapsed time: 5.03041 seconds
+MLUPS: 32.5699
+Estimated time left: 0h 7min 42s
+
+----------------------------------- (90000/1000000) 9.00% -----------------------------------
+Elapsed time: 5.07368 seconds
+MLUPS: 32.2922
+Estimated time left: 0h 7min 41s
+
+----------------------------------- (100000/1000000) 10.00% -----------------------------------
+Elapsed time: 5.08767 seconds
+MLUPS: 32.2033
+Estimated time left: 0h 7min 37s
+
+----------------------------------- (110000/1000000) 11.00% -----------------------------------
+Elapsed time: 5.44274 seconds
+MLUPS: 30.1025
+Estimated time left: 0h 8min 4s
+
+----------------------------------- (120000/1000000) 12.00% -----------------------------------
+Elapsed time: 5.71347 seconds
+MLUPS: 28.6761
+Estimated time left: 0h 8min 22s
+
+----------------------------------- (130000/1000000) 13.00% -----------------------------------
+Elapsed time: 5.23006 seconds
+MLUPS: 31.3266
+Estimated time left: 0h 7min 35s
+
+----------------------------------- (140000/1000000) 14.00% -----------------------------------
+Elapsed time: 5.46536 seconds
+MLUPS: 29.9779
+Estimated time left: 0h 7min 50s
+
+----------------------------------- (150000/1000000) 15.00% -----------------------------------
+Elapsed time: 5.16724 seconds
+MLUPS: 31.7075
+Estimated time left: 0h 7min 19s
+
+----------------------------------- (160000/1000000) 16.00% -----------------------------------
+Elapsed time: 5.12567 seconds
+MLUPS: 31.9646
+Estimated time left: 0h 7min 10s
+
+----------------------------------- (170000/1000000) 17.00% -----------------------------------
+Elapsed time: 5.22714 seconds
+MLUPS: 31.3441
+Estimated time left: 0h 7min 13s
+
+----------------------------------- (180000/1000000) 18.00% -----------------------------------
+Elapsed time: 5.19943 seconds
+MLUPS: 31.5112
+Estimated time left: 0h 7min 6s
+
+----------------------------------- (190000/1000000) 19.00% -----------------------------------
+Elapsed time: 5.15511 seconds
+MLUPS: 31.7821
+Estimated time left: 0h 6min 57s
+
+----------------------------------- (200000/1000000) 20.00% -----------------------------------
+Elapsed time: 5.15049 seconds
+MLUPS: 31.8106
+Estimated time left: 0h 6min 52s
+
+----------------------------------- (210000/1000000) 21.00% -----------------------------------
+Elapsed time: 5.14773 seconds
+MLUPS: 31.8276
+Estimated time left: 0h 6min 46s
+
+----------------------------------- (220000/1000000) 22.00% -----------------------------------
+Elapsed time: 5.14459 seconds
+MLUPS: 31.847
+Estimated time left: 0h 6min 41s
+
+----------------------------------- (230000/1000000) 23.00% -----------------------------------
+Elapsed time: 5.21137 seconds
+MLUPS: 31.439
+Estimated time left: 0h 6min 41s
+
+----------------------------------- (240000/1000000) 24.00% -----------------------------------
+Elapsed time: 5.21385 seconds
+MLUPS: 31.424
+Estimated time left: 0h 6min 36s
+
+----------------------------------- (250000/1000000) 25.00% -----------------------------------
+Elapsed time: 5.18341 seconds
+MLUPS: 31.6086
+Estimated time left: 0h 6min 28s
+
+----------------------------------- (260000/1000000) 26.00% -----------------------------------
+Elapsed time: 5.16675 seconds
+MLUPS: 31.7104
+Estimated time left: 0h 6min 22s
+
+----------------------------------- (270000/1000000) 27.00% -----------------------------------
+Elapsed time: 5.15645 seconds
+MLUPS: 31.7738
+Estimated time left: 0h 6min 16s
+
+----------------------------------- (280000/1000000) 28.00% -----------------------------------
+Elapsed time: 5.13281 seconds
+MLUPS: 31.9201
+Estimated time left: 0h 6min 9s
+
+----------------------------------- (290000/1000000) 29.00% -----------------------------------
+Elapsed time: 5.18785 seconds
+MLUPS: 31.5815
+Estimated time left: 0h 6min 8s
+
+----------------------------------- (300000/1000000) 30.00% -----------------------------------
+Elapsed time: 5.22307 seconds
+MLUPS: 31.3685
+Estimated time left: 0h 6min 5s
+
+----------------------------------- (310000/1000000) 31.00% -----------------------------------
+Elapsed time: 5.16042 seconds
+MLUPS: 31.7494
+Estimated time left: 0h 5min 56s
+
+----------------------------------- (320000/1000000) 32.00% -----------------------------------
+Elapsed time: 5.16473 seconds
+MLUPS: 31.7229
+Estimated time left: 0h 5min 51s
+
+----------------------------------- (330000/1000000) 33.00% -----------------------------------
+Elapsed time: 5.14655 seconds
+MLUPS: 31.8349
+Estimated time left: 0h 5min 44s
+
+----------------------------------- (340000/1000000) 34.00% -----------------------------------
+Elapsed time: 5.14308 seconds
+MLUPS: 31.8564
+Estimated time left: 0h 5min 39s
+
+----------------------------------- (350000/1000000) 35.00% -----------------------------------
+Elapsed time: 5.14456 seconds
+MLUPS: 31.8472
+Estimated time left: 0h 5min 34s
+
+----------------------------------- (360000/1000000) 36.00% -----------------------------------
+Elapsed time: 5.24136 seconds
+MLUPS: 31.259
+Estimated time left: 0h 5min 35s
+
+----------------------------------- (370000/1000000) 37.00% -----------------------------------
+Elapsed time: 5.19164 seconds
+MLUPS: 31.5584
+Estimated time left: 0h 5min 27s
+
+----------------------------------- (380000/1000000) 38.00% -----------------------------------
+Elapsed time: 5.16596 seconds
+MLUPS: 31.7153
+Estimated time left: 0h 5min 20s
+
+----------------------------------- (390000/1000000) 39.00% -----------------------------------
+Elapsed time: 5.15562 seconds
+MLUPS: 31.7789
+Estimated time left: 0h 5min 14s
+
+----------------------------------- (400000/1000000) 40.00% -----------------------------------
+Elapsed time: 5.16622 seconds
+MLUPS: 31.7137
+Estimated time left: 0h 5min 9s
+
+----------------------------------- (410000/1000000) 41.00% -----------------------------------
+Elapsed time: 5.13237 seconds
+MLUPS: 31.9229
+Estimated time left: 0h 5min 2s
+
+----------------------------------- (420000/1000000) 42.00% -----------------------------------
+Elapsed time: 5.22829 seconds
+MLUPS: 31.3372
+Estimated time left: 0h 5min 3s
+
+----------------------------------- (430000/1000000) 43.00% -----------------------------------
+Elapsed time: 5.19434 seconds
+MLUPS: 31.5421
+Estimated time left: 0h 4min 56s
+
+----------------------------------- (440000/1000000) 44.00% -----------------------------------
+Elapsed time: 5.16373 seconds
+MLUPS: 31.729
+Estimated time left: 0h 4min 49s
+
+----------------------------------- (450000/1000000) 45.00% -----------------------------------
+Elapsed time: 5.15783 seconds
+MLUPS: 31.7653
+Estimated time left: 0h 4min 43s
+
+----------------------------------- (460000/1000000) 46.00% -----------------------------------
+Elapsed time: 5.1494 seconds
+MLUPS: 31.8173
+Estimated time left: 0h 4min 38s
+
+----------------------------------- (470000/1000000) 47.00% -----------------------------------
+Elapsed time: 5.15046 seconds
+MLUPS: 31.8108
+Estimated time left: 0h 4min 32s
+
+----------------------------------- (480000/1000000) 48.00% -----------------------------------
+Elapsed time: 5.21724 seconds
+MLUPS: 31.4036
+Estimated time left: 0h 4min 31s
+
+----------------------------------- (490000/1000000) 49.00% -----------------------------------
+Elapsed time: 5.08387 seconds
+MLUPS: 32.2274
+Estimated time left: 0h 4min 19s
+
+----------------------------------- (500000/1000000) 50.00% -----------------------------------
+Elapsed time: 5.03581 seconds
+MLUPS: 32.535
+Estimated time left: 0h 4min 11s
+
+----------------------------------- (510000/1000000) 51.00% -----------------------------------
+Elapsed time: 5.01112 seconds
+MLUPS: 32.6953
+Estimated time left: 0h 4min 5s
+
+----------------------------------- (520000/1000000) 52.00% -----------------------------------
+Elapsed time: 5.01046 seconds
+MLUPS: 32.6996
+Estimated time left: 0h 4min 0s
+
+----------------------------------- (530000/1000000) 53.00% -----------------------------------
+Elapsed time: 5.00567 seconds
+MLUPS: 32.7309
+Estimated time left: 0h 3min 55s
+
+----------------------------------- (540000/1000000) 54.00% -----------------------------------
+Elapsed time: 5.04252 seconds
+MLUPS: 32.4917
+Estimated time left: 0h 3min 51s
+
+----------------------------------- (550000/1000000) 55.00% -----------------------------------
+Elapsed time: 5.0828 seconds
+MLUPS: 32.2342
+Estimated time left: 0h 3min 48s
+
+----------------------------------- (560000/1000000) 56.00% -----------------------------------
+Elapsed time: 5.04364 seconds
+MLUPS: 32.4844
+Estimated time left: 0h 3min 41s
+
+----------------------------------- (570000/1000000) 57.00% -----------------------------------
+Elapsed time: 5.02336 seconds
+MLUPS: 32.6156
+Estimated time left: 0h 3min 36s
+
+----------------------------------- (580000/1000000) 58.00% -----------------------------------
+Elapsed time: 5.01285 seconds
+MLUPS: 32.684
+Estimated time left: 0h 3min 30s
+
+----------------------------------- (590000/1000000) 59.00% -----------------------------------
+Elapsed time: 5.00834 seconds
+MLUPS: 32.7135
+Estimated time left: 0h 3min 25s
+
+----------------------------------- (600000/1000000) 60.00% -----------------------------------
+Elapsed time: 5.0052 seconds
+MLUPS: 32.7339
+Estimated time left: 0h 3min 20s
+
+----------------------------------- (610000/1000000) 61.00% -----------------------------------
+Elapsed time: 5.08272 seconds
+MLUPS: 32.2347
+Estimated time left: 0h 3min 18s
+
+----------------------------------- (620000/1000000) 62.00% -----------------------------------
+Elapsed time: 5.06098 seconds
+MLUPS: 32.3732
+Estimated time left: 0h 3min 12s
+
+----------------------------------- (630000/1000000) 63.00% -----------------------------------
+Elapsed time: 5.03225 seconds
+MLUPS: 32.558
+Estimated time left: 0h 3min 6s
+
+----------------------------------- (640000/1000000) 64.00% -----------------------------------
+Elapsed time: 5.01824 seconds
+MLUPS: 32.6489
+Estimated time left: 0h 3min 0s
+
+----------------------------------- (650000/1000000) 65.00% -----------------------------------
+Elapsed time: 5.01043 seconds
+MLUPS: 32.6998
+Estimated time left: 0h 2min 55s
+
+----------------------------------- (660000/1000000) 66.00% -----------------------------------
+Elapsed time: 5.00653 seconds
+MLUPS: 32.7253
+Estimated time left: 0h 2min 50s
+
+----------------------------------- (670000/1000000) 67.00% -----------------------------------
+Elapsed time: 5.05039 seconds
+MLUPS: 32.4411
+Estimated time left: 0h 2min 46s
+
+----------------------------------- (680000/1000000) 68.00% -----------------------------------
+Elapsed time: 5.07861 seconds
+MLUPS: 32.2608
+Estimated time left: 0h 2min 42s
+
+----------------------------------- (690000/1000000) 69.00% -----------------------------------
+Elapsed time: 5.04396 seconds
+MLUPS: 32.4824
+Estimated time left: 0h 2min 36s
+
+----------------------------------- (700000/1000000) 70.00% -----------------------------------
+Elapsed time: 5.021 seconds
+MLUPS: 32.6309
+Estimated time left: 0h 2min 30s
+
+----------------------------------- (710000/1000000) 71.00% -----------------------------------
+Elapsed time: 5.01844 seconds
+MLUPS: 32.6476
+Estimated time left: 0h 2min 25s
+
+----------------------------------- (720000/1000000) 72.00% -----------------------------------
+Elapsed time: 5.00886 seconds
+MLUPS: 32.71
+Estimated time left: 0h 2min 20s
+
+----------------------------------- (730000/1000000) 73.00% -----------------------------------
+Elapsed time: 5.01021 seconds
+MLUPS: 32.7012
+Estimated time left: 0h 2min 15s
+
+----------------------------------- (740000/1000000) 74.00% -----------------------------------
+Elapsed time: 5.10425 seconds
+MLUPS: 32.0988
+Estimated time left: 0h 2min 12s
+
+----------------------------------- (750000/1000000) 75.00% -----------------------------------
+Elapsed time: 5.05278 seconds
+MLUPS: 32.4257
+Estimated time left: 0h 2min 6s
+
+----------------------------------- (760000/1000000) 76.00% -----------------------------------
+Elapsed time: 5.02644 seconds
+MLUPS: 32.5956
+Estimated time left: 0h 2min 0s
+
+----------------------------------- (770000/1000000) 77.00% -----------------------------------
+Elapsed time: 5.0197 seconds
+MLUPS: 32.6394
+Estimated time left: 0h 1min 55s
+
+----------------------------------- (780000/1000000) 78.00% -----------------------------------
+Elapsed time: 5.01239 seconds
+MLUPS: 32.687
+Estimated time left: 0h 1min 50s
+
+----------------------------------- (790000/1000000) 79.00% -----------------------------------
+Elapsed time: 5.07611 seconds
+MLUPS: 32.2767
+Estimated time left: 0h 1min 46s
+
+----------------------------------- (800000/1000000) 80.00% -----------------------------------
+Elapsed time: 5.16765 seconds
+MLUPS: 31.7049
+Estimated time left: 0h 1min 43s
+
+----------------------------------- (810000/1000000) 81.00% -----------------------------------
+Elapsed time: 5.57568 seconds
+MLUPS: 29.3847
+Estimated time left: 0h 1min 45s
+
+----------------------------------- (820000/1000000) 82.00% -----------------------------------
+Elapsed time: 5.75287 seconds
+MLUPS: 28.4797
+Estimated time left: 0h 1min 43s
+
+----------------------------------- (830000/1000000) 83.00% -----------------------------------
+Elapsed time: 5.32665 seconds
+MLUPS: 30.7586
+Estimated time left: 0h 1min 30s
+
+----------------------------------- (840000/1000000) 84.00% -----------------------------------
+Elapsed time: 5.11897 seconds
+MLUPS: 32.0064
+Estimated time left: 0h 1min 21s
+
+----------------------------------- (850000/1000000) 85.00% -----------------------------------
+Elapsed time: 12.1954 seconds
+MLUPS: 13.4346
+Estimated time left: 0h 3min 2s
+
+----------------------------------- (860000/1000000) 86.00% -----------------------------------
+Elapsed time: 9.44356 seconds
+MLUPS: 17.3494
+Estimated time left: 0h 2min 12s
+
+----------------------------------- (870000/1000000) 87.00% -----------------------------------
+Elapsed time: 5.2621 seconds
+MLUPS: 31.1359
+Estimated time left: 0h 1min 8s
+
+----------------------------------- (880000/1000000) 88.00% -----------------------------------
+Elapsed time: 5.30086 seconds
+MLUPS: 30.9082
+Estimated time left: 0h 1min 3s
+
+----------------------------------- (890000/1000000) 89.00% -----------------------------------
+Elapsed time: 20.6132 seconds
+MLUPS: 7.94831
+Estimated time left: 0h 3min 46s
+
+----------------------------------- (900000/1000000) 90.00% -----------------------------------
+Elapsed time: 4.48529 seconds
+MLUPS: 36.5283
+Estimated time left: 0h 0min 44s
+
+----------------------------------- (910000/1000000) 91.00% -----------------------------------
+Elapsed time: 8.49666 seconds
+MLUPS: 19.2829
+Estimated time left: 0h 1min 16s
+
+----------------------------------- (920000/1000000) 92.00% -----------------------------------
+Elapsed time: 14.0183 seconds
+MLUPS: 11.6875
+Estimated time left: 0h 1min 52s
+
+----------------------------------- (930000/1000000) 93.00% -----------------------------------
+Elapsed time: 5.317 seconds
+MLUPS: 30.8144
+Estimated time left: 0h 0min 37s
+
+----------------------------------- (940000/1000000) 94.00% -----------------------------------
+Elapsed time: 5.26146 seconds
+MLUPS: 31.1396
+Estimated time left: 0h 0min 31s
+
+----------------------------------- (950000/1000000) 95.00% -----------------------------------
+Elapsed time: 5.18918 seconds
+MLUPS: 31.5734
+Estimated time left: 0h 0min 25s
+
+----------------------------------- (960000/1000000) 96.00% -----------------------------------
+Elapsed time: 5.11905 seconds
+MLUPS: 32.0059
+Estimated time left: 0h 0min 20s
+
+----------------------------------- (970000/1000000) 97.00% -----------------------------------
+Elapsed time: 5.37529 seconds
+MLUPS: 30.4802
+Estimated time left: 0h 0min 16s
+
+----------------------------------- (980000/1000000) 98.00% -----------------------------------
+Elapsed time: 6.97398 seconds
+MLUPS: 23.493
+Estimated time left: 0h 0min 13s
+
+----------------------------------- (990000/1000000) 99.00% -----------------------------------
+Elapsed time: 7.68595 seconds
+MLUPS: 21.3168
+Estimated time left: 0h 0min 7s
+
+----------------------------------- (1000000/1000000) 100.00% -----------------------------------
+Elapsed time: 14.7353 seconds
+MLUPS: 11.1189
+Estimated time left: 0h 0min 0s
+=========  Unused memory in allocation 0x707a64000 of size 65536 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x5b3b6] in sim_D2Q9_sm89
+=========         Host Frame: main [0xc09e] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a7a000 of size 6144 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x5b3b6] in sim_D2Q9_sm89
+=========         Host Frame: interfaceMalloc(ghostInterfaceData&) [0x16f49] in sim_D2Q9_sm89
+=========         Host Frame: main [0xc0b3] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a7b800 of size 6144 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x5b3b6] in sim_D2Q9_sm89
+=========         Host Frame: interfaceMalloc(ghostInterfaceData&) [0x16f57] in sim_D2Q9_sm89
+=========         Host Frame: main [0xc0b3] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a7d000 of size 6144 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x5b3b6] in sim_D2Q9_sm89
+=========         Host Frame: interfaceMalloc(ghostInterfaceData&) [0x16f65] in sim_D2Q9_sm89
+=========         Host Frame: main [0xc0b3] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a7e800 of size 6144 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x5b3b6] in sim_D2Q9_sm89
+=========         Host Frame: main [0xc0b3] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a74000 of size 6144 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x5b3b6] in sim_D2Q9_sm89
+=========         Host Frame: interfaceMalloc(ghostInterfaceData&) [0x16f11] in sim_D2Q9_sm89
+=========         Host Frame: main [0xc0b3] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a75800 of size 6144 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x5b3b6] in sim_D2Q9_sm89
+=========         Host Frame: interfaceMalloc(ghostInterfaceData&) [0x16f1f] in sim_D2Q9_sm89
+=========         Host Frame: main [0xc0b3] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a77000 of size 6144 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x5b3b6] in sim_D2Q9_sm89
+=========         Host Frame: interfaceMalloc(ghostInterfaceData&) [0x16f2d] in sim_D2Q9_sm89
+=========         Host Frame: main [0xc0b3] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a78800 of size 6144 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x5b3b6] in sim_D2Q9_sm89
+=========         Host Frame: interfaceMalloc(ghostInterfaceData&) [0x16f3b] in sim_D2Q9_sm89
+=========         Host Frame: main [0xc0b3] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a00000 of size 16384 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x5b3b6] in sim_D2Q9_sm89
+=========         Host Frame: init_state() [0x17162] in sim_D2Q9_sm89
+=========         Host Frame: main [0xc05b] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a04000 of size 65536 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x5b3b6] in sim_D2Q9_sm89
+=========         Host Frame: init_state() [0x17173] in sim_D2Q9_sm89
+=========         Host Frame: main [0xc05b] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a14000 of size 65536 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x5b3b6] in sim_D2Q9_sm89
+=========         Host Frame: init_state() [0x17188] in sim_D2Q9_sm89
+=========         Host Frame: main [0xc05b] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a24000 of size 65536 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x5b3b6] in sim_D2Q9_sm89
+=========         Host Frame: init_state() [0x1719d] in sim_D2Q9_sm89
+=========         Host Frame: main [0xc05b] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a34000 of size 65536 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x5b3b6] in sim_D2Q9_sm89
+=========         Host Frame: init_state() [0x171b2] in sim_D2Q9_sm89
+=========         Host Frame: main [0xc05b] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a44000 of size 65536 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x5b3b6] in sim_D2Q9_sm89
+=========         Host Frame: init_state() [0x171c3] in sim_D2Q9_sm89
+=========         Host Frame: main [0xc05b] in sim_D2Q9_sm89
+========= 
+=========  Unused memory in allocation 0x707a54000 of size 65536 bytes
+=========     Not written any memory.
+=========     100% of allocation were unused.
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x5b3b6] in sim_D2Q9_sm89
+=========         Host Frame: init_state() [0x171d4] in sim_D2Q9_sm89
+=========         Host Frame: main [0xc05b] in sim_D2Q9_sm89
+========= 
+
+--------------------------- Last Time Step 1000001 ---------------------------
+MLUPS: 28.817911
+========= ERROR SUMMARY: 18 errors

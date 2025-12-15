@@ -10,7 +10,7 @@ __global__ void velocity_average(dfloat *fMom, dfloat *ux_mean, dfloat *uy_mean,
     const std::size_t x_coord = NX / 2;
     const std::size_t y_coord = NY / 2;
 
-    const std::size_t time_counter = (step - N_STAT) / MACR_SAVE;
+    const std::size_t time_counter = (step) / MACR_SAVE;
     const dfloat inv_count = 1.0f / (1.0f + time_counter);
 
     const std::size_t x_thread_right = x_coord % BLOCK_NX;

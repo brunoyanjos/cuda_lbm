@@ -1,8 +1,7 @@
 #include "lbmInitialization.cuh"
 #include <cmath>
 
-__global__ void gpuInitialization_mom(
-	dfloat* fMom)
+__global__ void gpuInitialization_mom(LBMState state)
 {
 	int x = threadIdx.x + blockDim.x * blockIdx.x;
 	int y = threadIdx.y + blockDim.y * blockIdx.y;
@@ -17,9 +16,9 @@ __global__ void gpuInitialization_mom(
 	uy = U_0_Y;
 
 	// zeroth moment
-	fMom[idxMom(threadIdx.x, threadIdx.y, M_RHO_INDEX, blockIdx.x, blockIdx.y)] = rho - RHO_0;
-	fMom[idxMom(threadIdx.x, threadIdx.y, M_UX_INDEX, blockIdx.x, blockIdx.y)] = F_M_I_SCALE * ux;
-	fMom[idxMom(threadIdx.x, threadIdx.y, M_UY_INDEX, blockIdx.x, blockIdx.y)] = F_M_I_SCALE * uy;
+	state.d_rho[idxScalarBlock(threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y)] = rho - RHO_0;
+	state.d_ux[idxScalarBlock(threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y)] = F_M_I_SCALE * ux;
+	state.d_uy[idxScalarBlock(threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y)] = F_M_I_SCALE * uy;
 
 	// second moments
 	// define equilibrium populations
@@ -34,13 +33,13 @@ __global__ void gpuInitialization_mom(
 	dfloat pixy = ((pop[5] + pop[7]) - (pop[6] + pop[8])) * invRho;
 	dfloat piyy = (pop[2] + pop[4] + pop[5] + pop[6] + pop[7] + pop[8]) * invRho - cs2;
 
-	fMom[idxMom(threadIdx.x, threadIdx.y, M_MXX_INDEX, blockIdx.x, blockIdx.y)] = F_M_II_SCALE * pixx;
-	fMom[idxMom(threadIdx.x, threadIdx.y, M_MXY_INDEX, blockIdx.x, blockIdx.y)] = F_M_IJ_SCALE * pixy;
-	fMom[idxMom(threadIdx.x, threadIdx.y, M_MYY_INDEX, blockIdx.x, blockIdx.y)] = F_M_II_SCALE * piyy;
+	state.d_mxx[idxScalarBlock(threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y)] = F_M_II_SCALE * pixx;
+	state.d_mxy[idxScalarBlock(threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y)] = F_M_IJ_SCALE * pixy;
+	state.d_myy[idxScalarBlock(threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y)] = F_M_II_SCALE * piyy;
 }
 
 __global__ void gpuInitialization_pop(
-	dfloat* fMom, ghostInterfaceData ghostInterface)
+	LBMState state, ghostInterfaceData ghostInterface)
 {
 	int x = threadIdx.x + blockDim.x * blockIdx.x;
 	int y = threadIdx.y + blockDim.y * blockIdx.y;
@@ -48,12 +47,12 @@ __global__ void gpuInitialization_pop(
 		return;
 
 	// zeroth moment
-	dfloat rhoVar = RHO_0 + fMom[idxMom(threadIdx.x, threadIdx.y, M_RHO_INDEX, blockIdx.x, blockIdx.y)];
-	dfloat ux_t30 = fMom[idxMom(threadIdx.x, threadIdx.y, M_UX_INDEX, blockIdx.x, blockIdx.y)];
-	dfloat uy_t30 = fMom[idxMom(threadIdx.x, threadIdx.y, M_UY_INDEX, blockIdx.x, blockIdx.y)];
-	dfloat m_xx_t45 = fMom[idxMom(threadIdx.x, threadIdx.y, M_MXX_INDEX, blockIdx.x, blockIdx.y)];
-	dfloat m_xy_t90 = fMom[idxMom(threadIdx.x, threadIdx.y, M_MXY_INDEX, blockIdx.x, blockIdx.y)];
-	dfloat m_yy_t45 = fMom[idxMom(threadIdx.x, threadIdx.y, M_MYY_INDEX, blockIdx.x, blockIdx.y)];
+	dfloat rhoVar = RHO_0 + state.d_rho[idxScalarBlock(threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y)];
+	dfloat ux_t30 = state.d_ux[idxScalarBlock(threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y)];
+	dfloat uy_t30 = state.d_uy[idxScalarBlock(threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y)];
+	dfloat m_xx_t45 = state.d_mxx[idxScalarBlock(threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y)];
+	dfloat m_xy_t90 = state.d_mxy[idxScalarBlock(threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y)];
+	dfloat m_yy_t45 = state.d_myy[idxScalarBlock(threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y)];
 
 	dfloat pop[Q];
 
@@ -94,10 +93,8 @@ __global__ void gpuInitialization_pop(
 	}
 }
 
-
-
 __global__ void gpuInitialization_nodeType(
-	unsigned int* dNodeType)
+	unsigned int *dNodeType)
 {
 	int x = threadIdx.x + blockDim.x * blockIdx.x;
 	int y = threadIdx.y + blockDim.y * blockIdx.y;
@@ -105,18 +102,13 @@ __global__ void gpuInitialization_nodeType(
 	if (x >= NX || y >= NY)
 		return;
 
-	unsigned int nodeType;
-
-	boundary_definition(&nodeType, x, y);
-
-	dNodeType[idxScalarBlock(threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y)] = nodeType;
+	dNodeType[idxScalarBlock(threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y)] = boundary_definition(x, y);
 }
 
 __host__ void hostInitialization_nodeType_bulk(
-	unsigned int* hNodeType)
+	unsigned int *hNodeType)
 {
 	int x, y;
-
 
 	for (y = 0; y < NY; y++)
 	{
@@ -128,24 +120,16 @@ __host__ void hostInitialization_nodeType_bulk(
 }
 
 __host__ void hostInitialization_nodeType(
-	unsigned int* hNodeType)
+	unsigned int *hNodeType)
 {
 	int x, y;
-	unsigned int nodeType;
-
 
 	for (y = 0; y < NY; y++)
 	{
 		for (x = 0; x < NX; x++)
 		{
 
-			boundary_definition(&nodeType, x, y);
-
-			if (nodeType != BULK)
-				hNodeType[idxScalarBlock(x % BLOCK_NX, y % BLOCK_NY, x / BLOCK_NX, y / BLOCK_NY)] = (unsigned int)nodeType;
-
-
+			hNodeType[idxScalarBlock(x % BLOCK_NX, y % BLOCK_NY, x / BLOCK_NX, y / BLOCK_NY)] = boundary_definition(x, y);
 		}
 	}
-
 }

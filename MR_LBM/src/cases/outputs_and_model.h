@@ -1,7 +1,7 @@
 #ifndef OUTPUTS_AND_MODEL_H
 #define OUTPUTS_AND_MODEL_H
 
-#define PATH_FILES "LDC"
+#define PATH_FILES "ANNUL"
 
 #ifndef ID_SIM
 #define ID_SIM "001"
@@ -14,8 +14,8 @@
 // clang-format off
 
 #define COLREC STR(colrec/REG_ORDER/collision_and_reconstruction.cuh)
-#define CASE_CONSTANTS STR(BC_PROBLEM/constants.h)
-#define CASE_BC STR(CASE_DIRECTORY/BC_PROBLEM/boundaries.cuh)
+#define CASE_CONSTANTS STR(constants.h)
+#define CASE_BC STR(CASE_DIRECTORY/boundaries.cuh)
 
 // clang-format on
 
