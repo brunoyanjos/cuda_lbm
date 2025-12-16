@@ -155,6 +155,9 @@ LBMState init_state()
 {
 	LBMState state;
 
+	state.D_in = 0;
+	state.D_out = NX + 2;
+
 	// Defining Variable Sizes
 	state.bytes_fields = NUMBER_LBM_NODES * sizeof(dfloat);
 	state.bytes_types = NUMBER_LBM_NODES * sizeof(uint8_t);
@@ -224,21 +227,18 @@ void free_state(LBMState &state)
 __host__ bool initializeDomain(
 	GhostInterfaceData &ghostInterface,
 	LBMState &state,
-	unsigned int *&hNodeType, unsigned int *&dNodeType, int *ini_step,
 	dim3 gridBlock, dim3 threadBlock)
 {
+	// Node type initialization
+	hostInitialization_nodeType(state.h_node_type);
+	initialize_boundaries(state);
+
+	checkCudaErrors(cudaMemcpy(state.d_node_type, state.h_node_type, state.bytes_types, cudaMemcpyHostToDevice));
+	checkCudaErrors(cudaDeviceSynchronize());
+
 	// LBM Initialization
 	gpuInitialization_mom<<<gridBlock, threadBlock>>>(state);
 	gpuInitialization_pop<<<gridBlock, threadBlock>>>(state, ghostInterface);
-
-	// Node type initialization
-	checkCudaErrors(cudaMallocHost((void **)&hNodeType, sizeof(unsigned int) * NUMBER_LBM_NODES));
-
-	hostInitialization_nodeType_bulk(hNodeType);
-	hostInitialization_nodeType(hNodeType);
-
-	checkCudaErrors(cudaMemcpy(dNodeType, hNodeType, sizeof(unsigned int) * NUMBER_LBM_NODES, cudaMemcpyHostToDevice));
-	checkCudaErrors(cudaDeviceSynchronize());
 
 	// Interface population initialization
 	interfaceCudaMemcpy(ghostInterface, ghostInterface.gGhost, ghostInterface.fGhost, cudaMemcpyDeviceToDevice, QF);

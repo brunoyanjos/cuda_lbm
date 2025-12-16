@@ -16,19 +16,10 @@
 
 #include "globalStructs.h"
 
-/*
- *   @brief Updates macroscopics and then performs collision and streaming
- *   @param fMom: macroscopics moments
- *   @param ghostInterface interface block transfer information
- *   @param d_mean_rho: mean density, used for density correction
- *   @param d_BC_Fx: boundary condition force x
- *   @param d_BC_Fy: boundary condition force x
- *   @param d_BC_Fz: boundary condition force x
- *   @param step: current time step
- *   @param save: if is necessary save some data
- */
-__global__ void gpuMomCollisionStream(
-	LBMState state, unsigned int *dNodeType,
-	ghostInterfaceData ghostInterface, unsigned int step);
+__global__ void streaming_and_moments(LBMState state, ghostInterfaceData ghostInterface, dfloat OMEGA);
+
+__global__ void boundary_condition_and_interpolation(LBMState state, ghostInterfaceData ghostInterface, dfloat OMEGA);
+
+__global__ void collision_and_interface_saving(LBMState state, ghostInterfaceData ghostInterface, dfloat OMEGA);
 
 #endif

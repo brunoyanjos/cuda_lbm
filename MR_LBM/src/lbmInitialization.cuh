@@ -55,6 +55,8 @@ __host__ void hostInitialization_nodeType_bulk(
  *   @param nodeType: node type ID
  */
 __host__ void hostInitialization_nodeType(
-	unsigned int *hNodeType);
+	uint8_t *hNodeType);
+
+__host__ void initialize_boundaries(LBMState &state);
 
 #endif // !__LBM_INITIALIZATION_CUH

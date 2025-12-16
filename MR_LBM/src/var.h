@@ -2,7 +2,7 @@
 #define __VAR_H
 
 #include <builtin_types.h> // for devices variables
-#include <stdint.h>        // for uint32_t
+#include <stdint.h>		   // for uint32_t
 #include <map>
 
 #define _USE_MATH_DEFINES
@@ -19,6 +19,36 @@ typedef std::chrono::high_resolution_clock::time_point timestep;
 
 #define GPU_INDEX 0
 /* --------------------------  SIMULATION DEFINES -------------------------- */
+
+template <typename T>
+__host__ __device__ inline T dsqrt(T x);
+
+template <>
+__host__ __device__ inline float dsqrt<float>(float x)
+{
+	return sqrtf(x);
+}
+
+template <>
+__host__ __device__ inline double dsqrt<double>(double x)
+{
+	return sqrt(x);
+}
+
+template <typename T>
+__host__ __device__ inline T dabs(T x);
+
+template <>
+__host__ __device__ inline float dabs<float>(float x)
+{
+	return fabsf(x);
+}
+
+template <>
+__host__ __device__ inline double dabs<double>(double x)
+{
+	return fabs(x);
+}
 
 #define STR_IMPL(A) #A
 #define STR(A) STR_IMPL(A)
@@ -71,7 +101,7 @@ constexpr BlockDim findOptimalBlockDimensions(size_t maxElements)
 			}
 		}
 	}
-	return { bestX, bestY };
+	return {bestX, bestY};
 }
 
 #include "cases/outputs_and_model.h"

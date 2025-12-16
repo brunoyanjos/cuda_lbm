@@ -57,15 +57,35 @@ __host__ __device__
 }
 
 __host__ __device__
-size_t __forceinline__
-idxScalarGlobal(unsigned int x, unsigned int y)
+    size_t __forceinline__
+    idxScalarGlobal(unsigned int x, unsigned int y)
 {
     return x + NX * y;
 }
 
+__device__
+    size_t __forceinline__
+    idxBlock()
+{
+    return threadIdx.x + blockDim.x * (threadIdx.y + blockDim.y * (blockIdx.x + gridDim.x * blockIdx.y));
+}
+
 __host__ __device__
-size_t __forceinline__
-idxCylinder(unsigned int x, unsigned int y)
+    size_t __forceinline__
+    idxBlockCoord(const int x, const int y)
+{
+    const int tx = x % BLOCK_NX;
+    const int ty = y % BLOCK_NY;
+
+    const int bx = x / BLOCK_NX;
+    const int by = y / BLOCK_NY;
+
+    return tx + BLOCK_NX * (ty + BLOCK_NY * (bx + NUM_BLOCK_X * by));
+}
+
+__host__ __device__
+    size_t __forceinline__
+    idxCylinder(unsigned int x, unsigned int y)
 {
     return x + NX * y;
 }

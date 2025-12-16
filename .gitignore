@@ -29,6 +29,7 @@ src/CUDA/x64
 *.pdf
 *.dat
 *.png
+*log*
 *.avi
 sim_*
 MR_LBM/*.dat

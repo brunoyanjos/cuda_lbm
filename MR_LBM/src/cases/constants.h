@@ -3,23 +3,22 @@
 
 #include "../var.h"
 
-constexpr dfloat RE = 10000;
+constexpr dfloat RE = 1000;
 
 constexpr int SCALE = 1;
 
-constexpr int MACR_SAVE = 10000;
+constexpr int MACR_SAVE = 1000;
+constexpr int D = 128;
 
-constexpr int N = 256 * SCALE;
+constexpr int N = 2 * D;
 constexpr int NX = N; // size x of the grid
 constexpr int NY = N; // size y of the grid
 
+constexpr dfloat xc = dfloat(NX - 1) / 2;
+constexpr dfloat yc = dfloat(NY - 1) / 2;
+
 constexpr dfloat U_MAX = 0.0256;
 constexpr dfloat L = N;
-
-constexpr dfloat VISC = U_MAX * NX / RE;
-constexpr dfloat TAU = 0.5 + 3.0 * VISC; // relaxation time
-
-constexpr dfloat OMEGA = 1.0 / TAU; // (tau)^-1
 
 // value for the velocity initial condition in the domain
 constexpr dfloat U_0_X = 0.0;
@@ -36,7 +35,5 @@ constexpr int N_STEPS = 1000000;
 
 #define BC_X_WALL
 #define BC_Y_WALL
-
-constexpr bool IRBC = true;
 
 #endif // !CONSTANTS_H

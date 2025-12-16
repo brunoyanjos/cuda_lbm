@@ -28,7 +28,7 @@ __device__ inline void pop_reconstruction(dfloat rhoVar, dfloat ux, dfloat uy, d
 	pop[8] = multiplyTerm * (pics2 + ux - uy + mxx + myy - mxy);
 }
 
-__device__ inline void moment_collision(dfloat ux, dfloat uy, dfloat &mxx, dfloat &myy, dfloat &mxy)
+__device__ inline void moment_collision(dfloat ux, dfloat uy, dfloat &mxx, dfloat &myy, dfloat &mxy, dfloat OMEGA)
 {
 	const dfloat omegaVar = OMEGA;
 	const dfloat t_omegaVar = 1 - omegaVar;

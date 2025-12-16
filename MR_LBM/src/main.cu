@@ -17,9 +17,6 @@ int main()
 	auto state = init_state();
 	ghostInterfaceData ghostInterface;
 
-	unsigned int *dNodeType;
-	unsigned int *hNodeType;
-
 	/* ----------------- GRID AND THREADS DEFINITION FOR LBM ---------------- */
 	dim3 threadBlock(BLOCK_NX, BLOCK_NY);
 	dim3 gridBlock(NUM_BLOCK_X, NUM_BLOCK_Y);
@@ -29,7 +26,7 @@ int main()
 	int init_step = 0;
 
 	/* -------------- ALLOCATION FOR GPU ------------- */
-	allocateDeviceMemory(&dNodeType, &ghostInterface);
+	interfaceMalloc(ghostInterface);
 
 	// Setup Streams
 	cudaStream_t streamsLBM[1];
@@ -37,9 +34,7 @@ int main()
 	checkCudaErrors(cudaStreamCreate(&streamsLBM[0]));
 	checkCudaErrors(cudaDeviceSynchronize());
 
-	bool success = initializeDomain(ghostInterface, state,
-									hNodeType, dNodeType,
-									&init_step, gridBlock, threadBlock);
+	bool success = initializeDomain(ghostInterface, state, gridBlock, threadBlock);
 
 	if (!success)
 	{
@@ -57,19 +52,29 @@ int main()
 	timestep step_start = std::chrono::high_resolution_clock::now();
 	timestep step_end;
 
+	dfloat VISC = U_MAX * (state.D_out - state.D_in) / RE;
+	dfloat TAU = 0.5 + 3.0 * VISC; // relaxation time
+
+	dfloat OMEGA = 1.0 / TAU; // (tau)^-1
+
 	/* --------------------------------------------------------------------- */
 	/* ---------------------------- BEGIN LOOP ------------------------------ */
 	/* --------------------------------------------------------------------- */
 	for (step = init_step; step <= N_STEPS; ++step)
 	{
-		gpuMomCollisionStream<<<gridBlock, threadBlock>>>(state, dNodeType, ghostInterface, step);
+		streaming_and_moments<<<gridBlock, threadBlock>>>(state, ghostInterface, OMEGA);
 		checkCudaErrors(cudaDeviceSynchronize());
 
-		// swap interface pointers
+		boundary_condition_and_interpolation<<<gridBlock, threadBlock>>>(state, ghostInterface, OMEGA);
+		checkCudaErrors(cudaDeviceSynchronize());
+
+		collision_and_interface_saving<<<gridBlock, threadBlock>>>(state, ghostInterface, OMEGA);
+		checkCudaErrors(cudaDeviceSynchronize());
+
 		swapGhostInterfaces(ghostInterface);
 		checkCudaErrors(cudaDeviceSynchronize());
 
-		if (MACR_SAVE != 0 && step % MACR_SAVE == 0)
+		if (step != 0 && step % MACR_SAVE == 0)
 		{
 			printf("\n----------------------------------- (%d/%d) %.2f%% -----------------------------------\n",
 				   step, N_STEPS, static_cast<float>(step) / static_cast<float>(N_STEPS) * 100.0f);
@@ -81,7 +86,6 @@ int main()
 			upload_state_to_host(state);
 
 			create_vtk(state, step);
-			checkCudaErrors(cudaDeviceSynchronize());
 		}
 	}
 
@@ -101,9 +105,9 @@ int main()
 	saveSimInfo(step, MLUPS);
 
 	/* ------------------------------ FREE ------------------------------ */
-	cudaFree(dNodeType);
-	cudaFree(hNodeType);
 
 	interfaceFree(ghostInterface);
+	free_state(state);
+
 	return 0;
 }

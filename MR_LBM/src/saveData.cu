@@ -270,7 +270,6 @@ std::string getSimInfoString(int step, dfloat MLUPS)
 	strSimInfo << "      Simulation ID: " << ID_SIM << "\n";
 	strSimInfo << "       Velocity set: D2Q9\n";
 	strSimInfo << "          Reg Order: " << STR(REG_ORDER) << "\n";
-	strSimInfo << "               IRBC: " << IRBC << "\n";
 	strSimInfo << "                 Re: " << RE << "\n";
 	strSimInfo << "          Precision: float\n";
 	strSimInfo << "                 NX: " << NX << "\n";
@@ -376,6 +375,32 @@ void create_vtk(const LBMState &state, const unsigned int &step)
 			int idx = idxScalarBlock(x % BLOCK_NX, y % BLOCK_NY, x / BLOCK_NX, y / BLOCK_NY);
 			float rho = state.h_rho[idx] + RHO_0;
 			file << rho << "\n";
+		}
+	}
+
+	// --- VELOCITY UX ---
+	file << "SCALARS ux float 1\n";
+	file << "LOOKUP_TABLE default\n";
+
+	for (int y = 0; y < NY; y++)
+	{
+		for (int x = 0; x < NX; x++)
+		{
+			int idx = idxScalarBlock(x % BLOCK_NX, y % BLOCK_NY, x / BLOCK_NX, y / BLOCK_NY);
+			file << state.h_ux[idx] / F_M_I_SCALE << "\n";
+		}
+	}
+
+	// --- VELOCITY UY ---
+	file << "SCALARS uy float 1\n";
+	file << "LOOKUP_TABLE default\n";
+
+	for (int y = 0; y < NY; y++)
+	{
+		for (int x = 0; x < NX; x++)
+		{
+			int idx = idxScalarBlock(x % BLOCK_NX, y % BLOCK_NY, x / BLOCK_NX, y / BLOCK_NY);
+			file << state.h_uy[idx] / F_M_I_SCALE << "\n";
 		}
 	}
 

@@ -48,164 +48,54 @@
 	return BULK;
 }
 
-__device__ inline void boundary_calculation_old(unsigned int nodeType, dfloat &rhoVar,
-												dfloat &ux, dfloat &uy,
-												dfloat &mxx, dfloat &myy, dfloat &mxy,
-												dfloat *pop)
+[[nodiscard]] __host__ __device__ inline int annular_boundary_definition(unsigned int x, unsigned int y)
 {
-	switch (nodeType)
+	const dfloat xc_local = xc;
+	const dfloat yc_local = yc;
+
+	// ---------------------------
+	// Distance from the cell to the center
+	// ---------------------------
+	const dfloat dx = dfloat(x) - xc_local;
+	const dfloat dy = dfloat(y) - yc_local;
+	const dfloat dist = dsqrt(dx * dx + dy * dy);
+
+	// ---------------------------
+	// Radii definitions
+	// ---------------------------
+	const dfloat inner_radius = dfloat(D) / 2.0;
+	const dfloat outer_radius = dfloat(NX - 1) / 2.0;
+
+	// Smoothing thickness (LBM-friendly transition band)
+	const dfloat smooth = 0.5;
+
+	// ---------------------------
+	// INNER BOUNDARY (smooth band)
+	// ---------------------------
+	const dfloat d_inner = dabs(dist - inner_radius);
+
+	// Inside the inner solid region OR within the smoothing band → solid
+	if (dist <= inner_radius || d_inner <= smooth)
 	{
-	case NORTH:
+		return SOLID_NODE;
+	}
+
+	// ---------------------------
+	// OUTER BOUNDARY (smooth band)
+	// ---------------------------
+	const dfloat d_outer = dabs(dist - outer_radius);
+
+	// Outside the outer radius → solid region
+	// Within the smoothing band around the outer boundary → solid
+	if (d_outer <= smooth || dist >= outer_radius)
 	{
-		const dfloat rhoIn = pop[0] + pop[1] + pop[2] + pop[3] + pop[5] + pop[6];
-		const dfloat inv_rhoIn = 1.0f / rhoIn;
-
-		const dfloat mxyIn = (pop[5] - pop[6]) * inv_rhoIn;
-
-		ux = U_MAX;
-		uy = 0.0f;
-
-		rhoVar = 6.0f * rhoIn / 5.0f;
-
-		mxx = U_MAX * U_MAX;
-		mxy = 5.0f * mxyIn / 3.0f - U_MAX / 3.0f;
-		myy = 0.0f;
-
-		break;
+		return SOLID_NODE;
 	}
-	case SOUTH:
-	{
-		const dfloat rhoIn = pop[0] + pop[1] + pop[3] + pop[4] + pop[7] + pop[8];
-		const dfloat inv_rhoIn = 1.0f / rhoIn;
 
-		const dfloat mxyIn = (pop[7] - pop[8]) * inv_rhoIn;
-
-		ux = 0.0f;
-		uy = 0.0f;
-
-		rhoVar = 6.0f * rhoIn / 5.0f;
-
-		mxx = 0.0f;
-		mxy = 5.0f * mxyIn / 3.0f;
-		myy = 0.0f;
-
-		break;
-	}
-	case WEST:
-	{
-		const dfloat rhoIn = pop[0] + pop[2] + pop[3] + pop[4] + pop[6] + pop[7];
-		const dfloat inv_rhoIn = 1.0f / rhoIn;
-
-		const dfloat mxyIn = (pop[7] - pop[6]) * inv_rhoIn;
-
-		ux = 0.0f;
-		uy = 0.0f;
-
-		rhoVar = 6.0f * rhoIn / 5.0f;
-
-		mxx = 0.0f;
-		mxy = 5.0f * mxyIn / 3.0f;
-		myy = 0.0f;
-
-		break;
-	}
-	case EAST:
-	{
-		const dfloat rhoIn = pop[0] + pop[1] + pop[2] + pop[4] + pop[5] + pop[8];
-		const dfloat inv_rhoIn = 1.0f / rhoIn;
-
-		const dfloat mxyIn = (pop[5] - pop[8]) * inv_rhoIn;
-
-		ux = 0.0f;
-		uy = 0.0f;
-
-		rhoVar = 6.0f * rhoIn / 5.0f;
-
-		mxx = 0.0f;
-		mxy = 5.0f * mxyIn / 3.0f;
-		myy = 0.0f;
-
-		break;
-	}
-	case SOUTH_WEST:
-	{
-		const dfloat rhoIn = pop[0] + pop[3] + pop[4] + pop[7];
-		const dfloat inv_rhoIn = 1.0f / rhoIn;
-
-		const dfloat mxyIn = pop[7] * inv_rhoIn;
-
-		ux = 0.0f;
-		uy = 0.0f;
-
-		rhoVar = 36.0f * (rhoIn - mxyIn * rhoIn + mxyIn * OMEGA * rhoIn) / (24.0f + OMEGA);
-
-		mxx = 0.0f;
-		mxy = (36.0f * mxyIn * rhoIn - rhoVar) / (9.0f * rhoVar);
-		myy = 0.0f;
-
-		break;
-	}
-	case SOUTH_EAST:
-	{
-		const dfloat rhoIn = pop[0] + pop[1] + pop[4] + pop[8];
-		const dfloat inv_rhoIn = 1.0f / rhoIn;
-
-		const dfloat mxyIn = -pop[8] * inv_rhoIn;
-
-		ux = 0.0f;
-		uy = 0.0f;
-
-		rhoVar = -36.0f * (mxyIn * OMEGA * rhoIn - rhoIn - mxyIn * rhoIn) / (24 + OMEGA);
-
-		mxx = 0.0f;
-		mxy = (36.0f * mxyIn * rhoIn + rhoVar) / (9.0f * rhoVar);
-		myy = 0.0f;
-
-		break;
-	}
-	case NORTH_WEST:
-	{
-		const dfloat rhoIn = pop[0] + pop[2] + pop[3] + pop[6];
-		const dfloat inv_rhoIn = 1.0f / rhoIn;
-
-		const dfloat mxyIn = -pop[6] * inv_rhoIn;
-
-		ux = U_MAX;
-		uy = 0.0f;
-
-		rhoVar = -36.0f * (mxyIn * OMEGA * rhoIn - rhoIn - mxyIn * rhoIn) /
-				 (24.0f + OMEGA + 18.0f * U_MAX - 3.0f * OMEGA * U_MAX - 18.0f * U_MAX * U_MAX + 3.0f * OMEGA * U_MAX * U_MAX);
-
-		mxx = U_MAX * U_MAX;
-		mxy = (36.0f * mxyIn * rhoIn + rhoVar - 3.0f * U_MAX * rhoVar + 3.0f * U_MAX * U_MAX * rhoVar) /
-			  (9.0f * rhoVar);
-		myy = 0.0f;
-
-		break;
-	}
-	case NORTH_EAST:
-	{
-		const dfloat rhoIn = pop[0] + pop[1] + pop[2] + pop[5];
-		const dfloat inv_rhoIn = 1.0f / rhoIn;
-
-		const dfloat mxyIn = pop[5] * inv_rhoIn;
-
-		ux = U_MAX;
-		uy = 0.0f;
-
-		rhoVar = 36.0f * (mxyIn * OMEGA * rhoIn + rhoIn - mxyIn * rhoIn) /
-				 (24.0f + OMEGA - 18.0f * U_MAX + 3.0f * OMEGA * U_MAX - 18.0f * U_MAX * U_MAX + 3.0f * OMEGA * U_MAX * U_MAX);
-
-		mxx = U_MAX * U_MAX;
-		mxy = (36.0f * mxyIn * rhoIn - rhoVar - 3.0f * U_MAX * rhoVar - 3.0f * U_MAX * U_MAX * rhoVar) /
-			  (9.0f * rhoVar);
-		myy = 0.0f;
-
-		break;
-	}
-	default:
-		break;
-	}
+	// ---------------------------
+	// FLUID REGION (between inner and outer radii)
+	// ---------------------------
+	return BULK;
 }
 
 __device__ inline void evaluate_dir(uint8_t node_type,
@@ -247,60 +137,80 @@ __device__ inline void evaluate_dir(uint8_t node_type,
 	}
 }
 
-__device__ inline void boundary_calculation(unsigned int nodeType, dfloat &rho,
-											dfloat &ux, dfloat &uy,
-											dfloat &mxx, dfloat &myy, dfloat &mxy,
-											dfloat *pop)
+__device__ inline void evaluate_incomings(uint8_t node_type, dfloat *pop,
+										  dfloat &rho, dfloat &ux, dfloat &uy,
+										  dfloat &mxx, dfloat &mxy, dfloat &myy)
 {
 	uint8_t incoming_mask = 0;
 	uint8_t outgoing_mask = 0;
 
-	ux = 0.0;
-	uy = 0.0;
+	evaluate_dir(node_type, incoming_mask, outgoing_mask);
 
-	if (nodeType == NORTH || nodeType == NORTH_WEST || nodeType == NORTH_EAST)
-		ux = U_MAX;
+	dfloat rho_I = pop[0];
+
+	dfloat mxx_I = -cs2 * pop[0];
+	dfloat mxy_I = static_cast<dfloat>(0);
+	dfloat myy_I = -cs2 * pop[0];
+
+#pragma unroll 8
+	for (int i = 1; i < 9; ++i)
+	{
+		const dfloat Hxx = cx[i] * cx[i] - cs2;
+		const dfloat Hxy = cx[i] * cy[i];
+		const dfloat Hyy = cy[i] * cy[i] - cs2;
+
+		if (incoming_mask & (1u << (i - 1)))
+		{
+			rho_I += pop[i];
+
+			mxx_I += pop[i] * Hxx;
+			mxy_I += pop[i] * Hxy;
+			myy_I += pop[i] * Hyy;
+		}
+	}
+
+	const dfloat inv_rho_I = static_cast<dfloat>(1) / rho_I;
+
+	rho = rho_I;
+
+	mxx = mxx_I * inv_rho_I;
+	mxy = mxy_I * inv_rho_I;
+	myy = myy_I * inv_rho_I;
+}
+
+__device__ inline void boundary_calculation(unsigned int nodeType, dfloat &rho,
+											dfloat &ux, dfloat &uy,
+											dfloat &mxx, dfloat &mxy, dfloat &myy,
+											dfloat OMEGA)
+{
+	uint8_t incoming_mask = 0;
+	uint8_t outgoing_mask = 0;
 
 	evaluate_dir(nodeType, incoming_mask, outgoing_mask);
 
 	const dfloat omega_var = static_cast<dfloat>(1) - OMEGA;
 
-	const dfloat Hxx_0 = cx[0] * cx[0] - cs2;
-	const dfloat Hxy_0 = cx[0] * cy[0];
-	const dfloat Hyy_0 = cy[0] * cy[0] - cs2;
+	dfloat A = w[0];
 
-	const dfloat A_0 = w[0] * (1 + as2 * ux * cx[0] + as2 * uy * cy[0]);
-	const dfloat Bxx_0 = w[0] * as4 * static_cast<dfloat>(0.5) * Hxx_0;
-	const dfloat Bxy_0 = w[0] * as4 * static_cast<dfloat>(0.5) * Hxy_0;
-	const dfloat Byy_0 = w[0] * as4 * static_cast<dfloat>(0.5) * Hyy_0;
+	dfloat A_Hxx = -cs2 * w[0];
+	dfloat A_Hxy = static_cast<dfloat>(0);
+	dfloat A_Hyy = -cs2 * w[0];
 
-	dfloat rho_I = pop[0];
+	dfloat Bxx = -static_cast<dfloat>(0.5) * as2 * w[0];
+	dfloat Bxy = static_cast<dfloat>(0);
+	dfloat Byy = -static_cast<dfloat>(0.5) * as2 * w[0];
 
-	dfloat mxx_I = pop[0] * Hxx_0;
-	dfloat mxy_I = pop[0] * Hxy_0;
-	dfloat myy_I = pop[0] * Hyy_0;
+	dfloat Bxx_Hxx = static_cast<dfloat>(0.5) * w[0];
+	dfloat Bxy_Hxx = static_cast<dfloat>(0);
+	dfloat Byy_Hxx = static_cast<dfloat>(0.5) * w[0];
 
-	dfloat A = A_0;
+	dfloat Bxx_Hxy = static_cast<dfloat>(0);
+	dfloat Bxy_Hxy = static_cast<dfloat>(0);
+	dfloat Byy_Hxy = static_cast<dfloat>(0);
 
-	dfloat A_Hxx = A_0 * Hxx_0;
-	dfloat A_Hxy = A_0 * Hxy_0;
-	dfloat A_Hyy = A_0 * Hyy_0;
-
-	dfloat Bxx = Bxx_0;
-	dfloat Bxy = Bxy_0;
-	dfloat Byy = Byy_0;
-
-	dfloat Bxx_Hxx = Bxx_0 * Hxx_0;
-	dfloat Bxy_Hxx = Bxy_0 * Hxx_0;
-	dfloat Byy_Hxx = Byy_0 * Hxx_0;
-
-	dfloat Bxx_Hxy = Bxx_0 * Hxy_0;
-	dfloat Bxy_Hxy = Bxy_0 * Hxy_0;
-	dfloat Byy_Hxy = Byy_0 * Hxy_0;
-
-	dfloat Bxx_Hyy = Bxx_0 * Hyy_0;
-	dfloat Bxy_Hyy = Bxy_0 * Hyy_0;
-	dfloat Byy_Hyy = Byy_0 * Hyy_0;
+	dfloat Bxx_Hyy = static_cast<dfloat>(0.5) * w[0];
+	dfloat Bxy_Hyy = static_cast<dfloat>(0);
+	dfloat Byy_Hyy = static_cast<dfloat>(0.5) * w[0];
 
 #pragma unroll 8
 	for (int i = 1; i < Q; ++i)
@@ -325,12 +235,6 @@ __device__ inline void boundary_calculation(unsigned int nodeType, dfloat &rho,
 
 		if (incoming_mask & (1u << (i - 1)))
 		{
-			rho_I += pop[i];
-
-			mxx_I += pop[i] * Hxx;
-			mxy_I += pop[i] * Hxy;
-			myy_I += pop[i] * Hyy;
-
 			Bxx_Hxx += Bxx_i * Hxx;
 			Bxy_Hxx += Bxy_i * Hxx;
 			Byy_Hxx += Byy_i * Hxx;
@@ -349,39 +253,33 @@ __device__ inline void boundary_calculation(unsigned int nodeType, dfloat &rho,
 		}
 	}
 
-	const dfloat inv_rhoI = static_cast<dfloat>(1) / rho_I;
-
-	mxx_I *= inv_rhoI;
-	mxy_I *= inv_rhoI;
-	myy_I *= inv_rhoI;
-
 	const dfloat u_sum = ux * ux * Bxx +
 						 static_cast<dfloat>(2) * ux * uy * Bxy +
 						 uy * uy * Byy;
 
 	// mxx equations
 
-	const dfloat a11 = omega_var * Bxx * mxx_I - Bxx_Hxx;
-	const dfloat a12 = static_cast<dfloat>(2) * (omega_var * Bxy * mxx_I - Bxy_Hxx);
-	const dfloat a13 = omega_var * Byy * mxx_I - Byy_Hxx;
+	const dfloat a11 = omega_var * Bxx * mxx - Bxx_Hxx;
+	const dfloat a12 = static_cast<dfloat>(2) * (omega_var * Bxy * mxx - Bxy_Hxx);
+	const dfloat a13 = omega_var * Byy * mxx - Byy_Hxx;
 
-	const dfloat b1 = A_Hxx - (A + OMEGA * u_sum) * mxx_I;
+	const dfloat b1 = A_Hxx - (A + OMEGA * u_sum) * mxx;
 
 	// mxy equations
 
-	const dfloat a21 = omega_var * Bxx * mxy_I - Bxx_Hxy;
-	const dfloat a22 = static_cast<dfloat>(2) * (omega_var * Bxy * mxy_I - Bxy_Hxy);
-	const dfloat a23 = omega_var * Byy * mxy_I - Byy_Hxy;
+	const dfloat a21 = omega_var * Bxx * mxy - Bxx_Hxy;
+	const dfloat a22 = static_cast<dfloat>(2) * (omega_var * Bxy * mxy - Bxy_Hxy);
+	const dfloat a23 = omega_var * Byy * mxy - Byy_Hxy;
 
-	const dfloat b2 = A_Hxy - (A + OMEGA * u_sum) * mxy_I;
+	const dfloat b2 = A_Hxy - (A + OMEGA * u_sum) * mxy;
 
 	// myy equations
 
-	const dfloat a31 = omega_var * Bxx * myy_I - Bxx_Hyy;
-	const dfloat a32 = static_cast<dfloat>(2) * (omega_var * Bxy * myy_I - Bxy_Hyy);
-	const dfloat a33 = omega_var * Byy * myy_I - Byy_Hyy;
+	const dfloat a31 = omega_var * Bxx * myy - Bxx_Hyy;
+	const dfloat a32 = static_cast<dfloat>(2) * (omega_var * Bxy * myy - Bxy_Hyy);
+	const dfloat a33 = omega_var * Byy * myy - Byy_Hyy;
 
-	const dfloat b3 = A_Hyy - (A + OMEGA * u_sum) * myy_I;
+	const dfloat b3 = A_Hyy - (A + OMEGA * u_sum) * myy;
 
 	// solving system
 
@@ -397,13 +295,13 @@ __device__ inline void boundary_calculation(unsigned int nodeType, dfloat &rho,
 	const dfloat rho_denominator = A + omega_var * mom_sum + OMEGA * u_sum;
 	const dfloat inv_rho = static_cast<dfloat>(1) / rho_denominator;
 
-	rho = rho_I * inv_rho;
+	rho = rho * inv_rho;
 }
 
 __device__ inline void boundary_calculation_irbc(unsigned int nodeType, dfloat &rho,
 												 dfloat &ux, dfloat &uy,
 												 dfloat &mxx, dfloat &myy, dfloat &mxy,
-												 dfloat *pop)
+												 dfloat *pop, dfloat OMEGA)
 {
 	uint8_t incoming_mask = 0;
 	uint8_t outgoing_mask = 0;

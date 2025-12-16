@@ -21,6 +21,9 @@ typedef struct ghostInterfaceData
 
 struct LBMState
 {
+    dfloat D_in;
+    dfloat D_out;
+
     // DEVICE
     uint8_t *d_node_type;
 
