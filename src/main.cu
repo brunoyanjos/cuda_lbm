@@ -1,6 +1,7 @@
 
 #include "main.cuh"
 #include "saveData.cuh"
+#include "post_processing.cuh"
 
 using namespace std;
 
@@ -52,23 +53,12 @@ int main()
 	timestep step_start = std::chrono::high_resolution_clock::now();
 	timestep step_end;
 
-	dfloat VISC = U_MAX * (state.D_out - state.D_in) / RE;
-	dfloat TAU = 0.5 + 3.0 * VISC; // relaxation time
-
-	dfloat OMEGA = 1.0 / TAU; // (tau)^-1
-
 	/* --------------------------------------------------------------------- */
 	/* ---------------------------- BEGIN LOOP ------------------------------ */
 	/* --------------------------------------------------------------------- */
 	for (step = init_step; step <= N_STEPS; ++step)
 	{
-		streaming_and_moments<<<gridBlock, threadBlock>>>(state, ghostInterface, OMEGA);
-		checkCudaErrors(cudaDeviceSynchronize());
-
-		boundary_condition_and_interpolation<<<gridBlock, threadBlock>>>(state, ghostInterface, OMEGA);
-		checkCudaErrors(cudaDeviceSynchronize());
-
-		collision_and_interface_saving<<<gridBlock, threadBlock>>>(state, ghostInterface, OMEGA);
+		mlbmKernel<<<gridBlock, threadBlock>>>(state, ghostInterface);
 		checkCudaErrors(cudaDeviceSynchronize());
 
 		swapGhostInterfaces(ghostInterface);
@@ -84,13 +74,14 @@ int main()
 
 			checkCudaErrors(cudaDeviceSynchronize());
 			upload_state_to_host(state);
+			write_tke(state);
 
 			create_vtk(state, step);
 		}
 	}
 
 	/* --------------------------------------------------------------------- */
-	/* ------------------------------ END LOOP ------------------------------ */
+	/* ------------------------------ END LOOP ----------------------------- */
 	/* --------------------------------------------------------------------- */
 
 	checkCudaErrors(cudaDeviceSynchronize());

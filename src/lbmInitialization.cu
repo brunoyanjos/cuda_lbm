@@ -195,21 +195,7 @@ void initialize_boundaries(LBMState &state)
 									bit_8 * SOUTH_WEST;
 
 				if (dist < medium_radius)
-				{
 					bc_number += INNER_BOUNDARY;
-
-					if (2 * dist > state.D_in)
-					{
-						state.D_in = 2 * dist;
-					}
-				}
-				else
-				{
-					if (2 * dist < state.D_out)
-					{
-						state.D_out = 2 * dist;
-					}
-				}
 
 				state.h_node_type[idxBlockCoord(x, y)] = bc_number;
 			}

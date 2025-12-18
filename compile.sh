@@ -42,7 +42,7 @@ EXEC_NAME="sim_${LT}_sm${CompCap}"
 rm -f "$EXEC_NAME"
 
 # Compile from source directory
-cd MR_LBM/src || {
+cd src || {
     echo "Error: Failed to enter MR_LBM/src directory" >&2
     exit 1
 }
@@ -53,7 +53,7 @@ nvcc -gencode arch=compute_${CompCap},code=sm_${CompCap} -rdc=true -O3 --restric
     -lcudadevrt -lcurand -o ../../"$EXEC_NAME"
 
 # Return and run with simulation ID
-cd ../..
+cd ..
 ./"$EXEC_NAME" || {
     echo "Error: Simulation failed" >&2
     exit 1
