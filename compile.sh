@@ -36,6 +36,7 @@ if [ -d "$OUTPUT_DIR" ]; then
 fi
 
 mkdir -p "$OUTPUT_DIR"
+mkdir -p "$OUTPUT_DIR/vtk"
 
 # Clean specific executable
 EXEC_NAME="sim_${LT}_sm${CompCap}"
@@ -50,10 +51,11 @@ cd src || {
 nvcc -gencode arch=compute_${CompCap},code=sm_${CompCap} -rdc=true -O3 --restrict \
     -D ID_SIM=\"$ID_SIM\" \
     $(find . -name "*.cu") \
-    -lcudadevrt -lcurand -o ../../"$EXEC_NAME"
+    -lcudadevrt -lcurand -o ../"$EXEC_NAME"
 
 # Return and run with simulation ID
 cd ..
+
 ./"$EXEC_NAME" || {
     echo "Error: Simulation failed" >&2
     exit 1

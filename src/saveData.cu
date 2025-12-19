@@ -344,7 +344,7 @@ void saveSimInfo(int step, dfloat MLUPS)
 void create_vtk(const LBMState &state, const unsigned int &step)
 {
 	std::ostringstream filename;
-	filename << PATH_FILES << "/" << ID_SIM << "/" << "output_" << std::setw(6) << std::setfill('0') << step << ".vtk";
+	filename << PATH_FILES << "/" << ID_SIM << "/vtk/" << "output_" << std::setw(6) << std::setfill('0') << step << ".vtk";
 
 	std::ofstream file(filename.str());
 	if (!file.is_open())

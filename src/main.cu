@@ -85,6 +85,9 @@ int main()
 	/* --------------------------------------------------------------------- */
 
 	checkCudaErrors(cudaDeviceSynchronize());
+	upload_state_to_host(state);
+
+	write_velocity_profile(state);
 
 	// Calculate MLUPS
 	dfloat MLUPS = recordElapsedTime(start_step, stop_step, step);
@@ -92,11 +95,9 @@ int main()
 	printf("MLUPS: %f\n", MLUPS);
 
 	/* ------------------------------ POST ------------------------------ */
-	// save info file
 	saveSimInfo(step, MLUPS);
 
 	/* ------------------------------ FREE ------------------------------ */
-
 	interfaceFree(ghostInterface);
 	free_state(state);
 

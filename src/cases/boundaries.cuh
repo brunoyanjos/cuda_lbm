@@ -154,11 +154,11 @@ __device__ inline void boundary_calculation(unsigned int nodeType,
 
 	if (nodeType & INNER_BOUNDARY)
 	{
-		const dfloat xr = (x - xc);
-		const dfloat yr = (y - yc);
+		const dfloat dx = (x - xc);
+		const dfloat dy = (y - yc);
 
-		const dfloat x2 = xr * xr;
-		const dfloat y2 = yr * yr;
+		const dfloat x2 = dx * dx;
+		const dfloat y2 = dy * dy;
 
 		const dfloat radii = dsqrt(x2 + y2);
 
