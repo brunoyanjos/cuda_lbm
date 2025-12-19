@@ -3,7 +3,7 @@
 
 #include "../var.h"
 
-constexpr dfloat RE = 10000;
+constexpr dfloat RE = 100;
 
 constexpr int SCALE = 1;
 
