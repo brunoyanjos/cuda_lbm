@@ -136,10 +136,8 @@ __global__ void boundary_condition_and_interpolation(LBMState state, ghostInterf
 		const dfloat xw = xc + radii * unit_nx;
 		const dfloat yw = yc + radii * unit_ny;
 
-		const dfloat cos_theta = static_cast<dfloat>(xw - xc) * inv_radii;
-		const dfloat sen_theta = static_cast<dfloat>(yw - yc) * inv_radii;
-		const dfloat sen_two_theta = static_cast<dfloat>(2.0) * cos_theta * sen_theta;
-		const dfloat cos_two_theta = cos_theta * cos_theta - sen_theta * sen_theta;
+		const dfloat cos_theta = (xw - xc) * inv_radii;
+		const dfloat sen_theta = (yw - yc) * inv_radii;
 
 		const dfloat xwb_diff = xw - static_cast<dfloat>(x);
 		const dfloat ywb_diff = yw - static_cast<dfloat>(y);
@@ -177,8 +175,8 @@ __global__ void boundary_condition_and_interpolation(LBMState state, ghostInterf
 		const dfloat inv_dr2 = dfloat(1) / dx2;
 		const dfloat inv_2dr2 = dfloat(0.5) / dx2;
 
-		const dfloat ux_wall = -U_IN * (yw - yc) * inv_radii;
-		const dfloat uy_wall = U_IN * (xw - xc) * inv_radii;
+		const dfloat ux_wall = -U_IN * sen_theta;
+		const dfloat uy_wall = U_IN * cos_theta;
 
 		const dfloat wall_term = (dfloat(2) * dx2 - dr2 + dfloat(3) * dr * dx) * inv_2dr2;
 		const dfloat one_term = dr * (dr - dfloat(2) * dx) * inv_dr2;
@@ -204,10 +202,8 @@ __global__ void boundary_condition_and_interpolation(LBMState state, ghostInterf
 		const dfloat xw = xc + radii * unit_nx;
 		const dfloat yw = yc + radii * unit_ny;
 
-		const dfloat cos_theta = static_cast<dfloat>(xw - xc) * inv_radii;
-		const dfloat sen_theta = static_cast<dfloat>(yw - yc) * inv_radii;
-		const dfloat sen_two_theta = static_cast<dfloat>(2.0) * cos_theta * sen_theta;
-		const dfloat cos_two_theta = cos_theta * cos_theta - sen_theta * sen_theta;
+		const dfloat cos_theta = (xw - xc) * inv_radii;
+		const dfloat sen_theta = (yw - yc) * inv_radii;
 
 		const dfloat xwb_diff = xw - static_cast<dfloat>(x);
 		const dfloat ywb_diff = yw - static_cast<dfloat>(y);

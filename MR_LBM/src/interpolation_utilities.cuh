@@ -16,8 +16,8 @@ __device__ inline dfloat bilinear_velocity_interpolation(
     const dfloat u3 = u_array[idxBlockCoord(x0, y1)];
     const dfloat u4 = u_array[idxBlockCoord(x1, y1)];
 
-    const dfloat xd = x - x0;
-    const dfloat yd = y - y0;
+    const dfloat xd = x - dfloat(x0);
+    const dfloat yd = y - dfloat(y0);
 
     const dfloat u_y0 = fma(xd, u2 - u1, u1);
     const dfloat u_y1 = fma(xd, u4 - u3, u3);

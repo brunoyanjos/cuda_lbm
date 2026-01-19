@@ -155,22 +155,23 @@ __device__ inline void evaluate_incomings(uint8_t node_type, dfloat *pop,
 	dfloat mxy_I = static_cast<dfloat>(0);
 	dfloat myy_I = -cs2 * pop[0];
 
-	const dfloat radius = sqrt((x - xc) * (x - xc) + (y - yc) * (y - yc));
+	const dfloat dx = static_cast<dfloat>(x) - xc;
+	const dfloat dy = static_cast<dfloat>(y) - yc;
 
-	const dfloat cos_theta = static_cast<dfloat>(x - xc) / radius;
-	const dfloat sen_theta = static_cast<dfloat>(y - yc) / radius;
-	const dfloat sen_two_theta = static_cast<dfloat>(2.0) * cos_theta * sen_theta;
-	const dfloat cos_two_theta = cos_theta * cos_theta - sen_theta * sen_theta;
+	const dfloat radius = sqrt(dx * dx + dy * dy);
+
+	const dfloat cos_theta = dx / radius;
+	const dfloat sen_theta = dy / radius;
 
 #pragma unroll 8
 	for (int i = 1; i < 9; ++i)
 	{
-		dfloat cx_p = cx[i] * cos_theta + cy[i] * sen_theta;
-		dfloat cy_p = cy[i] * cos_theta - cx[i] * sen_theta;
+		dfloat cx_prime = cx[i] * cos_theta + cy[i] * sen_theta;
+		dfloat cy_prime = cy[i] * cos_theta - cx[i] * sen_theta;
 
-		const dfloat Hxx = cx_p * cx_p - cs2;
-		const dfloat Hxy = cx_p * cy_p;
-		const dfloat Hyy = cy_p * cy_p - cs2;
+		const dfloat Hxx = cx_prime * cx_prime - cs2;
+		const dfloat Hxy = cx_prime * cy_prime;
+		const dfloat Hyy = cy_prime * cy_prime - cs2;
 
 		if (incoming_mask & (1u << (i - 1)))
 		{
@@ -348,10 +349,13 @@ __device__ inline void boundary_calculation_irbc(unsigned int nodeType, dfloat &
 	dfloat Bxy_Hyy = static_cast<dfloat>(0);
 	dfloat Byy_Hyy = static_cast<dfloat>(0.5) * w[0];
 
-	const dfloat radius = sqrt((x - xc) * (x - xc) + (y - yc) * (y - yc));
+	const dfloat dx = static_cast<dfloat>(x) - xc;
+	const dfloat dy = static_cast<dfloat>(y) - yc;
 
-	const dfloat cos_theta = static_cast<dfloat>(x - xc) / radius;
-	const dfloat sen_theta = static_cast<dfloat>(y - yc) / radius;
+	const dfloat radius = sqrt(dx * dx + dy * dy);
+
+	const dfloat cos_theta = dx / radius;
+	const dfloat sen_theta = dy / radius;
 	const dfloat sen_two_theta = static_cast<dfloat>(2.0) * cos_theta * sen_theta;
 	const dfloat cos_two_theta = cos_theta * cos_theta - sen_theta * sen_theta;
 

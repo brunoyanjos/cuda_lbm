@@ -3,7 +3,7 @@
 
 #include "../var.h"
 
-constexpr dfloat RE = 100;
+constexpr dfloat RE = 50;
 
 constexpr int SCALE = 1;
 
@@ -17,7 +17,7 @@ constexpr int NY = N; // size y of the grid
 constexpr dfloat xc = dfloat(NX - 1) / 2;
 constexpr dfloat yc = dfloat(NY - 1) / 2;
 
-constexpr dfloat U_IN = 0.0256;
+constexpr dfloat U_IN = 0.01;
 constexpr dfloat U_OUT = 0.0;
 constexpr dfloat L = N;
 

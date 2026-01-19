@@ -51,8 +51,8 @@ constexpr int MAX_ELEMENTS_IN_BLOCK = 48128 / SHARED_MEMORY_ELEMENT_SIZE;
 
 constexpr BlockDim optimalBlockDimArray = findOptimalBlockDimensions(MAX_ELEMENTS_IN_BLOCK);
 
-const int BLOCK_NX = optimalBlockDimArray.x; // number of threads in x
-const int BLOCK_NY = optimalBlockDimArray.y; // number of threads in y
+const int BLOCK_NX = 16; // optimalBlockDimArray.x; // number of threads in x
+const int BLOCK_NY = 16; // optimalBlockDimArray.y; // number of threads in y
 
 #define BLOCK_LBM_SIZE (BLOCK_NX * BLOCK_NY) // size of a block
 
