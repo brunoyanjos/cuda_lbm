@@ -32,6 +32,7 @@ src/CUDA/x64
 *log*
 *.avi
 sim_*
+log.*
 MR_LBM/*.dat
 LDC/*
 venv/*
