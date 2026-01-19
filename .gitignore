@@ -37,6 +37,7 @@ MR_LBM/*.dat
 LDC/*
 venv/*
 OUTPUT/*
+output/*
 GRID/*
 CYLINDER/*
 ANNUL/*

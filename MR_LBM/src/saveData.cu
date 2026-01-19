@@ -276,7 +276,7 @@ std::string getSimInfoString(int step, dfloat MLUPS)
 	strSimInfo << "                 NY: " << NY << "\n";
 	strSimInfo << std::scientific << std::setprecision(6);
 	/*strSimInfo << "                Tau: " << TAU << "\n";*/
-	strSimInfo << "               Umax: " << U_MAX << "\n";
+	strSimInfo << "               Umax: " << U_IN << "\n";
 	strSimInfo << "             Macr_save: " << MACR_SAVE << "\n";
 	strSimInfo << "             Nsteps: " << step << "\n";
 	strSimInfo << "              MLUPS: " << MLUPS << "\n";

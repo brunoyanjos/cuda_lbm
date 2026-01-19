@@ -136,6 +136,11 @@ __global__ void boundary_condition_and_interpolation(LBMState state, ghostInterf
 		const dfloat xw = xc + radii * unit_nx;
 		const dfloat yw = yc + radii * unit_ny;
 
+		const dfloat cos_theta = static_cast<dfloat>(xw - xc) * inv_radii;
+		const dfloat sen_theta = static_cast<dfloat>(yw - yc) * inv_radii;
+		const dfloat sen_two_theta = static_cast<dfloat>(2.0) * cos_theta * sen_theta;
+		const dfloat cos_two_theta = cos_theta * cos_theta - sen_theta * sen_theta;
+
 		const dfloat xwb_diff = xw - static_cast<dfloat>(x);
 		const dfloat ywb_diff = yw - static_cast<dfloat>(y);
 
@@ -154,11 +159,17 @@ __global__ void boundary_condition_and_interpolation(LBMState state, ghostInterf
 		const int int_x2 = int(x2);
 		const int int_y2 = int(y2);
 
-		dfloat ux1 = bilinear_velocity_interpolation(x1, y1, int_x1, int_y1, state.d_ux);
-		dfloat ux2 = bilinear_velocity_interpolation(x2, y2, int_x2, int_y2, state.d_ux);
+		const dfloat ux1 = bilinear_velocity_interpolation(x1, y1, int_x1, int_y1, state.d_ux);
+		const dfloat ux2 = bilinear_velocity_interpolation(x2, y2, int_x2, int_y2, state.d_ux);
 
-		dfloat uy1 = bilinear_velocity_interpolation(x1, y1, int_x1, int_y1, state.d_uy);
-		dfloat uy2 = bilinear_velocity_interpolation(x2, y2, int_x2, int_y2, state.d_uy);
+		const dfloat uy1 = bilinear_velocity_interpolation(x1, y1, int_x1, int_y1, state.d_uy);
+		const dfloat uy2 = bilinear_velocity_interpolation(x2, y2, int_x2, int_y2, state.d_uy);
+
+		dfloat mxx1, myy1;
+		dfloat mxx2, myy2;
+
+		bilinear_moment_interpolation(x1, y1, int_x1, int_y1, state, mxx1, myy1);
+		bilinear_moment_interpolation(x2, y2, int_x2, int_y2, state, mxx2, myy2);
 
 		const dfloat dx = dsqrt(static_cast<dfloat>(2.0));
 		const dfloat dx2 = dx * dx;
@@ -166,22 +177,37 @@ __global__ void boundary_condition_and_interpolation(LBMState state, ghostInterf
 		const dfloat inv_dr2 = dfloat(1) / dx2;
 		const dfloat inv_2dr2 = dfloat(0.5) / dx2;
 
-		const dfloat ux_wall = -U_MAX * (yw - yc) * inv_radii;
-		const dfloat uy_wall = U_MAX * (xw - xc) * inv_radii;
+		const dfloat ux_wall = -U_IN * (yw - yc) * inv_radii;
+		const dfloat uy_wall = U_IN * (xw - xc) * inv_radii;
 
 		const dfloat wall_term = (dfloat(2) * dx2 - dr2 + dfloat(3) * dr * dx) * inv_2dr2;
 		const dfloat one_term = dr * (dr - dfloat(2) * dx) * inv_dr2;
 		const dfloat two_term = dr * (dr - dx) * inv_2dr2;
 
+		const dfloat ux_prime = ux_wall * cos_theta + uy_wall * sen_theta;
+		const dfloat uy_prime = uy_wall * cos_theta - ux_wall * sen_theta;
+
+		const dfloat mxx_wall = ux_prime * ux_prime;
+		const dfloat myy_wall = uy_prime * uy_prime;
+
 		ux_boundary = wall_term * ux_wall + one_term * ux1 - two_term * ux2;
 		uy_boundary = wall_term * uy_wall + one_term * uy1 - two_term * uy2;
+
+		mxx = wall_term * mxx_wall + one_term * mxx1 - two_term * mxx2;
+		myy = wall_term * myy_wall + one_term * myy1 - two_term * myy2;
 	}
 	else
 	{
 		const dfloat radii = state.D_out * static_cast<dfloat>(0.5);
+		const dfloat inv_radii = dfloat(1) / radii;
 
 		const dfloat xw = xc + radii * unit_nx;
 		const dfloat yw = yc + radii * unit_ny;
+
+		const dfloat cos_theta = static_cast<dfloat>(xw - xc) * inv_radii;
+		const dfloat sen_theta = static_cast<dfloat>(yw - yc) * inv_radii;
+		const dfloat sen_two_theta = static_cast<dfloat>(2.0) * cos_theta * sen_theta;
+		const dfloat cos_two_theta = cos_theta * cos_theta - sen_theta * sen_theta;
 
 		const dfloat xwb_diff = xw - static_cast<dfloat>(x);
 		const dfloat ywb_diff = yw - static_cast<dfloat>(y);
@@ -207,23 +233,42 @@ __global__ void boundary_condition_and_interpolation(LBMState state, ghostInterf
 		dfloat uy1 = bilinear_velocity_interpolation(x1, y1, int_x1, int_y1, state.d_uy);
 		dfloat uy2 = bilinear_velocity_interpolation(x2, y2, int_x2, int_y2, state.d_uy);
 
+		dfloat mxx1, myy1;
+		dfloat mxx2, myy2;
+
+		bilinear_moment_interpolation(x1, y1, int_x1, int_y1, state, mxx1, myy1);
+		bilinear_moment_interpolation(x2, y2, int_x2, int_y2, state, mxx2, myy2);
+
 		const dfloat dx = dsqrt(static_cast<dfloat>(2.0));
 		const dfloat dx2 = dx * dx;
 
 		const dfloat inv_dr2 = dfloat(1) / dx2;
 		const dfloat inv_2dr2 = dfloat(0.5) / dx2;
 
+		const dfloat wall_term = (dfloat(2) * dx2 - dr2 + dfloat(3) * dr * dx) * inv_2dr2;
 		const dfloat one_term = dr * (dr - dfloat(2) * dx) * inv_dr2;
 		const dfloat two_term = dr * (dr - dx) * inv_2dr2;
 
-		ux_boundary = one_term * ux1 - two_term * ux2;
-		uy_boundary = one_term * uy1 - two_term * uy2;
+		const dfloat ux_wall = -U_OUT * (yw - yc) * inv_radii;
+		const dfloat uy_wall = U_OUT * (xw - xc) * inv_radii;
+
+		const dfloat ux_prime = ux_wall * cos_theta + uy_wall * sen_theta;
+		const dfloat uy_prime = uy_wall * cos_theta - ux_wall * sen_theta;
+
+		const dfloat mxx_wall = ux_prime * ux_prime;
+		const dfloat myy_wall = uy_prime * uy_prime;
+
+		ux_boundary = wall_term * ux_wall + one_term * ux1 - two_term * ux2;
+		uy_boundary = wall_term * uy_wall + one_term * uy1 - two_term * uy2;
+
+		mxx = wall_term * mxx_wall + one_term * mxx1 - two_term * mxx2;
+		myy = wall_term * myy_wall + one_term * myy1 - two_term * myy2;
 	}
 
-	boundary_calculation(nodeType, rho,
-						 ux_boundary, uy_boundary,
-						 mxx, mxy, myy,
-						 OMEGA);
+	boundary_calculation_irbc(nodeType, rho,
+							  ux_boundary, uy_boundary,
+							  mxx, mxy, myy,
+							  OMEGA);
 
 	state.d_rho[idxBlock()] = rho - RHO_0;
 

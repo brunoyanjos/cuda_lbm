@@ -70,8 +70,8 @@ __host__ void truncate_tke_file(unsigned int last_valid_step)
     std::vector<std::tuple<dfloat, dfloat>> records;
 
     dfloat t_star, tke_val;
-    dfloat valid_t_star =  last_valid_step * U_MAX / NX;
-    
+    dfloat valid_t_star = last_valid_step * U_IN / NX;
+
     while (in_file.read(reinterpret_cast<char *>(&t_star), sizeof(dfloat)) &&
            in_file.read(reinterpret_cast<char *>(&tke_val), sizeof(dfloat)))
     {

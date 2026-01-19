@@ -52,13 +52,13 @@ int main()
 	timestep step_start = std::chrono::high_resolution_clock::now();
 	timestep step_end;
 
-	dfloat VISC = U_MAX * (state.D_out - state.D_in) / RE;
+	dfloat VISC = U_IN * (state.D_out - state.D_in) / RE;
 	dfloat TAU = 0.5 + 3.0 * VISC; // relaxation time
 
 	dfloat OMEGA = 1.0 / TAU; // (tau)^-1
 
 	/* --------------------------------------------------------------------- */
-	/* ---------------------------- BEGIN LOOP ------------------------------ */
+	/* ---------------------------- BEGIN LOOP ----------------------------- */
 	/* --------------------------------------------------------------------- */
 	for (step = init_step; step <= N_STEPS; ++step)
 	{

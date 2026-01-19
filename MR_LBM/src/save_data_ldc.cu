@@ -160,8 +160,8 @@ __host__ void kinetic_energy(dfloat *fMom, unsigned int step)
         }
     }
 
-    tke_sum /= (U_MAX * U_MAX * NX * NY);
-    const dfloat t_star = step * U_MAX / NX;
+    tke_sum /= (U_IN * U_IN * NX * NY);
+    const dfloat t_star = step * U_IN / NX;
 
     tke_file.write(reinterpret_cast<const char *>(&t_star), sizeof(dfloat));
     tke_file.write(reinterpret_cast<const char *>(&tke_sum), sizeof(dfloat));
@@ -193,7 +193,6 @@ __host__ void saving_probes(dfloat *fMom, dfloat *probes, unsigned int step)
     int x_pos[3] = {(NX - 1) / 21, (NX - 1) / 2, (NX - 1) * 20 / 21};
     int y_pos[3] = {(NY - 1) / 21, (NY - 1) / 2, (NY - 1) * 20 / 21};
 
-
     for (int y = 2; y >= 0; --y)
     {
         for (size_t x = 0; x < 3; ++x)
@@ -217,7 +216,7 @@ __host__ void saving_probes(dfloat *fMom, dfloat *probes, unsigned int step)
         }
     }
 
-    const dfloat t_star = step * U_MAX / NX;
+    const dfloat t_star = step * U_IN / NX;
 
     tke_file.write(reinterpret_cast<const char *>(&t_star), sizeof(dfloat));
     tke_file.write(reinterpret_cast<const char *>(probes), 9 * sizeof(dfloat));
